@@ -601,11 +601,7 @@ button.action-btn {
 }
 
 .role-card-tip {
-    margin: 12px 0 0;
-    color: var(--text-dim);
-    font-size: 0.82rem;
-    line-height: 1.65;
-    text-align: center;
+    display: none;
 }
 
 .role-card-actions {
@@ -1276,6 +1272,8 @@ button.night-btn {
 }
 
 .player-card {
+    display: flex;
+    flex-direction: column;
     padding: 14px;
     border-radius: 18px;
     border-left: 3px solid rgba(197, 165, 106, 0.34);
@@ -1389,7 +1387,8 @@ button.night-btn {
 
 .copy-role-btn {
     width: 100%;
-    margin-top: 6px;
+    margin-top: auto;
+    min-height: 42px;
     background: linear-gradient(180deg, rgba(70, 59, 42, 0.96), rgba(39, 31, 22, 0.99));
     border-color: rgba(197, 165, 106, 0.26);
     color: #f1e5cb;
@@ -2847,13 +2846,10 @@ button.night-btn {
             const contentWidth = width - paddingX * 2;
             const bodyFontSize = portrait ? 28 : 24;
             const bodyLineHeight = portrait ? 40 : 34;
-            const hookFontSize = portrait ? 30 : 26;
-            const hookLineHeight = portrait ? 42 : 36;
             const sectionLabelSize = portrait ? 24 : 22;
             const sectionPadX = portrait ? 26 : 28;
             const sectionPadY = portrait ? 22 : 20;
             const emblemRadius = portrait ? 88 : 98;
-            const hookText = getRoleCardHook(roleName);
             const sections = [
                 { label: '技能', text: getCurrentRoleAbilities()[roleName] || '无技能描述。' },
                 { label: '初级玩法', text: getRoleBasicPlay(roleName) },
@@ -2864,8 +2860,6 @@ button.night-btn {
             const ctx = canvas.getContext('2d');
             if (!ctx) return null;
 
-            ctx.font = `${hookFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
-            const hookLines = wrapRoleCardText(ctx, hookText, contentWidth - 36);
             ctx.font = `${bodyFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
             const sectionData = sections.map(section => ({
                 ...section,
@@ -2873,8 +2867,7 @@ button.night-btn {
             }));
 
             const headerHeight = portrait ? 248 : 214;
-            const hookHeight = 42 + hookLines.reduce((sum, line) => sum + (line === '' ? 18 : hookLineHeight), 0) + 28;
-            let height = topPad + headerHeight + hookHeight + 24;
+            let height = topPad + headerHeight + 24;
             sectionData.forEach(section => {
                 height += 36 + sectionPadY * 2;
                 height += section.lines.reduce((sum, line) => sum + (line === '' ? 16 : bodyLineHeight), 0);
@@ -2925,7 +2918,7 @@ button.night-btn {
 
             ctx.fillStyle = palette.bodyDim;
             ctx.textAlign = 'right';
-            ctx.fillText('公开展示版', width - paddingX, topPad);
+            ctx.fillText(`座位  ${player.name || getDefaultSeatName(player.id)}`, width - paddingX, topPad);
             ctx.textAlign = 'left';
 
             ctx.fillStyle = '#f4eadc';
@@ -2945,6 +2938,10 @@ button.night-btn {
             ctx.fillText(badgeText, paddingX + 16, topPad + 131);
 
             const dividerY = topPad + headerHeight - 20;
+            const hookFontSize = bodyFontSize;
+            const hookLineHeight = bodyLineHeight;
+            const hookLines = [];
+            const hookHeight = -22;
             ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
             ctx.beginPath();
             ctx.moveTo(paddingX, dividerY);
@@ -2952,12 +2949,7 @@ button.night-btn {
             ctx.stroke();
 
             let y = topPad + headerHeight;
-            ctx.fillStyle = palette.hookFill;
-            drawRoundedRect(ctx, paddingX, y, contentWidth, hookHeight, 24);
-            ctx.fill();
-            ctx.strokeStyle = palette.hookEdge;
-            ctx.lineWidth = 1.2;
-            ctx.stroke();
+            ctx.globalAlpha = 0;
 
             ctx.fillStyle = palette.accent;
             ctx.font = '600 20px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
@@ -2975,6 +2967,7 @@ button.night-btn {
                 innerY += hookLineHeight;
             });
             y += hookHeight + 22;
+            ctx.globalAlpha = 1;
 
             sectionData.forEach(section => {
                 const sectionHeight = 34 + sectionPadY * 2 + section.lines.reduce((sum, line) => sum + (line === '' ? 16 : bodyLineHeight), 0);
