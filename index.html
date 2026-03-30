@@ -1910,12 +1910,12 @@ button.night-btn {
 
     <div id="roleCardPreviewModal" class="modal-overlay" onclick="closeRoleCardPreviewModal()">
         <div id="roleCardPreviewPanel" class="modal-panel role-card-modal-panel">
-            <div class="seat-token-title">角色卡预览</div>
-            <div class="seat-token-subtitle">手机上若无法直接复制图片，可长按下方角色卡保存到相册。</div>
+            <div id="roleCardPreviewTitle" class="seat-token-title">角色卡预览</div>
+            <div id="roleCardPreviewSubtitle" class="seat-token-subtitle">手机上若无法直接复制图片，可长按下方图片保存到相册。</div>
             <img id="roleCardPreviewImage" class="role-card-preview" alt="角色卡预览">
             <div class="role-card-actions">
                 <button id="roleCardShareBtn" type="button" class="show-bluff-btn role-card-action-btn" onclick="shareLatestRoleCard()">📤 系统分享角色卡</button>
-                <button type="button" class="bluff-random-btn role-card-action-btn secondary" onclick="downloadLatestRoleCard()">⬇️ 下载角色卡图片</button>
+                <button id="roleCardDownloadBtn" type="button" class="bluff-random-btn role-card-action-btn secondary" onclick="downloadLatestRoleCard()">⬇️ 下载角色卡图片</button>
             </div>
             <div id="roleCardPreviewTip" class="role-card-tip">若系统分享不可用，请直接长按图片保存。</div>
         </div>
@@ -2093,6 +2093,7 @@ button.night-btn {
         let activeSeatAssignPlayerId = null;
         let latestRoleCardBlob = null;
         let latestRoleCardFileName = '';
+        let latestPreviewShareTitle = '角色卡';
         const STORAGE_KEY = 'tb_v2_0_data';
         const LEGACY_STORAGE_KEYS = ['tb_v9_7_data', 'tb_v9_6_data'];
         const TRAVELER_ROLE = '旅行者：旅行者';
@@ -2652,6 +2653,11 @@ button.night-btn {
                 .map(([name]) => name)
                 .sort((a, b) => a.localeCompare(b, 'zh-CN'));
         }
+        function getCurrentMvpScore() {
+            const entries = Object.entries(scoreBoard);
+            if (!entries.length) return 0;
+            return Math.max(...entries.map(([, score]) => score));
+        }
         function renderScoreBoard() {
             const list = document.getElementById('scoreBoardList');
             const summary = document.getElementById('seriesSummary');
@@ -2716,10 +2722,29 @@ button.night-btn {
         function finalizeSeriesMvp() {
             const currentMvpNames = getCurrentMvpNames();
             if (!currentMvpNames.length) return alert('当前还没有可结算的 MVP 分数。');
+            const mvpScore = getCurrentMvpScore();
             finalMvp = currentMvpNames.join('、');
             saveData();
             renderScoreBoard();
-            alert(`本轮赛季 MVP：${finalMvp}`);
+            const canvas = createMvpAwardCanvas(currentMvpNames, mvpScore, seriesGames);
+            if (!canvas) {
+                alert(`本轮赛季 MVP：${finalMvp}`);
+                return;
+            }
+            canvasToBlob(canvas).then(blob => {
+                if (!blob) {
+                    alert(`本轮赛季 MVP：${finalMvp}`);
+                    return;
+                }
+                const fileName = `${sanitizeFileName(selectedScript === 'dycs' ? '黯月初升' : '暗流魔典')}_${sanitizeFileName(finalMvp)}_MVP荣誉图.png`;
+                openRoleCardPreviewModal(canvas, blob, fileName, {
+                    title: 'MVP 荣誉图',
+                    subtitle: '手机上可长按下方荣誉图保存到相册，或直接使用系统分享。',
+                    shareTitle: 'MVP 荣誉图',
+                    shareLabel: '📤 系统分享 MVP 荣誉图',
+                    downloadLabel: '⬇️ 下载 MVP 荣誉图'
+                });
+            });
         }
         function migratePlayerScoreName(oldName, newName) {
             if (!oldName || !newName || oldName === newName || !(oldName in scoreBoard)) return;
@@ -2783,15 +2808,23 @@ button.night-btn {
             const modal = document.getElementById('roleCardPreviewModal');
             if (modal) modal.style.display = 'none';
         }
-        function openRoleCardPreviewModal(canvas, blob, fileName) {
+        function openRoleCardPreviewModal(canvas, blob, fileName, options = {}) {
             if (!canvas || !blob) return false;
             latestRoleCardBlob = blob;
             latestRoleCardFileName = fileName || 'role-card.png';
+            latestPreviewShareTitle = options.shareTitle || '角色卡';
             const modal = document.getElementById('roleCardPreviewModal');
             const image = document.getElementById('roleCardPreviewImage');
             const tip = document.getElementById('roleCardPreviewTip');
+            const title = document.getElementById('roleCardPreviewTitle');
+            const subtitle = document.getElementById('roleCardPreviewSubtitle');
             const shareBtn = document.getElementById('roleCardShareBtn');
-            if (!modal || !image || !tip || !shareBtn) return false;
+            const downloadBtn = document.getElementById('roleCardDownloadBtn');
+            if (!modal || !image || !tip || !title || !subtitle || !shareBtn || !downloadBtn) return false;
+            title.innerText = options.title || '角色卡预览';
+            subtitle.innerText = options.subtitle || '手机上若无法直接复制图片，可长按下方图片保存到相册。';
+            shareBtn.innerText = options.shareLabel || '📤 系统分享角色卡';
+            downloadBtn.innerText = options.downloadLabel || '⬇️ 下载角色卡图片';
             image.src = canvas.toDataURL('image/png');
             const shareAvailable = canShareRoleCard(blob, latestRoleCardFileName);
             shareBtn.style.display = shareAvailable ? 'inline-flex' : 'none';
@@ -2809,7 +2842,7 @@ button.night-btn {
             try {
                 const file = new File([latestRoleCardBlob], latestRoleCardFileName || 'role-card.png', { type: 'image/png' });
                 await navigator.share({
-                    title: '角色卡',
+                    title: latestPreviewShareTitle || '角色卡',
                     files: [file]
                 });
             } catch (error) {
@@ -3116,6 +3149,248 @@ button.night-btn {
             }
 
             ctx.restore();
+        }
+        function getMvpHonorTitle(winCount, nameCount) {
+            if (nameCount > 1) return '并列星冕';
+            if (winCount >= 8) return '烛夜王冕';
+            if (winCount >= 5) return '审判冠冕';
+            if (winCount >= 3) return '夜宴主宰';
+            return '新月之星';
+        }
+        function drawMvpCrown(ctx, centerX, centerY, scale = 1) {
+            ctx.save();
+            ctx.translate(centerX, centerY);
+
+            const glow = ctx.createRadialGradient(0, 0, 8, 0, 0, 120 * scale);
+            glow.addColorStop(0, 'rgba(245, 218, 145, 0.34)');
+            glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(0, 0, 118 * scale, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(255, 246, 214, 0.18)';
+            ctx.lineWidth = 1.5 * scale;
+            ctx.beginPath();
+            ctx.arc(0, 0, 102 * scale, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.fillStyle = 'rgba(111, 42, 57, 0.72)';
+            ctx.strokeStyle = '#e1bb72';
+            ctx.lineWidth = 5 * scale;
+            ctx.beginPath();
+            ctx.moveTo(-92 * scale, 38 * scale);
+            ctx.lineTo(-92 * scale, 14 * scale);
+            ctx.lineTo(-58 * scale, -40 * scale);
+            ctx.lineTo(-18 * scale, 0);
+            ctx.lineTo(0, -66 * scale);
+            ctx.lineTo(18 * scale, 0);
+            ctx.lineTo(58 * scale, -40 * scale);
+            ctx.lineTo(92 * scale, 14 * scale);
+            ctx.lineTo(92 * scale, 38 * scale);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = '#f3dca0';
+            [[-58, -42], [0, -68], [58, -42]].forEach(([x, y]) => {
+                ctx.beginPath();
+                ctx.arc(x * scale, y * scale, 8 * scale, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            ctx.fillStyle = 'rgba(197, 165, 106, 0.18)';
+            drawRoundedRect(ctx, -104 * scale, 34 * scale, 208 * scale, 34 * scale, 16 * scale);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(225, 187, 114, 0.5)';
+            ctx.lineWidth = 3 * scale;
+            ctx.stroke();
+
+            ctx.fillStyle = '#f6ebc9';
+            ctx.beginPath();
+            ctx.arc(0, 52 * scale, 12 * scale, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
+        }
+        function createMvpAwardCanvas(mvpNames, winCount, totalGames) {
+            const names = Array.isArray(mvpNames) ? mvpNames.filter(Boolean) : [];
+            if (!names.length) return null;
+            const portrait = isMobileLikeDevice();
+            const width = portrait ? 920 : 1120;
+            const paddingX = portrait ? 72 : 88;
+            const topPad = portrait ? 70 : 78;
+            const contentWidth = width - paddingX * 2;
+            const honorTitle = getMvpHonorTitle(winCount, names.length);
+            const sectionGap = portrait ? 18 : 20;
+            const nameFontSize = portrait ? 48 : 54;
+            const bodyFontSize = portrait ? 28 : 30;
+            const bodyLineHeight = portrait ? 40 : 44;
+            const nameBlock = names.join(' / ');
+            const summaryLines = [
+                `胜利局数  ${winCount} 局`,
+                `记录局数  ${totalGames} 局`,
+                names.length > 1 ? '本赛季由多位玩家并列摘得 MVP 冠冕。' : '本赛季由这位玩家摘得唯一 MVP 冠冕。'
+            ];
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return null;
+
+            ctx.font = `${nameFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            const nameLines = wrapRoleCardText(ctx, nameBlock, contentWidth - 64);
+            ctx.font = `${bodyFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            const infoLines = summaryLines.flatMap((line, index) => {
+                const wrapped = wrapRoleCardText(ctx, line, contentWidth - 64);
+                if (index < summaryLines.length - 1) wrapped.push('');
+                return wrapped;
+            });
+
+            let height = topPad + 260;
+            height += nameLines.reduce((sum, line) => sum + (line === '' ? 16 : nameFontSize + 10), 0);
+            height += 210;
+            height += infoLines.reduce((sum, line) => sum + (line === '' ? 18 : bodyLineHeight), 0);
+            height += 90;
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, width, height);
+
+            const bg = ctx.createLinearGradient(0, 0, 0, height);
+            bg.addColorStop(0, '#2b171b');
+            bg.addColorStop(0.42, '#140d10');
+            bg.addColorStop(1, '#09080a');
+            ctx.fillStyle = bg;
+            ctx.fillRect(0, 0, width, height);
+
+            const radial = ctx.createRadialGradient(width * 0.5, topPad + 60, 30, width * 0.5, topPad + 120, width * 0.72);
+            radial.addColorStop(0, 'rgba(224, 184, 103, 0.28)');
+            radial.addColorStop(0.4, 'rgba(123, 43, 56, 0.18)');
+            radial.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = radial;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = 'rgba(225, 187, 114, 0.46)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(22, 22, width - 44, height - 44);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(36, 36, width - 72, height - 72);
+
+            for (let i = 0; i < width; i += 36) {
+                ctx.strokeStyle = i % 72 === 0 ? 'rgba(255,255,255,0.012)' : 'rgba(255,255,255,0.006)';
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(0, i);
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#cdbda7';
+            ctx.font = '20px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            ctx.fillText('血染钟楼 · 赛季终局', paddingX, topPad);
+
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#d7c097';
+            ctx.fillText(`${selectedScript === 'dycs' ? '黯月初升' : '暗流魔典'} · 第 ${Math.max(totalGames, 1)} 局封卷`, width - paddingX, topPad);
+            ctx.textAlign = 'left';
+
+            drawMvpCrown(ctx, width / 2, topPad + 116, portrait ? 0.9 : 1);
+
+            ctx.fillStyle = '#f7e9cf';
+            ctx.font = `${portrait ? 66 : 76}px "Georgia", "Noto Serif SC", serif`;
+            ctx.textAlign = 'center';
+            ctx.fillText('MVP', width / 2, topPad + 238);
+
+            ctx.font = `${portrait ? 24 : 26}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            drawRoundedRect(ctx, width / 2 - 132, topPad + 264, 264, 44, 22);
+            ctx.fillStyle = 'rgba(197, 165, 106, 0.16)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(225, 187, 114, 0.34)';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+            ctx.fillStyle = '#f0d7a0';
+            ctx.fillText(`${honorTitle} · 闪耀称号`, width / 2, topPad + 294);
+
+            const nameCardY = topPad + 340;
+            drawRoundedRect(ctx, paddingX, nameCardY, contentWidth, 120 + nameLines.length * (nameFontSize + 6), 28);
+            ctx.fillStyle = 'rgba(61, 24, 31, 0.56)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(197, 165, 106, 0.22)';
+            ctx.lineWidth = 1.4;
+            ctx.stroke();
+
+            ctx.fillStyle = '#c5a56a';
+            ctx.font = '600 24px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('获奖玩家', paddingX + 28, nameCardY + 36);
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(paddingX + 28, nameCardY + 54);
+            ctx.lineTo(width - paddingX - 28, nameCardY + 54);
+            ctx.stroke();
+
+            ctx.fillStyle = '#f4eadc';
+            ctx.font = `600 ${nameFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            ctx.textAlign = 'center';
+            let nameY = nameCardY + 104;
+            nameLines.forEach(line => {
+                if (line === '') {
+                    nameY += 16;
+                    return;
+                }
+                ctx.fillText(line, width / 2, nameY);
+                nameY += nameFontSize + 10;
+            });
+
+            const summaryY = nameCardY + 148 + nameLines.length * (nameFontSize + 6);
+            drawRoundedRect(ctx, paddingX, summaryY, contentWidth, 178 + Math.max(0, infoLines.length - 3) * 10, 26);
+            ctx.fillStyle = 'rgba(25, 21, 27, 0.68)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(197, 165, 106, 0.18)';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            const chipY = summaryY + 28;
+            const chipWidth = (contentWidth - 44) / 2;
+            [['胜利局数', `${winCount} 局`], ['赛季总局数', `${totalGames} 局`]].forEach(([label, value], index) => {
+                const chipX = paddingX + 18 + index * (chipWidth + 8);
+                drawRoundedRect(ctx, chipX, chipY, chipWidth, 74, 22);
+                ctx.fillStyle = index === 0 ? 'rgba(116, 41, 56, 0.5)' : 'rgba(69, 51, 31, 0.5)';
+                ctx.fill();
+                ctx.strokeStyle = index === 0 ? 'rgba(193, 98, 118, 0.26)' : 'rgba(225, 187, 114, 0.24)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                ctx.fillStyle = '#cdbda7';
+                ctx.font = '18px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(label, chipX + 18, chipY + 28);
+                ctx.fillStyle = '#f6e3b1';
+                ctx.font = '600 28px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+                ctx.fillText(value, chipX + 18, chipY + 58);
+            });
+
+            ctx.fillStyle = '#d9c8af';
+            ctx.font = `${bodyFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            ctx.textAlign = 'left';
+            let infoY = chipY + 120;
+            infoLines.forEach(line => {
+                if (line === '') {
+                    infoY += sectionGap;
+                    return;
+                }
+                ctx.fillText(line, paddingX + 24, infoY);
+                infoY += bodyLineHeight;
+            });
+
+            ctx.fillStyle = 'rgba(245, 218, 145, 0.88)';
+            ctx.font = '20px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('荣耀封存于烛火与审判之间', width / 2, height - 44);
+
+            return canvas;
         }
         function createRoleProfileCanvasV2(player) {
             if (!player) return null;
