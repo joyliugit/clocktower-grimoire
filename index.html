@@ -2744,8 +2744,10 @@ button.night-btn {
             const canvas = createRoleProfileCanvas(player);
             const imageBlob = await canvasToBlob(canvas);
             const imageFileName = `${sanitizeFileName(player.name)}_${sanitizeFileName(roleName)}.png`;
+            const isMobileLike = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')
+                || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
 
-            if (imageBlob && (!navigator.clipboard || !window.isSecureContext || typeof ClipboardItem === 'undefined') && openRoleCardPreviewModal(canvas, imageBlob, imageFileName)) {
+            if (imageBlob && (isMobileLike || !navigator.clipboard || !window.isSecureContext || typeof ClipboardItem === 'undefined') && openRoleCardPreviewModal(canvas, imageBlob, imageFileName)) {
                 return;
             }
 
@@ -3697,7 +3699,7 @@ button.night-btn {
                     <div class="row"><span class="player-name">${p.name}</span>${actionHtml}</div>
                     <div class="row" style="margin-bottom: 4px;"><select onchange="updateRole(${p.id}, this.value)">${roleOptions}</select></div>
                     <div class="role-desc">ℹ️ ${abilityDesc}</div>
-                    <button class="copy-role-btn" onclick="copyRoleProfile(${p.id})">📋 复制角色资料</button>
+                    <button class="copy-role-btn" onclick="copyRoleProfile(${p.id})">🖼️ 保存/分享角色卡</button>
                 `;
                 list.appendChild(card);
             });
