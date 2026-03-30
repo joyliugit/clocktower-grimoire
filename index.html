@@ -456,6 +456,11 @@ button.night-btn:active,
     width: 100%;
 }
 
+.traveler-preview {
+    margin: 10px 0 0;
+    text-align: left;
+}
+
 .traveler-hint {
     margin-top: 10px;
     color: var(--text-dim);
@@ -1502,6 +1507,10 @@ button.night-btn {
     font-size: 0.88rem;
 }
 
+.traveler-editor .role-desc {
+    margin: 0;
+}
+
 .copy-role-btn {
     width: 100%;
     margin-top: auto;
@@ -1975,7 +1984,7 @@ button.night-btn {
                 <div class="roster-label">🧳 添加旅行者</div>
                 <div class="traveler-grid">
                     <select id="travelerSeatSelect" class="traveler-meta-input" onchange="syncTravelerEditorFromSeat()"></select>
-                    <input type="text" id="travelerNameInput" class="traveler-meta-input" placeholder="旅行者名称，例如 枪手">
+                    <select id="travelerRoleSelect" class="traveler-meta-input" onchange="syncTravelerAbilityPreview(this.value)"></select>
                 </div>
                 <div class="traveler-grid">
                     <select id="travelerCampSelect" class="traveler-meta-input">
@@ -1985,11 +1994,11 @@ button.night-btn {
                     </select>
                     <button id="travelerApplyBtn" type="button" class="bluff-random-btn traveler-action-btn" onclick="applyTravelerToSelectedSeat()">+ 设为旅行者</button>
                 </div>
-                <textarea id="travelerAbilityInput" class="traveler-ability-input" placeholder="输入旅行者技能说明，保存后会同步到轮盘、角色栏和角色卡。"></textarea>
+                <div id="travelerAbilityPreview" class="role-desc traveler-preview">请选择官方旅行者角色，技能会在这里显示。</div>
                 <div class="traveler-actions">
                     <button id="travelerClearBtn" type="button" class="show-bluff-btn traveler-action-btn" onclick="clearTravelerFromSelectedSeat()">清除旅行者</button>
                 </div>
-                <div id="travelerHint" class="traveler-hint">旅行者不参与随机发牌，请先布置座位后再指定。</div>
+                <div id="travelerHint" class="traveler-hint">旅行者不参与随机发牌，请先布置座位后再从官方列表里选择。</div>
             </div>
 
             <button class="action-btn" onclick="generateAndDeal()">✨ 一键布置并随机发牌</button>
@@ -2093,10 +2102,66 @@ button.night-btn {
             evil: '邪恶'
         };
         const travelerRoleTexts = {
-            ability: '旅行者不参与随机发牌；请手动填写旅行者名称、阵营与能力，并由说书人按对应旅行者规则裁定。',
+            ability: '旅行者不参与随机发牌；请从官方旅行者列表中选择角色，并由说书人按对应旅行者规则裁定。',
             basic: '旅行者适合临时加入本局的玩家，建议先公开其旅行者身份、阵营与能力边界，再让所有人围绕其公开信息站边。',
             advanced: '高阶旅行者的价值在于改写白天票型与叙事结构；说书人应先讲清技能边界，再让旅行者公开影响桌面。',
             wheel: '旅行者'
+        };
+        const travelerPresets = {
+            tb: [
+                {
+                    name: '枪手',
+                    ability: '每个白天，你可以选择一名玩家：如果当天第一个被放逐或处决的玩家获得了你的同意票，那么你选择的玩家死亡。',
+                    wheel: '白天点杀一人'
+                },
+                {
+                    name: '乞丐',
+                    ability: '你必须公开自己的选票。每当一名死者玩家将他们的选票标记给你时，说书人会私下告知你他们的阵营（善良/邪恶），并且你失去所有之前获得的选票标记。',
+                    wheel: '收死者票知阵营'
+                },
+                {
+                    name: '官僚',
+                    ability: '每晚，选择一名玩家：他们今晚得知一个虚假的角色。明天，他们的选票计为三票，但死者如果投票给他们，该票不计入票数。',
+                    wheel: '虚假角色/三票'
+                },
+                {
+                    name: '小偷',
+                    ability: '你的选票计为负一票。每晚，选择一名玩家：他们明天的选票计为零票（即投票不计入票数）。',
+                    wheel: '负票/封票'
+                },
+                {
+                    name: '替罪羊',
+                    ability: '如果有玩家将被放逐或处决时，你可以选择自己代替其死亡。',
+                    wheel: '替人赴死'
+                }
+            ],
+            dycs: [
+                {
+                    name: '主教',
+                    ability: '你的投票计为两票。说书人每天必须告知所有人一个特定的阵营（善良或邪恶）。如果你投票放逐或处决的目标不是该阵营，则不需要消耗选票。',
+                    wheel: '双票/指定阵营'
+                },
+                {
+                    name: '法官',
+                    ability: '一次游戏，在投票阶段，你可以强制判定当前被提名者的放逐/处决通过或不通过。',
+                    wheel: '一次强判通过'
+                },
+                {
+                    name: '女族长',
+                    ability: '你的投票计为两票。每晚，选择一个阵营：要么该阵营的死者玩家不能投票，要么该阵营的存活玩家死亡。',
+                    wheel: '双票/选阵营'
+                },
+                {
+                    name: '巫毒师',
+                    ability: '如果你活着，存活玩家提名需要额外一张选票才能通过，死者玩家只需一个放逐投票可通过该投票。死者不需要选票标记即可为你（仅为你）的提名投票。',
+                    wheel: '改写提名阈值'
+                },
+                {
+                    name: '学徒',
+                    ability: '你活着时，获得一种说书人选择的存活玩家角色的能力（甚至是邪恶阵营的）。',
+                    wheel: '获得他人能力'
+                }
+            ]
         };
 
         const scriptMeta = {
@@ -2545,8 +2610,10 @@ button.night-btn {
         }
         function getWheelAbilityText(roleStr, player = null) {
             if ((player && isTravelerPlayer(player)) || isTravelerRole(roleStr)) {
+                const preset = player ? findTravelerPresetByName(getTravelerName(player)) : null;
+                const wheelText = preset?.wheel || travelerRoleTexts.wheel;
                 const camp = player ? getTravelerCampValue(player) : 'undecided';
-                return camp === 'undecided' ? travelerRoleTexts.wheel : `${travelerRoleTexts.wheel}·${getTravelerCampLabel(camp)}`;
+                return camp === 'undecided' ? wheelText : `${wheelText}·${getTravelerCampLabel(camp)}`;
             }
             return getCurrentWheelAbilityMap()[normalizeRoleName(roleStr)] || '待定';
         }
@@ -3669,11 +3736,28 @@ button.night-btn {
             const campValue = typeof playerOrValue === 'string' ? playerOrValue : getTravelerCampValue(playerOrValue);
             return travelerCampLabels[campValue] || travelerCampLabels.undecided;
         }
+        function getTravelerPresetList(script = selectedScript) {
+            return travelerPresets[script] || travelerPresets.tb;
+        }
+        function findTravelerPresetByName(name, script = selectedScript) {
+            return getTravelerPresetList(script).find(preset => preset.name === name) || null;
+        }
+        function applyTravelerPresetToPlayer(player, presetName, script = selectedScript) {
+            if (!player) return;
+            const preset = findTravelerPresetByName(presetName, script) || getTravelerPresetList(script)[0];
+            if (!preset) return;
+            player.role = TRAVELER_ROLE;
+            player.travelerName = preset.name;
+            player.travelerAbility = preset.ability;
+            if (!travelerCampLabels[player.travelerCamp]) player.travelerCamp = 'undecided';
+        }
         function getTravelerName(player) {
-            return `${player?.travelerName || ''}`.trim() || '旅行者';
+            const preset = findTravelerPresetByName(`${player?.travelerName || ''}`.trim());
+            return preset?.name || `${player?.travelerName || ''}`.trim() || getTravelerPresetList()[0]?.name || '旅行者';
         }
         function getTravelerAbilityText(player) {
-            return `${player?.travelerAbility || ''}`.trim() || travelerRoleTexts.ability;
+            const preset = findTravelerPresetByName(getTravelerName(player));
+            return preset?.ability || `${player?.travelerAbility || ''}`.trim() || travelerRoleTexts.ability;
         }
         function getPlayerRoleLabel(player) {
             if (isTravelerPlayer(player)) return `旅行者：${getTravelerName(player)}`;
@@ -3768,6 +3852,7 @@ button.night-btn {
         function normalizePlayerData(player, index) {
             const roleName = normalizeRoleName(player.role);
             const isTraveler = isTravelerRole(roleName);
+            const preset = isTraveler ? findTravelerPresetByName(`${player.travelerName || ''}`.trim()) : null;
             return {
                 id: typeof player.id === 'number' ? player.id : index,
                 name: player.name || getDefaultSeatName(index),
@@ -3778,8 +3863,8 @@ button.night-btn {
                 hasBeenNominated: !!player.hasBeenNominated,
                 tokens: Array.isArray(player.tokens) ? player.tokens : [],
                 deathType: player.deathType || (player.isAlive === false ? 'execution' : ''),
-                travelerName: isTraveler ? `${player.travelerName || ''}`.trim() : '',
-                travelerAbility: isTraveler ? `${player.travelerAbility || ''}`.trim() : '',
+                travelerName: isTraveler ? (preset?.name || `${player.travelerName || ''}`.trim() || getTravelerPresetList()[0]?.name || '') : '',
+                travelerAbility: isTraveler ? (preset?.ability || `${player.travelerAbility || ''}`.trim() || travelerRoleTexts.ability) : '',
                 travelerCamp: isTraveler && travelerCampLabels[player.travelerCamp] ? player.travelerCamp : 'undecided'
             };
         }
@@ -3805,81 +3890,87 @@ button.night-btn {
             const travelerId = Number(seatSelect.value);
             return players.find(player => player.id === travelerId) || null;
         }
+        function syncTravelerAbilityPreview(selectedTravelerName = '') {
+            const roleSelect = document.getElementById('travelerRoleSelect');
+            const preview = document.getElementById('travelerAbilityPreview');
+            if (!roleSelect || !preview) return;
+            const travelerName = selectedTravelerName || roleSelect.value;
+            const preset = findTravelerPresetByName(travelerName);
+            preview.innerHTML = preset ? `ℹ️ ${preset.ability}` : '请选择官方旅行者角色，技能会在这里显示。';
+        }
         function syncTravelerEditorFromSeat() {
             const seatSelect = document.getElementById('travelerSeatSelect');
-            const nameInput = document.getElementById('travelerNameInput');
+            const roleSelect = document.getElementById('travelerRoleSelect');
             const campSelect = document.getElementById('travelerCampSelect');
-            const abilityInput = document.getElementById('travelerAbilityInput');
             const hint = document.getElementById('travelerHint');
             const player = getTravelerEditorPlayer();
-            if (!seatSelect || !nameInput || !campSelect || !abilityInput || !hint) return;
+            const defaultTraveler = getTravelerPresetList()[0];
+            if (!seatSelect || !roleSelect || !campSelect || !hint) return;
             if (!player) {
-                nameInput.value = '';
+                roleSelect.value = defaultTraveler?.name || '';
                 campSelect.value = 'undecided';
-                abilityInput.value = '';
-                hint.innerText = '旅行者不参与随机发牌，请先布置座位后再指定。';
+                syncTravelerAbilityPreview(roleSelect.value);
+                hint.innerText = '旅行者不参与随机发牌，请先布置座位后再从官方列表里选择。';
                 return;
             }
             if (isTravelerPlayer(player)) {
-                nameInput.value = player.travelerName || '';
+                roleSelect.value = getTravelerName(player);
                 campSelect.value = getTravelerCampValue(player);
-                abilityInput.value = player.travelerAbility || '';
-                hint.innerText = `${player.name} 当前已设为旅行者，可继续修改其名称、阵营与能力。`;
+                syncTravelerAbilityPreview(roleSelect.value);
+                hint.innerText = `${player.name} 当前已设为旅行者 ${getTravelerName(player)}，可继续调整其阵营。`;
             } else {
-                nameInput.value = '';
+                roleSelect.value = defaultTraveler?.name || '';
                 campSelect.value = 'undecided';
-                abilityInput.value = '';
-                hint.innerText = `当前选中 ${player.name}，填写信息后可将其设为旅行者。`;
+                syncTravelerAbilityPreview(roleSelect.value);
+                hint.innerText = `当前选中 ${player.name}，请选择一个官方旅行者角色。`;
             }
         }
         function initTravelerControls() {
             const seatSelect = document.getElementById('travelerSeatSelect');
-            const nameInput = document.getElementById('travelerNameInput');
+            const roleSelect = document.getElementById('travelerRoleSelect');
             const campSelect = document.getElementById('travelerCampSelect');
-            const abilityInput = document.getElementById('travelerAbilityInput');
             const applyBtn = document.getElementById('travelerApplyBtn');
             const clearBtn = document.getElementById('travelerClearBtn');
             const hint = document.getElementById('travelerHint');
-            if (!seatSelect || !nameInput || !campSelect || !abilityInput || !applyBtn || !clearBtn || !hint) return;
+            const preview = document.getElementById('travelerAbilityPreview');
+            if (!seatSelect || !roleSelect || !campSelect || !applyBtn || !clearBtn || !hint || !preview) return;
 
             if (!players.length) {
                 seatSelect.innerHTML = '<option value="">请先布置座位后再添加旅行者</option>';
+                roleSelect.innerHTML = '<option value="">请先选择剧本与座位</option>';
                 seatSelect.disabled = true;
-                nameInput.disabled = true;
+                roleSelect.disabled = true;
                 campSelect.disabled = true;
-                abilityInput.disabled = true;
                 applyBtn.disabled = true;
                 clearBtn.disabled = true;
-                nameInput.value = '';
                 campSelect.value = 'undecided';
-                abilityInput.value = '';
+                preview.innerHTML = '请选择官方旅行者角色，技能会在这里显示。';
                 hint.innerText = '旅行者不参与随机发牌，请先一键布置并随机发牌。';
                 return;
             }
 
             const previousValue = players.some(player => `${player.id}` === `${seatSelect.value}`) ? seatSelect.value : `${players[0].id}`;
+            const previousTraveler = findTravelerPresetByName(roleSelect.value) ? roleSelect.value : '';
             seatSelect.innerHTML = players.map(player => `<option value="${player.id}">${escapeHtml(player.name)} · ${escapeHtml(getTravelerSeatStatus(player))}</option>`).join('');
+            roleSelect.innerHTML = getTravelerPresetList().map(preset => `<option value="${preset.name}">${preset.name}</option>`).join('');
             seatSelect.value = previousValue;
+            roleSelect.value = previousTraveler || getTravelerPresetList()[0]?.name || '';
             seatSelect.disabled = false;
-            nameInput.disabled = false;
+            roleSelect.disabled = false;
             campSelect.disabled = false;
-            abilityInput.disabled = false;
             applyBtn.disabled = false;
             clearBtn.disabled = false;
             syncTravelerEditorFromSeat();
         }
         function applyTravelerToSelectedSeat() {
             const player = getTravelerEditorPlayer();
-            const nameInput = document.getElementById('travelerNameInput');
+            const roleSelect = document.getElementById('travelerRoleSelect');
             const campSelect = document.getElementById('travelerCampSelect');
-            const abilityInput = document.getElementById('travelerAbilityInput');
-            if (!player || !nameInput || !campSelect || !abilityInput) return alert('请先布置座位后再添加旅行者。');
-            const travelerName = nameInput.value.trim();
-            if (!travelerName) return alert('请输入旅行者名称。');
-            player.role = TRAVELER_ROLE;
-            player.travelerName = travelerName;
+            if (!player || !roleSelect || !campSelect) return alert('请先布置座位后再添加旅行者。');
+            const preset = findTravelerPresetByName(roleSelect.value);
+            if (!preset) return alert('请选择一个官方旅行者角色。');
+            applyTravelerPresetToPlayer(player, preset.name);
             player.travelerCamp = travelerCampLabels[campSelect.value] ? campSelect.value : 'undecided';
-            player.travelerAbility = abilityInput.value.trim() || travelerRoleTexts.ability;
             saveData();
             renderAll();
         }
@@ -3900,8 +3991,7 @@ button.night-btn {
         function updateTravelerField(id, field, value) {
             const player = players.find(item => item.id === id);
             if (!player || !isTravelerPlayer(player)) return;
-            if (field === 'travelerName') player.travelerName = `${value || ''}`.trim();
-            if (field === 'travelerAbility') player.travelerAbility = `${value || ''}`.trim();
+            if (field === 'travelerName') applyTravelerPresetToPlayer(player, value);
             if (field === 'travelerCamp') player.travelerCamp = travelerCampLabels[value] ? value : 'undecided';
             saveData();
             renderAll();
@@ -4295,8 +4385,7 @@ button.night-btn {
             const normalizedRole = normalizeRoleName(newRole);
             player.role = normalizedRole;
             if (isTravelerRole(normalizedRole)) {
-                if (!player.travelerName) player.travelerName = '旅行者';
-                if (!player.travelerAbility) player.travelerAbility = travelerRoleTexts.ability;
+                applyTravelerPresetToPlayer(player, player.travelerName || getTravelerPresetList()[0]?.name);
                 player.travelerCamp = travelerCampLabels[player.travelerCamp] ? player.travelerCamp : 'undecided';
             } else {
                 player.travelerName = '';
@@ -4389,6 +4478,7 @@ button.night-btn {
             const saved = localStorage.getItem(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(key => localStorage.getItem(key)).find(Boolean); 
             if (saved) { 
                 const data = JSON.parse(saved);
+                selectedScript = scriptMeta[data.selectedScript] ? data.selectedScript : 'tb';
                 players = (data.players || []).map((player, index) => normalizePlayerData(player, index));
                 bluffs = (data.bluffs || ['❓ 未分配', '❓ 未分配', '❓ 未分配']).map(normalizeRoleName);
                 currentNightOrderType = data.currentNightOrderType || '';
@@ -4397,7 +4487,6 @@ button.night-btn {
                 seriesGames = typeof data.seriesGames === 'number' ? data.seriesGames : 0;
                 finalMvp = data.finalMvp || '';
                 playerRoster = normalizeRosterList(data.playerRoster);
-                selectedScript = scriptMeta[data.selectedScript] ? data.selectedScript : 'tb';
                 if (playerRoster.length === 0) playerRoster = inferRosterFromPlayers(players);
                 if(players.length > 0) document.getElementById('timerPanel').style.display = 'block';
             } else {
@@ -4520,13 +4609,14 @@ button.night-btn {
                 const actionHtml = p.isAlive
                     ? ''
                     : `<div class="actions">${ghostBtnHtml}<button class="revive-btn" onclick="revivePlayer(${p.id})">✨ 复活</button><button class="death-mark ${deathClass}" disabled>${deathLabel}</button></div>`;
+                const travelerPresetOptions = getTravelerPresetList().map(preset => `<option value="${preset.name}" ${getTravelerName(p) === preset.name ? 'selected' : ''}>${preset.name}</option>`).join('');
                 const travelerEditorHtml = isTravelerPlayer(p)
                     ? `
                         <div class="traveler-editor">
                             <div class="traveler-editor-row">
                                 <div>
-                                    <div class="traveler-editor-label">旅行者名称</div>
-                                    <input type="text" class="traveler-meta-input" value="${escapeHtml(p.travelerName || '')}" placeholder="旅行者名称" onchange="updateTravelerField(${p.id}, 'travelerName', this.value)">
+                                    <div class="traveler-editor-label">旅行者角色</div>
+                                    <select class="traveler-meta-input" onchange="updateTravelerField(${p.id}, 'travelerName', this.value)">${travelerPresetOptions}</select>
                                 </div>
                                 <div>
                                     <div class="traveler-editor-label">公开阵营</div>
@@ -4537,10 +4627,7 @@ button.night-btn {
                                     </select>
                                 </div>
                             </div>
-                            <div>
-                                <div class="traveler-editor-label">旅行者能力</div>
-                                <textarea class="traveler-ability-input" placeholder="输入旅行者能力说明" onchange="updateTravelerField(${p.id}, 'travelerAbility', this.value)">${escapeHtml(p.travelerAbility || '')}</textarea>
-                            </div>
+                            <div class="role-desc">ℹ️ ${getTravelerAbilityText(p)}</div>
                         </div>
                     `
                     : '';
