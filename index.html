@@ -276,6 +276,19 @@ button.night-btn:active,
 
 .roster-input {
     width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    border-radius: 14px;
+    color: var(--text-main);
+    background: linear-gradient(180deg, rgba(12, 10, 13, 0.9), rgba(20, 15, 18, 0.96));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+    caret-color: var(--gold);
+    -webkit-text-fill-color: var(--text-main);
+}
+
+.roster-input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
 }
 
 .roster-add-btn {
@@ -1401,6 +1414,17 @@ button.night-btn {
     gap: 10px;
 }
 
+.score-mvp-note {
+    padding: 12px 14px;
+    border: 1px solid rgba(197, 165, 106, 0.12);
+    border-radius: 14px;
+    color: var(--text-dim);
+    font-size: 0.84rem;
+    line-height: 1.6;
+    text-align: center;
+    background: rgba(18, 15, 18, 0.52);
+}
+
 .score-btn-good {
     background: linear-gradient(180deg, rgba(82, 95, 62, 0.96), rgba(46, 55, 35, 0.99));
     border-color: rgba(133, 147, 104, 0.32);
@@ -1443,9 +1467,38 @@ button.night-btn {
     font-weight: 600;
 }
 
+.scoreboard-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .scoreboard-score {
     color: var(--gold);
     font-weight: 700;
+}
+
+.score-adjust-btn {
+    min-height: 30px;
+    min-width: 30px;
+    padding: 0 8px;
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    border-radius: 999px;
+    color: var(--text-main);
+    background: linear-gradient(180deg, rgba(53, 43, 33, 0.96), rgba(29, 22, 18, 0.99));
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.score-adjust-btn.minus {
+    color: #f1d6d2;
+    border-color: rgba(160, 74, 88, 0.24);
+    background: linear-gradient(180deg, rgba(82, 27, 37, 0.96), rgba(46, 18, 25, 0.99));
+}
+
+.score-adjust-btn.plus {
+    color: #f7eccf;
+    border-color: rgba(197, 165, 106, 0.24);
+    background: linear-gradient(180deg, rgba(106, 75, 39, 0.96), rgba(63, 42, 21, 0.99));
 }
 
 .score-empty {
@@ -1745,7 +1798,7 @@ button.night-btn {
             <div id="seriesSummary" class="score-summary">已记录 0 局，当前未结算 MVP。</div>
             <div id="scoreBoardList" class="scoreboard-list"><div class="score-empty">暂无记分记录。</div></div>
             <div class="score-mvp-row">
-                <select id="mvpSelect"></select>
+                <div class="score-mvp-note">系统会按当前最高分自动评为 MVP；若同分，则并列记为 MVP。</div>
                 <button class="show-bluff-btn" onclick="finalizeSeriesMvp()">🏁 结束并记录 MVP</button>
             </div>
             <div id="mvpSummary" class="score-summary">当前赛季 MVP：未选择</div>
@@ -1983,16 +2036,14 @@ button.night-btn {
             saveData();
             updatePlayerListLayoutUi();
         }
-        function updateMvpSelect() {
-            const select = document.getElementById('mvpSelect');
-            if (!select) return;
-            const playerNames = players.map(player => player.name).filter(Boolean);
-            const uniqueNames = [...new Set(playerNames)];
-            const options = uniqueNames.length
-                ? uniqueNames.map(name => `<option value="${name}" ${finalMvp === name ? 'selected' : ''}>${name}</option>`).join('')
-                : '<option value="">暂无玩家</option>';
-            select.innerHTML = options;
-            if (finalMvp && uniqueNames.includes(finalMvp)) select.value = finalMvp;
+        function getCurrentMvpNames() {
+            const entries = Object.entries(scoreBoard);
+            if (!entries.length) return [];
+            const maxScore = Math.max(...entries.map(([, score]) => score));
+            return entries
+                .filter(([, score]) => score === maxScore)
+                .map(([name]) => name)
+                .sort((a, b) => a.localeCompare(b, 'zh-CN'));
         }
         function renderScoreBoard() {
             const list = document.getElementById('scoreBoardList');
@@ -2000,16 +2051,37 @@ button.night-btn {
             const mvpSummary = document.getElementById('mvpSummary');
             if (!list || !summary || !mvpSummary) return;
             const entries = Object.entries(scoreBoard).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'));
+            const currentMvpNames = getCurrentMvpNames();
             list.innerHTML = entries.length
-                ? entries.map(([name, score]) => `<div class="scoreboard-item"><span class="scoreboard-name">${name}</span><span class="scoreboard-score">${score} 分</span></div>`).join('')
+                ? entries.map(([name, score]) => {
+                    const encodedName = encodeURIComponent(name);
+                    return `
+                        <div class="scoreboard-item">
+                            <span class="scoreboard-name">${escapeHtml(name)}</span>
+                            <div class="scoreboard-controls">
+                                <button type="button" class="score-adjust-btn minus" onclick="adjustPlayerScore(decodeURIComponent('${encodedName}'), -1)">-1</button>
+                                <span class="scoreboard-score">${score} 分</span>
+                                <button type="button" class="score-adjust-btn plus" onclick="adjustPlayerScore(decodeURIComponent('${encodedName}'), 1)">+1</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')
                 : '<div class="score-empty">暂无记分记录。</div>';
             summary.innerText = `已记录 ${seriesGames} 局，当前共有 ${entries.length} 名玩家进入记分。`;
-            mvpSummary.innerText = `当前赛季 MVP：${finalMvp || '未选择'}`;
-            updateMvpSelect();
+            mvpSummary.innerText = `当前赛季 MVP：${finalMvp || (currentMvpNames.length ? currentMvpNames.join('、') : '未产生')}`;
         }
         function addScoreToPlayer(name, amount = 1) {
             if (!name) return;
-            scoreBoard[name] = (scoreBoard[name] || 0) + amount;
+            const nextScore = (scoreBoard[name] || 0) + amount;
+            if (nextScore <= 0) delete scoreBoard[name];
+            else scoreBoard[name] = nextScore;
+        }
+        function adjustPlayerScore(name, delta) {
+            if (!name || !delta) return;
+            addScoreToPlayer(name, delta);
+            finalMvp = '';
+            saveData();
+            renderScoreBoard();
         }
         function recordCampWin(camp) {
             if (!players.length) return alert('请先布置本局玩家和身份。');
@@ -2021,14 +2093,15 @@ button.night-btn {
             if (!winners.length) return alert('当前没有可计分的胜利阵营玩家。');
             winners.forEach(player => addScoreToPlayer(player.name, 1));
             seriesGames += 1;
+            finalMvp = '';
             saveData();
             renderScoreBoard();
             alert(`${camp === 'evil' ? '邪恶阵营' : '善良阵营'}已加分。`);
         }
         function finalizeSeriesMvp() {
-            const select = document.getElementById('mvpSelect');
-            if (!select || !select.value) return alert('请先选择一名 MVP 选手。');
-            finalMvp = select.value;
+            const currentMvpNames = getCurrentMvpNames();
+            if (!currentMvpNames.length) return alert('当前还没有可结算的 MVP 分数。');
+            finalMvp = currentMvpNames.join('、');
             saveData();
             renderScoreBoard();
             alert(`本轮赛季 MVP：${finalMvp}`);
