@@ -586,6 +586,44 @@ button.action-btn {
     box-shadow: 0 0 28px rgba(166, 123, 67, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
+.role-card-modal-panel {
+    width: min(92vw, 520px);
+}
+
+.role-card-preview {
+    width: 100%;
+    max-height: 62vh;
+    border: 1px solid rgba(197, 165, 106, 0.22);
+    border-radius: 18px;
+    object-fit: contain;
+    background: rgba(10, 8, 10, 0.72);
+    box-shadow: 0 14px 28px rgba(0, 0, 0, 0.28);
+}
+
+.role-card-tip {
+    margin: 12px 0 0;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    line-height: 1.65;
+    text-align: center;
+}
+
+.role-card-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.role-card-action-btn {
+    width: 100%;
+}
+
+.role-card-action-btn.secondary {
+    background: linear-gradient(180deg, rgba(59, 50, 38, 0.96), rgba(33, 27, 21, 0.99));
+    color: #f0e2c4;
+}
+
 .seat-token-title {
     margin: 0 0 8px;
     color: var(--text-main);
@@ -1740,6 +1778,20 @@ button.night-btn {
         <div class="modal-close-tip">-- 点击屏幕任意处关闭 --</div>
     </div>
 
+    <div id="roleCardPreviewModal" class="modal-overlay" onclick="closeRoleCardPreviewModal()">
+        <div id="roleCardPreviewPanel" class="modal-panel role-card-modal-panel">
+            <div class="seat-token-title">角色卡预览</div>
+            <div class="seat-token-subtitle">手机上若无法直接复制图片，可长按下方角色卡保存到相册。</div>
+            <img id="roleCardPreviewImage" class="role-card-preview" alt="角色卡预览">
+            <div class="role-card-actions">
+                <button id="roleCardShareBtn" type="button" class="show-bluff-btn role-card-action-btn" onclick="shareLatestRoleCard()">📤 系统分享角色卡</button>
+                <button type="button" class="bluff-random-btn role-card-action-btn secondary" onclick="downloadLatestRoleCard()">⬇️ 下载角色卡图片</button>
+            </div>
+            <div id="roleCardPreviewTip" class="role-card-tip">若系统分享不可用，请直接长按图片保存。</div>
+        </div>
+        <div class="modal-close-tip">-- 点击空白处关闭 --</div>
+    </div>
+
     <div id="seatTokenModal" class="modal-overlay" onclick="closeSeatTokenModal()">
         <div id="seatTokenModalPanel" class="modal-panel">
             <div class="seat-token-title" id="seatTokenTitle">座位标记</div>
@@ -1888,6 +1940,8 @@ button.night-btn {
         let selectedScript = 'tb';
         let playerRoster = [];
         let activeSeatAssignPlayerId = null;
+        let latestRoleCardBlob = null;
+        let latestRoleCardFileName = '';
         const STORAGE_KEY = 'tb_v2_0_data';
         const LEGACY_STORAGE_KEYS = ['tb_v9_7_data', 'tb_v9_6_data'];
 
@@ -2473,6 +2527,58 @@ button.night-btn {
             setTimeout(() => URL.revokeObjectURL(url), 1000);
             return true;
         }
+        function canShareRoleCard(blob, fileName) {
+            if (!blob || !navigator.share || typeof File === 'undefined') return false;
+            try {
+                const file = new File([blob], fileName || 'role-card.png', { type: 'image/png' });
+                return typeof navigator.canShare === 'function' ? navigator.canShare({ files: [file] }) : true;
+            } catch (error) {
+                return false;
+            }
+        }
+        function closeRoleCardPreviewModal() {
+            const modal = document.getElementById('roleCardPreviewModal');
+            if (modal) modal.style.display = 'none';
+        }
+        function openRoleCardPreviewModal(canvas, blob, fileName) {
+            if (!canvas || !blob) return false;
+            latestRoleCardBlob = blob;
+            latestRoleCardFileName = fileName || 'role-card.png';
+            const modal = document.getElementById('roleCardPreviewModal');
+            const image = document.getElementById('roleCardPreviewImage');
+            const tip = document.getElementById('roleCardPreviewTip');
+            const shareBtn = document.getElementById('roleCardShareBtn');
+            if (!modal || !image || !tip || !shareBtn) return false;
+            image.src = canvas.toDataURL('image/png');
+            const shareAvailable = canShareRoleCard(blob, latestRoleCardFileName);
+            shareBtn.style.display = shareAvailable ? 'inline-flex' : 'none';
+            tip.innerText = shareAvailable
+                ? '可直接系统分享；如果分享不可用，也可以长按图片保存到相册。'
+                : '当前环境更适合长按图片保存到相册，或点击下载角色卡图片。';
+            modal.style.display = 'flex';
+            return true;
+        }
+        async function shareLatestRoleCard() {
+            if (!canShareRoleCard(latestRoleCardBlob, latestRoleCardFileName)) {
+                alert('当前浏览器不支持系统分享图片，请长按图片保存或使用下载按钮。');
+                return;
+            }
+            try {
+                const file = new File([latestRoleCardBlob], latestRoleCardFileName || 'role-card.png', { type: 'image/png' });
+                await navigator.share({
+                    title: '角色卡',
+                    files: [file]
+                });
+            } catch (error) {
+                if (error && error.name !== 'AbortError') {
+                    alert('系统分享失败，请长按图片保存或使用下载按钮。');
+                }
+            }
+        }
+        function downloadLatestRoleCard() {
+            if (!latestRoleCardBlob) return;
+            downloadRoleProfileImage(latestRoleCardBlob, latestRoleCardFileName || 'role-card.png');
+        }
         function drawRoundedRect(ctx, x, y, width, height, radius) {
             const r = Math.min(radius, width / 2, height / 2);
             ctx.beginPath();
@@ -2639,12 +2745,17 @@ button.night-btn {
             const imageBlob = await canvasToBlob(canvas);
             const imageFileName = `${sanitizeFileName(player.name)}_${sanitizeFileName(roleName)}.png`;
 
+            if (imageBlob && (!navigator.clipboard || !window.isSecureContext || typeof ClipboardItem === 'undefined') && openRoleCardPreviewModal(canvas, imageBlob, imageFileName)) {
+                return;
+            }
+
             if (imageBlob && navigator.clipboard && window.isSecureContext && typeof ClipboardItem !== 'undefined') {
                 try {
                     await navigator.clipboard.write([new ClipboardItem({ 'image/png': imageBlob })]);
                     alert('已复制角色资料图片。');
                     return;
                 } catch (error) {
+                    if (openRoleCardPreviewModal(canvas, imageBlob, imageFileName)) return;
                     // Fall through to file download or text fallback.
                 }
             }
@@ -3490,6 +3601,11 @@ button.night-btn {
             if (seatAssignPanel && !seatAssignPanel.dataset.bound) {
                 seatAssignPanel.addEventListener('click', event => event.stopPropagation());
                 seatAssignPanel.dataset.bound = '1';
+            }
+            const roleCardPreviewPanel = document.getElementById('roleCardPreviewPanel');
+            if (roleCardPreviewPanel && !roleCardPreviewPanel.dataset.bound) {
+                roleCardPreviewPanel.addEventListener('click', event => event.stopPropagation());
+                roleCardPreviewPanel.dataset.bound = '1';
             }
             const seatAssignInput = document.getElementById('seatAssignInput');
             if (seatAssignInput && !seatAssignInput.dataset.bound) {
