@@ -1,2192 +1,2978 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1b1218" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta
-      name="description"
-      content="血染钟楼暗流涌动说书人本地网页：圆桌建局、自动发牌、夜间提词器、玩家卡片、标记与自动存档。"
-    />
-    <title>暗流涌动说书人台</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>血染钟楼 - 魔典 v2.0</title>
     <style>
 :root {
-  --bg: #110d12;
-  --bg-soft: #181218;
-  --panel: rgba(28, 18, 24, 0.86);
-  --panel-strong: rgba(39, 24, 29, 0.94);
-  --line: rgba(255, 228, 202, 0.12);
-  --line-strong: rgba(255, 228, 202, 0.24);
-  --text: #f5e8d4;
-  --muted: #cbb49c;
-  --accent: #c44937;
-  --accent-soft: rgba(196, 73, 55, 0.16);
-  --gold: #d5b06a;
-  --gold-soft: rgba(213, 176, 106, 0.2);
-  --cyan: #6ea6bf;
-  --rose: #b8647b;
-  --green: #719a69;
-  --danger: #a83f48;
-  --shadow: 0 22px 60px rgba(0, 0, 0, 0.32);
-  --radius-lg: 28px;
-  --radius-md: 20px;
-  --radius-sm: 14px;
-  --townsfolk: #d5b06a;
-  --outsider: #72a9bf;
-  --minion: #c16c87;
-  --demon: #d44e46;
+    --bg-void: #070708;
+    --bg-charcoal: #111012;
+    --panel-glass: rgba(25, 18, 22, 0.74);
+    --panel-glass-strong: rgba(15, 12, 15, 0.88);
+    --panel-edge: rgba(197, 165, 106, 0.22);
+    --panel-line: rgba(102, 85, 70, 0.36);
+    --gold: #c5a56a;
+    --gold-soft: #897047;
+    --wine: #4b141d;
+    --wine-bright: #7b2b38;
+    --steel: #7c8996;
+    --mist: #d8d0c3;
+    --text-main: #f2eadc;
+    --text-dim: #a99c90;
+    --text-muted: #7b6f67;
+    --dead: rgba(44, 37, 41, 0.82);
+    --danger: #a33d4a;
+    --ghost: #617687;
+    --success: #5a6f4e;
+    --shadow-deep: 0 24px 48px rgba(0, 0, 0, 0.48);
+    --shadow-glow: 0 0 28px rgba(166, 123, 67, 0.12);
+    --altar-size: 320px;
+    --seat-size: 64px;
+    --seat-name-size: 12px;
+    --seat-role-size: 10px;
 }
 
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 html {
-  scroll-behavior: smooth;
+    background: var(--bg-void);
+    scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  color: var(--text);
-  font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  background:
-    radial-gradient(circle at top left, rgba(196, 73, 55, 0.2), transparent 28%),
-    radial-gradient(circle at top right, rgba(112, 82, 131, 0.18), transparent 24%),
-    radial-gradient(circle at bottom center, rgba(213, 176, 106, 0.08), transparent 32%),
-    linear-gradient(180deg, #171015 0%, #0d0a0e 100%);
+    margin: 0;
+    min-height: 100vh;
+    padding: 18px 14px 32px;
+    overflow-x: hidden;
+    color: var(--text-main);
+    font-family: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "Palatino Linotype", serif;
+    background:
+        radial-gradient(circle at 50% -10%, rgba(186, 145, 76, 0.16), transparent 34%),
+        radial-gradient(circle at 18% 18%, rgba(91, 22, 32, 0.18), transparent 28%),
+        radial-gradient(circle at 82% 14%, rgba(89, 97, 112, 0.12), transparent 22%),
+        linear-gradient(180deg, #090809 0%, #100d10 48%, #140e11 100%);
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  background:
-    repeating-linear-gradient(
-      135deg,
-      rgba(255, 255, 255, 0.012) 0,
-      rgba(255, 255, 255, 0.012) 1px,
-      transparent 1px,
-      transparent 18px
-    );
-  opacity: 0.3;
-  mix-blend-mode: soft-light;
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.72;
+    mix-blend-mode: screen;
+    background:
+        repeating-linear-gradient(135deg, rgba(201, 178, 136, 0.028) 0 2px, transparent 2px 18px),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 11px),
+        radial-gradient(circle at center, rgba(196, 150, 82, 0.08), transparent 38%);
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    inset: -16%;
+    pointer-events: none;
+    background: radial-gradient(circle at center, transparent 34%, rgba(0, 0, 0, 0.78) 100%);
+}
+
+.ritual-shell {
+    position: relative;
+    z-index: 1;
+    width: min(100%, 680px);
+    margin: 0 auto;
+}
+
+.panel,
+#nightOrderDisplay,
+.player-card {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--panel-edge);
+    background: linear-gradient(180deg, rgba(43, 30, 35, 0.78) 0%, rgba(17, 13, 16, 0.9) 100%);
+    box-shadow: var(--shadow-deep), var(--shadow-glow), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(16px) saturate(108%);
+    -webkit-backdrop-filter: blur(16px) saturate(108%);
+}
+
+.panel::after,
+#nightOrderDisplay::after,
+.player-card::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.hero-panel,
+.control-panel,
+.circle-container,
+#nightOrderDisplay,
+.timer-bottom-panel {
+    animation: ritualReveal 0.6s ease both;
+}
+
+.hero-panel {
+    padding: 24px 18px 18px;
+    margin-bottom: 16px;
+    border-radius: 24px;
+}
+
+.hero-panel::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border-radius: 18px;
+    pointer-events: none;
+    border: 1px solid rgba(197, 165, 106, 0.08);
+    background: radial-gradient(circle at top, rgba(197, 165, 106, 0.08), transparent 58%);
+}
+
+.hero-caption {
+    position: relative;
+    z-index: 1;
+    margin-bottom: 10px;
+    color: var(--steel);
+    font-size: 0.74rem;
+    letter-spacing: 0.34em;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+h2 {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    gap: 14px;
+    align-items: center;
+    margin: 0;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(197, 165, 106, 0.2);
+    text-align: center;
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.title-text {
+    display: block;
+    color: var(--text-main);
+    font-size: clamp(1.8rem, 7vw, 2.8rem);
+    line-height: 1.04;
+    letter-spacing: 0.14em;
+    text-shadow: 0 0 20px rgba(0, 0, 0, 0.45), 0 0 24px rgba(123, 43, 56, 0.14);
+}
+
+.hero-subtitle {
+    position: relative;
+    z-index: 1;
+    margin: 14px 0 0;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    text-align: center;
+}
+
+.text-center {
+    text-align: center;
 }
 
 button,
 input,
-select,
-textarea {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-.page-shell {
-  width: min(1500px, calc(100% - 28px));
-  margin: 0 auto;
-  padding: 24px 0 40px;
-}
-
-.panel {
-  position: relative;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 28%),
-    var(--panel);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow);
-  overflow: hidden;
-  backdrop-filter: blur(18px);
-}
-
-.panel::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at top right, rgba(213, 176, 106, 0.08), transparent 28%),
-    radial-gradient(circle at bottom left, rgba(196, 73, 55, 0.08), transparent 38%);
-}
-
-.hero,
-.setup-panel,
-.table-panel,
-.night-panel,
-.players-panel,
-.notes-panel {
-  padding: 28px;
-}
-
-.hero {
-  display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.hero-copy,
-.save-panel,
-.section-heading,
-.table-core,
-.night-current,
-.player-card,
-.save-card,
-.bluff-item,
-.warning-item,
-.night-step-item {
-  position: relative;
-  z-index: 1;
-}
-
-.eyebrow,
-.kicker,
-.save-kicker {
-  margin: 0 0 10px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-size: 12px;
-  color: var(--gold);
-}
-
-h1,
-h2,
-h3,
-.seat-number,
-.seat-role,
-.role-name,
-.type-badge {
-  font-family: "Georgia", "Songti SC", "STSong", serif;
-}
-
-h1,
-h2,
-h3,
-p {
-  margin: 0;
-}
-
-h1 {
-  font-size: clamp(2.6rem, 5vw, 4.9rem);
-  line-height: 0.95;
-  max-width: 9ch;
-}
-
-h2 {
-  font-size: clamp(1.8rem, 3vw, 2.5rem);
-  line-height: 1;
-}
-
-h3 {
-  font-size: 1.4rem;
-  line-height: 1.05;
-}
-
-.hero-lead,
-.save-note,
-.label,
-.section-copy,
-.tiny-copy,
-.ability-copy,
-.role-ability,
-.role-note,
-.hint-copy,
-.warning-copy,
-.night-ability,
-.seat-name,
-.empty-state {
-  color: var(--muted);
-}
-
-.hero-lead {
-  max-width: 58ch;
-  margin-top: 18px;
-  line-height: 1.8;
-}
-
-.hero-tags,
-.save-panel,
-.button-row,
-.summary-grid,
-.status-row,
-.field-row,
-.token-list,
-.token-presets,
-.card-badges,
-.night-toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.hero-tags {
-  margin-top: 22px;
-}
-
-.hero-tags span,
-.card-badge,
-.save-chip,
-.seat-token-count {
-  padding: 8px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 228, 202, 0.14);
-  background: rgba(255, 255, 255, 0.04);
-}
-
-.save-panel {
-  display: grid;
-  align-content: start;
-}
-
-.save-card {
-  padding: 18px 20px;
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-.save-card.compact {
-  background: rgba(255, 255, 255, 0.03);
-}
-
-.save-card strong {
-  display: block;
-  font-size: 1.2rem;
-  margin-bottom: 8px;
-}
-
-.main-layout {
-  display: grid;
-  grid-template-columns: 1.02fr 1.2fr 0.96fr;
-  gap: 24px;
-  align-items: start;
-}
-
-.section-heading {
-  margin-bottom: 18px;
-}
-
-.section-copy {
-  margin-top: 10px;
-  line-height: 1.75;
-}
-
-.control-stack {
-  display: grid;
-  gap: 14px;
-}
-
-.count-field {
-  display: grid;
-  gap: 8px;
-}
-
-.count-field span {
-  font-size: 0.95rem;
-  color: var(--muted);
-}
-
-input[type="number"],
-input[type="text"],
-select,
-textarea {
-  width: 100%;
-  border-radius: 16px;
-  border: 1px solid rgba(255, 228, 202, 0.14);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--text);
-}
-
-input[type="number"],
-input[type="text"],
 select {
-  padding: 12px 14px;
-}
-
-textarea {
-  padding: 14px 16px;
-  resize: vertical;
-  min-height: 200px;
-  line-height: 1.7;
+    font: inherit;
 }
 
 button {
-  padding: 11px 14px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 228, 202, 0.14);
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text);
-  transition:
-    transform 0.18s ease,
-    border-color 0.18s ease,
-    background 0.18s ease,
-    color 0.18s ease;
+    appearance: none;
+    -webkit-appearance: none;
+    color: var(--text-main);
 }
 
-button:hover,
-.seat:hover,
-.token:hover,
-.night-step-item:hover {
-  transform: translateY(-1px);
-  border-color: rgba(213, 176, 106, 0.52);
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(197, 165, 106, 0.1);
 }
 
-.accent-button {
-  background: linear-gradient(135deg, rgba(196, 73, 55, 0.26), rgba(213, 176, 106, 0.16));
-  border-color: rgba(213, 176, 106, 0.52);
+.reset-btn,
+button.action-btn,
+.bluff-random-btn,
+.show-bluff-btn,
+button.night-btn,
+.actions button,
+.nom-btn,
+.quick-btn,
+.timer-controls button {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 10px 14px;
+    border: 1px solid rgba(197, 165, 106, 0.24);
+    border-radius: 14px;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(92, 52, 59, 0.92), rgba(46, 24, 29, 0.98));
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.08), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+    transition: transform 0.16s ease, border-color 0.16s ease, filter 0.16s ease, box-shadow 0.16s ease;
 }
 
-.danger-button {
-  background: rgba(168, 63, 72, 0.16);
-  border-color: rgba(168, 63, 72, 0.42);
+button.action-btn:active,
+.reset-btn:active,
+.bluff-random-btn:active,
+.show-bluff-btn:active,
+button.night-btn:active,
+.actions button:active,
+.nom-btn:active,
+.quick-btn:active,
+.timer-controls button:active {
+    transform: translateY(1px) scale(0.99);
 }
 
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-  margin-top: 20px;
+.reset-btn {
+    justify-self: center;
+    background: linear-gradient(180deg, rgba(94, 34, 46, 0.95), rgba(46, 17, 26, 0.98));
 }
 
-.summary-grid article,
-.bluff-card,
-.night-list-wrap,
-.player-card,
-.token,
-.warning-item,
-.night-step-item,
-.bluff-item {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+.control-panel {
+    padding: 20px 16px;
+    margin-bottom: 20px;
+    border-radius: 22px;
 }
 
-.summary-grid article {
-  padding: 16px;
-  border-radius: var(--radius-md);
+.control-panel > label {
+    display: block;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
 }
 
-.summary-grid strong {
-  display: block;
-  margin: 10px 0 8px;
-  font-size: 1.4rem;
+.roster-panel {
+    margin: 18px 0 12px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(197, 165, 106, 0.14);
 }
 
-.bluff-card {
-  margin-top: 22px;
-  padding: 18px;
-  border-radius: var(--radius-md);
+.roster-label {
+    display: block;
+    margin-bottom: 10px;
+    color: #e0bcc1;
+    font-size: 0.76rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
 }
 
-.inline-head {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 14px;
-  margin-bottom: 12px;
+.roster-entry {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
 }
 
-.bluff-list {
-  display: grid;
-  gap: 10px;
+.roster-input {
+    width: 100%;
 }
 
-.bluff-item {
-  padding: 12px 14px;
-  border-radius: 16px;
+.roster-add-btn {
+    width: 100%;
 }
 
-.bluff-item strong {
-  display: block;
-  margin-bottom: 6px;
+.roster-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
 }
 
-.table-stage {
-  position: relative;
-  display: grid;
-  place-items: center;
-  width: min(100%, 720px);
-  aspect-ratio: 1;
-  margin: 0 auto;
+.roster-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 38px;
+    padding: 8px 10px;
+    border: 1px solid rgba(197, 165, 106, 0.14);
+    border-radius: 999px;
+    background: rgba(23, 18, 21, 0.58);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
-.table-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 0 42%, transparent 42%),
-    radial-gradient(circle at center, rgba(196, 73, 55, 0.08), transparent 65%),
-    radial-gradient(circle at center, rgba(213, 176, 106, 0.08), transparent 80%);
-  border: 1px solid rgba(255, 228, 202, 0.1);
+.roster-chip.assigned {
+    border-color: rgba(197, 165, 106, 0.26);
+    background: rgba(56, 42, 22, 0.34);
 }
 
-.table-ring::before,
-.table-ring::after {
-  content: "";
-  position: absolute;
-  inset: 8% 8%;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 228, 202, 0.08);
+.roster-chip-name {
+    color: var(--text-main);
+    font-size: 0.82rem;
+    font-weight: 600;
 }
 
-.table-ring::after {
-  inset: 20% 20%;
+.roster-chip-seat {
+    color: var(--text-dim);
+    font-size: 0.76rem;
 }
 
-.table-core {
-  width: min(36%, 220px);
-  aspect-ratio: 1;
-  display: grid;
-  place-items: center;
-  padding: 22px;
-  text-align: center;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at top, rgba(213, 176, 106, 0.16), transparent 50%),
-    var(--panel-strong);
-  border: 1px solid rgba(255, 228, 202, 0.12);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.26);
+.roster-chip-remove {
+    min-height: 28px;
+    min-width: 28px;
+    padding: 0 7px;
+    border: 1px solid rgba(160, 74, 88, 0.2);
+    border-radius: 999px;
+    color: #e6c9c6;
+    background: rgba(67, 21, 30, 0.62);
+    box-shadow: none;
 }
 
-.core-script {
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  font-size: 11px;
-  color: var(--gold);
+.roster-empty {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    font-style: italic;
 }
 
-.table-core strong {
-  display: block;
-  margin: 8px 0 6px;
-  font-size: 1.2rem;
+input[type="number"],
+select,
+.add-token-input {
+    width: 100%;
+    padding: 12px 14px;
+    color: var(--text-main);
+    background: rgba(9, 8, 10, 0.38);
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
 }
 
-.table-core span {
-  color: var(--muted);
-  line-height: 1.6;
-  font-size: 0.92rem;
+select option {
+    background: #171317;
+    color: var(--text-main);
+}
+
+.control-panel input[type="number"] {
+    max-width: 110px;
+    margin: 12px auto 0;
+    text-align: center;
+    font-size: 1.32rem;
+    font-weight: 600;
+    color: var(--gold);
+}
+
+button.action-btn {
+    width: 100%;
+    margin: 16px 0 8px;
+    background: linear-gradient(180deg, rgba(136, 102, 58, 0.95), rgba(88, 61, 34, 0.99));
+    color: #faf4e8;
+    font-size: 1.02rem;
+    letter-spacing: 0.06em;
+}
+
+.role-info {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    max-width: 100%;
+    margin: 12px auto 4px;
+    padding: 10px 14px;
+    border: 1px solid rgba(120, 141, 160, 0.24);
+    border-radius: 999px;
+    background: rgba(77, 85, 98, 0.13);
+    color: #c9d4dd;
+    font-size: 0.86rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.bluffs-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(197, 165, 106, 0.14);
+}
+
+.bluffs-header label {
+    color: #e0bcc1;
+    font-size: 0.76rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+}
+
+.bluff-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.bluff-random-btn {
+    background: linear-gradient(180deg, rgba(93, 71, 42, 0.95), rgba(50, 37, 22, 0.98));
+    color: #f4e8d3;
+}
+
+.show-bluff-btn {
+    background: linear-gradient(180deg, rgba(84, 28, 38, 0.95), rgba(42, 18, 24, 0.98));
+    color: #f1d3d0;
+}
+
+.bluffs-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    width: 100%;
+    margin-top: 12px;
+}
+
+.bluff-select {
+    min-width: 0;
+    min-height: 48px;
+    padding: 12px 10px;
+    text-align: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    color: #f1d5d9;
+    background: rgba(68, 19, 28, 0.24);
+    border-color: rgba(164, 79, 91, 0.32);
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    background: radial-gradient(circle at center, rgba(118, 28, 44, 0.18), rgba(0, 0, 0, 0.92) 42%), rgba(0, 0, 0, 0.96);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+.modal-overlay::before {
+    content: "";
+    position: absolute;
+    width: min(78vw, 440px);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    box-shadow: 0 0 0 18px rgba(197, 165, 106, 0.03), inset 0 0 36px rgba(104, 19, 30, 0.16);
+}
+
+.modal-title {
+    position: relative;
+    z-index: 1;
+    color: #f1cbc7;
+    font-size: 1.18rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-align: center;
+}
+
+.modal-bluff-card {
+    position: relative;
+    z-index: 1;
+    width: min(88vw, 420px);
+    padding: 22px 20px;
+    border: 1px solid rgba(197, 165, 106, 0.28);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(51, 26, 31, 0.9), rgba(20, 14, 18, 0.96));
+    color: var(--gold);
+    font-size: clamp(1.7rem, 8vw, 2.35rem);
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: 0.12em;
+    box-shadow: 0 0 28px rgba(166, 123, 67, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.modal-close-tip {
+    position: relative;
+    z-index: 1;
+    margin-top: 12px;
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+}
+
+.modal-role-note {
+    position: relative;
+    z-index: 1;
+    color: #d8c8b0;
+    font-size: 0.82rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+}
+
+.modal-panel {
+    position: relative;
+    z-index: 1;
+    width: min(90vw, 430px);
+    padding: 20px 18px;
+    border: 1px solid rgba(197, 165, 106, 0.24);
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(47, 28, 34, 0.92), rgba(18, 13, 17, 0.96));
+    box-shadow: 0 0 28px rgba(166, 123, 67, 0.14), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.seat-token-title {
+    margin: 0 0 8px;
+    color: var(--text-main);
+    font-size: 1.08rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-align: center;
+}
+
+.seat-token-subtitle {
+    margin: 0 0 14px;
+    color: var(--text-dim);
+    font-size: 0.84rem;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.seat-token-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.seat-assign-list {
+    display: grid;
+    gap: 10px;
+    max-height: min(44vh, 340px);
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.seat-assign-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    border-radius: 14px;
+    color: var(--text-main);
+    text-align: left;
+    background: linear-gradient(180deg, rgba(39, 31, 34, 0.96), rgba(22, 18, 21, 0.99));
+}
+
+.seat-assign-btn.active {
+    border-color: rgba(197, 165, 106, 0.42);
+    color: #fff4de;
+    background: linear-gradient(180deg, rgba(106, 73, 38, 0.96), rgba(67, 44, 21, 0.99));
+}
+
+.seat-assign-btn.occupied {
+    border-color: rgba(120, 140, 158, 0.26);
+    color: #dce4ec;
+    background: linear-gradient(180deg, rgba(46, 53, 65, 0.96), rgba(27, 31, 39, 0.99));
+}
+
+.seat-assign-meta {
+    color: var(--text-dim);
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+.seat-assign-manual {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(197, 165, 106, 0.12);
+}
+
+.seat-assign-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.seat-assign-empty {
+    padding: 14px 12px;
+    border: 1px dashed rgba(197, 165, 106, 0.16);
+    border-radius: 14px;
+    color: var(--text-dim);
+    font-size: 0.84rem;
+    line-height: 1.6;
+    text-align: center;
+    background: rgba(20, 17, 20, 0.44);
+}
+
+.seat-token-btn {
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    border-radius: 14px;
+    color: var(--text-dim);
+    background: linear-gradient(180deg, rgba(39, 31, 34, 0.96), rgba(22, 18, 21, 0.99));
+}
+
+.seat-token-btn.active {
+    color: #fff4e6;
+    border-color: rgba(197, 165, 106, 0.34);
+    background: linear-gradient(180deg, rgba(104, 73, 39, 0.96), rgba(64, 43, 22, 0.99));
+}
+
+.seat-token-btn.clear {
+    grid-column: 1 / -1;
+    color: #f1d6d2;
+    border-color: rgba(160, 74, 88, 0.28);
+    background: linear-gradient(180deg, rgba(86, 28, 38, 0.96), rgba(46, 17, 24, 0.99));
+}
+
+.seat-token-btn.wide {
+    grid-column: 1 / -1;
+}
+
+.seat-token-btn.death {
+    color: #f3ddd8;
+    border-color: rgba(160, 74, 88, 0.28);
+    background: linear-gradient(180deg, rgba(85, 28, 38, 0.96), rgba(45, 17, 24, 0.99));
+}
+
+.seat-token-btn.death.active {
+    color: #fff1ee;
+    border-color: rgba(196, 95, 112, 0.54);
+    background: linear-gradient(180deg, rgba(135, 44, 61, 0.98), rgba(82, 24, 36, 0.99));
+    box-shadow: 0 0 18px rgba(171, 92, 108, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.seat-token-btn.demon {
+    color: #f6e4bf;
+    border-color: rgba(197, 165, 106, 0.3);
+    background: linear-gradient(180deg, rgba(105, 73, 38, 0.96), rgba(61, 40, 19, 0.99));
+}
+
+.seat-token-btn.demon.active {
+    color: #fff4d9;
+    border-color: rgba(219, 183, 108, 0.56);
+    background: linear-gradient(180deg, rgba(146, 103, 48, 0.98), rgba(87, 58, 24, 0.99));
+    box-shadow: 0 0 18px rgba(197, 165, 106, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.seat-token-btn.revive {
+    color: #e3ead7;
+    border-color: rgba(133, 147, 104, 0.28);
+    background: linear-gradient(180deg, rgba(63, 76, 47, 0.96), rgba(36, 45, 28, 0.99));
+}
+
+.seat-token-btn.blocked {
+    cursor: not-allowed;
+    color: var(--text-muted);
+    border-color: rgba(113, 104, 98, 0.2);
+    background: linear-gradient(180deg, rgba(35, 32, 35, 0.94), rgba(19, 17, 19, 0.99));
+}
+
+.circle-toolbar {
+    display: grid;
+    gap: 10px;
+    margin: -2px 0 18px;
+    padding: 14px;
+    border-radius: 18px;
+}
+
+.rename-toggle-btn {
+    width: 100%;
+    margin: 0;
+    background: linear-gradient(180deg, rgba(56, 47, 35, 0.96), rgba(30, 23, 18, 0.99));
+    color: #efe2c8;
+}
+
+.rename-toggle-btn.mode-on {
+    background: linear-gradient(180deg, rgba(112, 77, 37, 0.96), rgba(70, 45, 21, 0.99));
+    border-color: rgba(197, 165, 106, 0.42);
+    color: #fff3d8;
+}
+
+.circle-toolbar-tip {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    line-height: 1.6;
+    text-align: center;
+}
+
+.circle-stage {
+    width: min(100%, 760px);
+    margin: 8px auto 20px;
+    padding: 42px 24px 56px;
+}
+
+.circle-container {
+    position: relative;
+    display: block;
+    width: var(--altar-size);
+    height: var(--altar-size);
+    margin: 0 auto;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, rgba(52, 28, 34, 0.86) 0%, rgba(25, 16, 20, 0.84) 58%, rgba(12, 10, 12, 0.92) 100%);
+    border: 1px solid rgba(197, 165, 106, 0.22);
+    box-shadow: var(--shadow-deep), var(--shadow-glow), inset 0 0 28px rgba(0, 0, 0, 0.34);
+}
+
+.circle-container::before {
+    content: "";
+    position: absolute;
+    inset: 12%;
+    border-radius: 50%;
+    border: 1px solid rgba(197, 165, 106, 0.16);
+    background: radial-gradient(circle, rgba(122, 93, 54, 0.08), rgba(31, 17, 21, 0.02) 60%, transparent 61%), repeating-conic-gradient(from 0deg, rgba(197, 165, 106, 0.13) 0 3deg, transparent 3deg 30deg);
+    box-shadow: inset 0 0 24px rgba(196, 150, 82, 0.06), 0 0 20px rgba(107, 29, 39, 0.16);
+}
+
+.circle-container::after {
+    content: "";
+    position: absolute;
+    inset: 29%;
+    border-radius: 50%;
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    background: radial-gradient(circle, rgba(161, 126, 70, 0.16), rgba(62, 24, 28, 0.22) 46%, rgba(18, 14, 17, 0.88) 100%);
+    box-shadow: 0 0 36px rgba(166, 123, 67, 0.14), inset 0 0 28px rgba(0, 0, 0, 0.45);
+    animation: altarGlow 6s ease-in-out infinite;
 }
 
 .seat {
-  position: absolute;
-  left: var(--seat-x);
-  top: var(--seat-y);
-  width: clamp(78px, 10vw, 106px);
-  min-height: clamp(78px, 10vw, 106px);
-  transform: translate(-50%, -50%);
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 5px;
-  padding: 10px 8px;
-  text-align: center;
-  border-radius: 22px;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 60%),
-    rgba(24, 15, 20, 0.88);
-  border: 1px solid rgba(255, 228, 202, 0.12);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
+    position: absolute;
+    z-index: 2;
+    width: var(--seat-size);
+    height: var(--seat-size);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid rgba(197, 165, 106, 0.28);
+    background: radial-gradient(circle at 35% 28%, rgba(120, 91, 100, 0.48), rgba(44, 28, 33, 0.98) 62%, rgba(16, 12, 15, 0.98) 100%);
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.52), 0 10px 18px rgba(0, 0, 0, 0.34), 0 0 16px rgba(112, 28, 37, 0.08);
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
-.seat.dead {
-  opacity: 0.46;
-  filter: grayscale(0.4);
+.seat:hover {
+    transform: translate(-50%, -50%) scale(1.04);
 }
 
-.seat-number {
-  font-size: 1.05rem;
-  color: var(--gold);
+.seat.dead-seat {
+    opacity: 0.6;
+    filter: grayscale(78%);
+    border-color: rgba(113, 104, 98, 0.34);
+    background: radial-gradient(circle at 35% 28%, rgba(63, 58, 61, 0.6), rgba(24, 21, 24, 0.98) 68%, rgba(10, 9, 10, 0.98) 100%);
+}
+
+.seat-minion {
+    border-color: rgba(224, 88, 116, 0.98);
+    background: radial-gradient(circle at 35% 22%, rgba(205, 78, 111, 0.62), rgba(96, 23, 38, 0.99) 54%, rgba(16, 10, 14, 0.99) 100%);
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.58), 0 0 0 3px rgba(148, 34, 61, 0.38), 0 0 0 7px rgba(93, 17, 35, 0.2), 0 0 40px rgba(205, 74, 104, 0.46), 0 14px 24px rgba(0, 0, 0, 0.4);
+}
+
+.seat-minion .seat-name {
+    color: #fff1f3;
+    text-shadow: 0 0 16px rgba(224, 104, 130, 0.52);
+}
+
+.seat-minion .seat-role {
+    color: #ffd0d8;
+    text-shadow: 0 0 10px rgba(224, 104, 130, 0.34);
+}
+
+.seat-demon {
+    border-color: rgba(219, 183, 108, 0.92);
+    background: radial-gradient(circle at 35% 22%, rgba(205, 158, 83, 0.5), rgba(106, 32, 34, 0.98) 56%, rgba(16, 10, 12, 0.98) 100%);
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.58), 0 0 0 3px rgba(197, 165, 106, 0.28), 0 0 42px rgba(197, 165, 106, 0.42), 0 14px 24px rgba(0, 0, 0, 0.4);
+}
+
+.seat-demon .seat-name {
+    color: #fff1c9;
+    text-shadow: 0 0 14px rgba(205, 171, 102, 0.38);
+}
+
+.seat-demon .seat-role {
+    color: #f4d899;
 }
 
 .seat-name {
-  font-size: 0.88rem;
-  line-height: 1.25;
-  min-height: 2.4em;
+    max-width: calc(var(--seat-size) - 12px);
+    color: #fff8ee;
+    font-size: var(--seat-name-size);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .seat-role {
-  font-size: 0.9rem;
-  line-height: 1.1;
+    max-width: calc(var(--seat-size) - 12px);
+    margin-top: 4px;
+    color: var(--gold);
+    font-size: var(--seat-role-size);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.seat-status {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  justify-content: center;
+.seat-ability {
+    position: absolute;
+    z-index: 1;
+    min-width: 58px;
+    max-width: 88px;
+    padding: 6px 8px;
+    border: 1px solid rgba(197, 165, 106, 0.12);
+    border-radius: 12px;
+    color: var(--text-dim);
+    font-size: 9.5px;
+    line-height: 1.28;
+    text-align: center;
+    letter-spacing: 0.02em;
+    background: rgba(17, 14, 17, 0.72);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03), 0 6px 14px rgba(0, 0, 0, 0.2);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-.seat-token-count {
-  font-size: 0.76rem;
-  padding: 4px 8px;
+.seat-ability.evil {
+    color: #f0c9cf;
+    border-color: rgba(171, 92, 108, 0.18);
+    background: rgba(47, 20, 28, 0.72);
 }
 
-.seat[data-type="townsfolk"] {
-  border-color: rgba(213, 176, 106, 0.38);
+.seat-ability.demon {
+    color: #f2ddab;
+    border-color: rgba(197, 165, 106, 0.2);
+    background: rgba(57, 38, 18, 0.74);
 }
 
-.seat[data-type="outsider"] {
-  border-color: rgba(110, 166, 191, 0.36);
+.seat-badges {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    pointer-events: none;
+    z-index: 3;
 }
 
-.seat[data-type="minion"] {
-  border-color: rgba(184, 100, 123, 0.38);
+.seat-badge {
+    position: relative;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(131, 145, 160, 0.5);
+    background: rgba(15, 12, 18, 0.96);
+    box-shadow: 0 0 12px rgba(96, 116, 138, 0.24);
+    font-size: 12px;
 }
 
-.seat[data-type="demon"] {
-  border-color: rgba(212, 78, 70, 0.42);
+.seat-badge.rival {
+    border-color: rgba(131, 145, 160, 0.58);
+    background: rgba(16, 14, 24, 0.98);
+    box-shadow: 0 0 12px rgba(96, 116, 138, 0.26);
 }
 
-.night-toolbar {
-  margin-bottom: 14px;
+.seat-badge.poison {
+    border-color: rgba(171, 92, 108, 0.6);
+    background: rgba(56, 19, 28, 0.96);
+    box-shadow: 0 0 12px rgba(171, 92, 108, 0.24);
 }
 
-.night-current {
-  min-height: 320px;
-  padding: 20px;
-  border-radius: var(--radius-md);
-  background:
-    linear-gradient(180deg, rgba(213, 176, 106, 0.06), transparent 45%),
-    rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+.seat-badge.drunk {
+    border-color: rgba(199, 165, 106, 0.58);
+    background: rgba(66, 42, 20, 0.96);
+    box-shadow: 0 0 12px rgba(199, 165, 106, 0.22);
 }
 
-.night-current.empty {
-  display: grid;
-  place-items: center;
-  text-align: center;
+.seat-badge.protect {
+    border-color: rgba(108, 142, 125, 0.56);
+    background: rgba(24, 46, 34, 0.96);
+    box-shadow: 0 0 12px rgba(108, 142, 125, 0.22);
 }
 
-.step-counter {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--gold);
-  margin-bottom: 14px;
+.seat-badge.master {
+    border-color: rgba(197, 165, 106, 0.58);
+    background: rgba(56, 43, 19, 0.96);
+    box-shadow: 0 0 12px rgba(197, 165, 106, 0.22);
 }
 
-.step-title {
-  margin-bottom: 8px;
-  font-size: 1.65rem;
+.seat-badge.execution {
+    border-color: rgba(170, 84, 98, 0.68);
+    background: rgba(63, 19, 28, 0.96);
+    box-shadow: 0 0 12px rgba(170, 84, 98, 0.28);
 }
 
-.step-meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 16px;
+.seat-badge.demon-death {
+    border-color: rgba(205, 171, 102, 0.72);
+    background: rgba(74, 46, 19, 0.96);
+    box-shadow: 0 0 14px rgba(205, 171, 102, 0.28);
 }
 
-.type-badge,
-.warning-badge,
-.hint-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 228, 202, 0.14);
-  background: rgba(255, 255, 255, 0.05);
-  font-size: 0.88rem;
+.hints-panel {
+    margin-bottom: 18px;
+    padding: 16px;
+    border-radius: 18px;
 }
 
-.type-badge[data-type="townsfolk"] {
-  color: var(--townsfolk);
+.hints-title {
+    margin-bottom: 12px;
+    color: var(--gold);
+    font-size: 0.84rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
 }
 
-.type-badge[data-type="outsider"] {
-  color: var(--outsider);
+.hints-list {
+    display: grid;
+    gap: 10px;
 }
 
-.type-badge[data-type="minion"] {
-  color: var(--minion);
+.hint-item {
+    padding: 11px 12px;
+    border-radius: 14px;
+    line-height: 1.6;
+    font-size: 0.86rem;
+    color: var(--text-dim);
+    background: rgba(20, 17, 20, 0.52);
+    border: 1px solid rgba(197, 165, 106, 0.08);
 }
 
-.type-badge[data-type="demon"] {
-  color: var(--demon);
+.hint-item.warning {
+    color: #f2ddd7;
+    background: rgba(79, 29, 37, 0.32);
+    border-color: rgba(160, 74, 88, 0.22);
 }
 
-.night-ability {
-  font-style: italic;
-  line-height: 1.75;
-  margin-bottom: 14px;
+.hint-item.system {
+    color: #d0dae3;
+    background: rgba(52, 63, 77, 0.28);
+    border-color: rgba(123, 144, 167, 0.2);
 }
 
-.guide-box {
-  padding: 16px;
-  border-radius: 18px;
-  background: linear-gradient(135deg, rgba(213, 176, 106, 0.18), rgba(213, 176, 106, 0.08));
-  border: 1px solid rgba(213, 176, 106, 0.36);
-  color: #f9e7b5;
-  line-height: 1.7;
-  margin-bottom: 14px;
+.night-panel {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 18px;
 }
 
-.warning-box {
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: rgba(168, 63, 72, 0.16);
-  border: 1px solid rgba(168, 63, 72, 0.34);
-  color: #ffd8d8;
-  line-height: 1.7;
+button.night-btn {
+    width: 100%;
+    min-height: 52px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
 }
 
-.warning-stack {
-  display: grid;
-  gap: 10px;
-  margin-top: 14px;
+.btn-first {
+    background: linear-gradient(180deg, rgba(109, 82, 45, 0.96), rgba(67, 47, 27, 0.99));
 }
 
-.warning-item {
-  padding: 12px 14px;
-  border-radius: 16px;
+.btn-other {
+    color: #dde4ea;
+    background: linear-gradient(180deg, rgba(52, 59, 72, 0.96), rgba(30, 34, 44, 0.99));
+    border-color: rgba(140, 151, 164, 0.28);
 }
 
-.night-list-wrap {
-  margin-top: 18px;
-  padding: 18px;
-  border-radius: var(--radius-md);
+#nightOrderDisplay {
+    display: none;
+    margin-bottom: 18px;
+    padding: 20px 18px;
+    border-radius: 22px;
 }
 
-.night-step-list {
-  display: grid;
-  gap: 10px;
-  max-height: 360px;
-  overflow: auto;
+#nightOrderDisplay::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 18px;
+    right: 18px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(197, 165, 106, 0.52), transparent);
 }
 
-.night-step-item {
-  padding: 12px 14px;
-  border-radius: 16px;
+.night-order-title {
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(197, 165, 106, 0.18);
+    color: var(--gold);
+    font-size: 1.12rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
 }
 
-.night-step-item.active {
-  border-color: rgba(213, 176, 106, 0.38);
-  background: linear-gradient(135deg, rgba(196, 73, 55, 0.14), rgba(213, 176, 106, 0.12));
+.night-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.night-step-item strong {
-  display: block;
-  margin-bottom: 5px;
+.night-item {
+    padding: 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(197, 165, 106, 0.12);
+    border-left: 3px solid rgba(197, 165, 106, 0.4);
+    background: linear-gradient(180deg, rgba(40, 27, 31, 0.78), rgba(18, 14, 17, 0.84));
 }
 
-.players-panel,
-.notes-panel {
-  margin-top: 24px;
+.night-header {
+    margin-bottom: 6px;
+    font-size: 1.02rem;
+    line-height: 1.5;
+    letter-spacing: 0.03em;
 }
 
-.player-cards {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
+.highlight {
+    color: var(--gold);
+    font-weight: 600;
+}
+
+.system-prompt {
+    color: #c7d2dc;
+    font-weight: 600;
+}
+
+.status-dead {
+    color: #e3b2aa;
+    font-size: 0.82em;
+}
+
+.role-ability {
+    margin-bottom: 8px;
+    color: var(--text-dim);
+    font-size: 0.86rem;
+    line-height: 1.6;
+}
+
+.storyteller-action {
+    padding: 9px 10px;
+    border: 1px solid rgba(143, 71, 81, 0.28);
+    border-radius: 12px;
+    color: #f3ebe3;
+    background: rgba(82, 25, 35, 0.18);
+    line-height: 1.6;
+}
+
+.ai-suggestion {
+    margin-top: 8px;
+    padding: 8px 10px;
+    border-left: 2px solid rgba(122, 143, 165, 0.36);
+    border-radius: 10px;
+    color: #d0dae3;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    background: rgba(93, 109, 128, 0.12);
+}
+
+.ai-suggestion-title {
+    margin-bottom: 6px;
+    color: #d7e0e8;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+}
+
+.ai-option {
+    margin-top: 6px;
+    padding-top: 6px;
+    border-top: 1px dashed rgba(122, 143, 165, 0.16);
+}
+
+.ai-option:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
+}
+
+.inline-reveal-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 28px;
+    padding: 4px 9px;
+    margin: 0 2px;
+    border-radius: 999px;
+    border: 1px solid rgba(197, 165, 106, 0.28);
+    background: linear-gradient(180deg, rgba(104, 76, 41, 0.96), rgba(59, 42, 24, 0.99));
+    color: #faecd0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.poison-warning,
+.poison-false-info {
+    margin-top: 8px;
+    padding: 9px 10px;
+    border-radius: 10px;
+    font-size: 0.84rem;
+    line-height: 1.6;
+}
+
+.poison-warning {
+    color: #f3d8d5;
+    background: rgba(89, 28, 38, 0.24);
+    border-left: 2px solid rgba(173, 83, 98, 0.42);
+}
+
+.poison-false-info {
+    color: #e8dcc7;
+    background: rgba(99, 72, 34, 0.18);
+    border-left: 2px solid rgba(197, 165, 106, 0.38);
+}
+
+#playerList {
+    display: grid;
+    gap: 14px;
+}
+
+#playerList.single-column {
+    grid-template-columns: 1fr;
+}
+
+#playerList.double-column {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.playerlist-toolbar {
+    display: grid;
+    gap: 10px;
+    margin-bottom: 14px;
+    padding: 14px;
+    border-radius: 18px;
+}
+
+.playerlist-layout-btn {
+    width: 100%;
+    margin: 0;
+    background: linear-gradient(180deg, rgba(58, 49, 36, 0.96), rgba(31, 24, 18, 0.99));
+    color: #efe2c8;
+}
+
+.playerlist-layout-btn.double {
+    background: linear-gradient(180deg, rgba(108, 75, 39, 0.96), rgba(67, 44, 21, 0.99));
+    border-color: rgba(197, 165, 106, 0.4);
+    color: #fff3d8;
 }
 
 .player-card {
-  display: grid;
-  gap: 14px;
-  padding: 18px;
-  border-radius: var(--radius-md);
+    padding: 14px;
+    border-radius: 18px;
+    border-left: 3px solid rgba(197, 165, 106, 0.34);
 }
 
-.player-card.dead {
-  opacity: 0.8;
+.dead {
+    background: linear-gradient(180deg, rgba(40, 34, 38, 0.82), rgba(24, 21, 24, 0.92));
+    border-left-color: rgba(113, 104, 98, 0.36);
 }
 
-.card-head {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 10px;
+.dead .player-name {
+    color: #91857d;
+    text-decoration: line-through;
 }
 
-.card-head strong {
-  display: block;
-  font-size: 1.25rem;
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
 }
 
-.role-name {
-  font-size: 1.2rem;
+.player-name {
+    font-size: 1.12rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
 }
 
-.card-badges {
-  align-items: center;
+.row select {
+    max-width: none;
 }
 
-.card-badge.dead {
-  color: #ffd3d3;
-  border-color: rgba(168, 63, 72, 0.4);
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
 }
 
-.card-badge.good {
-  color: #d6ebb7;
-  border-color: rgba(113, 154, 105, 0.4);
+.actions button {
+    margin-left: 0;
+    min-height: 38px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
 }
 
-.field-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+.kill-btn {
+    background: linear-gradient(180deg, rgba(118, 31, 44, 0.96), rgba(74, 18, 28, 0.99));
+    border-color: rgba(164, 79, 91, 0.38);
 }
 
-.role-ability,
-.role-note {
-  line-height: 1.7;
+.revive-btn {
+    background: linear-gradient(180deg, rgba(83, 94, 63, 0.96), rgba(49, 57, 36, 0.99));
+    border-color: rgba(133, 147, 104, 0.34);
 }
 
-.card-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.demon-btn {
+    background: linear-gradient(180deg, rgba(122, 81, 38, 0.96), rgba(76, 49, 24, 0.99));
+    border-color: rgba(197, 165, 106, 0.34);
+    color: #faecd0;
 }
 
-.card-controls button {
-  padding: 9px 12px;
+.blocked-btn,
+.actions button:disabled {
+    cursor: not-allowed;
+    color: var(--text-muted);
+    background: linear-gradient(180deg, rgba(37, 34, 36, 0.94), rgba(20, 18, 20, 0.99));
+    border-color: rgba(113, 104, 98, 0.22);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
-.card-controls button.is-active,
-.token-preset.is-active {
-  background: linear-gradient(135deg, rgba(196, 73, 55, 0.24), rgba(213, 176, 106, 0.12));
-  border-color: rgba(213, 176, 106, 0.48);
+.ghost-btn {
+    background: linear-gradient(180deg, rgba(71, 84, 98, 0.96), rgba(40, 49, 60, 0.99));
+    border-color: rgba(123, 144, 167, 0.36);
 }
 
-.token-zone {
-  display: grid;
-  gap: 12px;
+.no-ghost {
+    color: var(--text-muted);
+    background: linear-gradient(180deg, rgba(35, 32, 35, 0.94), rgba(19, 17, 19, 0.99));
+    border-color: rgba(113, 104, 98, 0.22);
 }
 
-.token-presets {
-  gap: 8px;
+.death-mark {
+    pointer-events: none;
+    opacity: 0.92;
 }
 
-.token-preset {
-  padding: 8px 11px;
-  font-size: 0.9rem;
+.execution-mark {
+    background: linear-gradient(180deg, rgba(94, 32, 42, 0.94), rgba(56, 18, 25, 0.99));
+    border-color: rgba(160, 74, 88, 0.28);
 }
 
-.token-list {
-  gap: 8px;
+.demon-mark {
+    background: linear-gradient(180deg, rgba(97, 68, 35, 0.94), rgba(60, 41, 20, 0.99));
+    border-color: rgba(197, 165, 106, 0.28);
+}
+
+.role-desc {
+    margin: 6px 0 8px;
+    padding: 10px 12px;
+    border-left: 2px solid rgba(197, 165, 106, 0.22);
+    border-radius: 12px;
+    color: var(--text-dim);
+    font-size: 0.84rem;
+    line-height: 1.65;
+    background: rgba(9, 8, 10, 0.28);
+}
+
+.copy-role-btn {
+    width: 100%;
+    margin-top: 6px;
+    background: linear-gradient(180deg, rgba(70, 59, 42, 0.96), rgba(39, 31, 22, 0.99));
+    border-color: rgba(197, 165, 106, 0.26);
+    color: #f1e5cb;
+}
+
+.tokens-area {
+    margin-top: 12px;
+    padding: 12px;
+    border: 1px solid rgba(197, 165, 106, 0.08);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(10, 9, 11, 0.28), rgba(10, 9, 11, 0.14));
+}
+
+.tokens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 28px;
+    margin-bottom: 8px;
 }
 
 .token {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  border-radius: 999px;
-  color: var(--text);
+    padding: 6px 10px;
+    border: 1px solid rgba(170, 84, 98, 0.35);
+    border-radius: 999px;
+    color: #fff6f2;
+    font-size: 0.78rem;
+    cursor: pointer;
+    background: linear-gradient(180deg, rgba(103, 33, 46, 0.96), rgba(64, 18, 28, 0.99));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.token.removeable {
-  cursor: pointer;
-}
-
-.token-input-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 10px;
-}
-
-.notes-panel textarea {
-  position: relative;
-  z-index: 1;
-}
-
-.hidden {
-  display: none !important;
-}
-
-@media (max-width: 1320px) {
-  .main-layout {
-    grid-template-columns: 1fr;
-  }
-
-  .table-stage {
-    width: min(100%, 680px);
-  }
-}
-
-@media (max-width: 1080px) {
-  .player-cards {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .summary-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 760px) {
-  .page-shell {
-    width: min(100% - 18px, 100%);
-    padding-top: 18px;
-  }
-
-  .hero,
-  .setup-panel,
-  .table-panel,
-  .night-panel,
-  .players-panel,
-  .notes-panel {
-    padding: 22px;
-  }
-
-  .hero {
-    grid-template-columns: 1fr;
-  }
-
-  .inline-head,
-  .card-head {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .button-row,
-  .night-toolbar,
-  .field-row,
-  .token-input-row {
-    grid-template-columns: 1fr;
-    display: grid;
-  }
-
-  .player-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .seat {
-    width: 78px;
-    min-height: 78px;
-    padding: 8px 6px;
-    border-radius: 18px;
-  }
-
-  .seat-role {
+.token-empty {
+    color: var(--text-muted);
     font-size: 0.8rem;
-  }
+    font-style: italic;
+}
 
-  .table-core {
-    width: 42%;
-  }
+.quick-tokens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid rgba(197, 165, 106, 0.12);
+}
+
+.quick-btn {
+    min-height: 38px;
+    padding: 8px 12px;
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    background: linear-gradient(180deg, rgba(39, 31, 34, 0.96), rgba(22, 18, 21, 0.99));
+    border-color: rgba(111, 94, 78, 0.24);
+}
+
+.add-token-input {
+    flex: 1 1 120px;
+    min-width: 86px;
+    margin-left: 0;
+    color: var(--gold);
+    background: rgba(7, 7, 8, 0.34);
+}
+
+.timer-bottom-panel {
+    margin-top: 18px;
+    margin-bottom: 24px;
+    padding: 16px;
+    border-radius: 22px;
+    border-color: rgba(120, 140, 158, 0.18);
+    background: linear-gradient(180deg, rgba(29, 24, 28, 0.8), rgba(13, 11, 14, 0.92));
+}
+
+.display-panel {
+    margin-top: 18px;
+    margin-bottom: 20px;
+    padding: 16px;
+    border-radius: 22px;
+}
+
+.display-panel-title {
+    margin-bottom: 12px;
+    color: var(--gold);
+    font-size: 0.84rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.display-panel-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.display-panel-row .show-bluff-btn {
+    width: 100%;
+}
+
+.score-panel {
+    margin-bottom: 24px;
+    padding: 16px;
+    border-radius: 22px;
+}
+
+.score-buttons,
+.score-mvp-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.score-btn-good {
+    background: linear-gradient(180deg, rgba(82, 95, 62, 0.96), rgba(46, 55, 35, 0.99));
+    border-color: rgba(133, 147, 104, 0.32);
+    color: #eef2df;
+}
+
+.score-btn-evil {
+    background: linear-gradient(180deg, rgba(101, 32, 46, 0.96), rgba(59, 19, 28, 0.99));
+    border-color: rgba(164, 79, 91, 0.34);
+    color: #f6dde0;
+}
+
+.score-summary {
+    margin-top: 12px;
+    color: var(--text-dim);
+    font-size: 0.84rem;
+    line-height: 1.65;
+    text-align: center;
+}
+
+.scoreboard-list {
+    display: grid;
+    gap: 8px;
+    margin: 14px 0;
+}
+
+.scoreboard-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(197, 165, 106, 0.12);
+    background: rgba(18, 14, 17, 0.5);
+    color: var(--text-main);
+}
+
+.scoreboard-name {
+    font-weight: 600;
+}
+
+.scoreboard-score {
+    color: var(--gold);
+    font-weight: 700;
+}
+
+.score-empty {
+    color: var(--text-muted);
+    font-size: 0.84rem;
+    text-align: center;
+}
+
+.timer-container {
+    text-align: center;
+    background: radial-gradient(circle at top, rgba(120, 139, 156, 0.08), rgba(0, 0, 0, 0) 60%);
+}
+
+.timer-display {
+    margin-bottom: 12px;
+    color: #d7c097;
+    font-size: clamp(2.6rem, 15vw, 4rem);
+    font-family: "Georgia", "Palatino Linotype", "Songti SC", serif;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-shadow: 0 0 18px rgba(197, 165, 106, 0.16), 0 0 36px rgba(78, 22, 31, 0.28);
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.timer-display.danger {
+    color: #e3b2aa;
+    text-shadow: 0 0 18px rgba(162, 61, 74, 0.38);
+    animation: emberPulse 1s infinite;
+}
+
+.timer-controls {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.timer-controls button {
+    width: 100%;
+}
+
+.timer-controls button.primary {
+    grid-column: 1 / -1;
+    background: linear-gradient(180deg, rgba(110, 85, 49, 0.95), rgba(72, 53, 31, 0.99));
+    border-color: rgba(197, 165, 106, 0.34);
+    color: var(--text-main);
+}
+
+.timer-controls button.primary.is-running {
+    background: linear-gradient(180deg, rgba(126, 54, 41, 0.95), rgba(82, 34, 25, 0.99));
+    border-color: rgba(175, 112, 92, 0.36);
+}
+
+@media (min-width: 520px) {
+    body {
+        padding: 24px 18px 40px;
+    }
+
+    h2 {
+        grid-template-columns: minmax(0, 1fr) auto;
+        text-align: left;
+    }
+
+    .hero-caption,
+    .hero-subtitle {
+        text-align: left;
+    }
+
+    .reset-btn {
+        justify-self: end;
+    }
+
+    .bluffs-container {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .roster-entry {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .roster-add-btn {
+        width: auto;
+        min-width: 120px;
+    }
+
+    .circle-stage {
+        padding: 56px 46px 68px;
+    }
+
+    .display-panel-row {
+        grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .score-buttons,
+    .score-mvp-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 560px) {
+    .night-panel {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .reset-btn:hover,
+    button.action-btn:hover,
+    .bluff-random-btn:hover,
+    .show-bluff-btn:hover,
+    button.night-btn:hover,
+    .actions button:hover,
+    .nom-btn:hover,
+    .quick-btn:hover,
+    .timer-controls button:hover {
+        filter: brightness(1.06);
+        border-color: rgba(197, 165, 106, 0.36);
+        box-shadow: 0 12px 22px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.1), inset 0 -1px 0 rgba(0, 0, 0, 0.44);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+@keyframes ritualReveal {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes altarGlow {
+    0%,
+    100% {
+        box-shadow: 0 0 30px rgba(166, 123, 67, 0.1), inset 0 0 28px rgba(0, 0, 0, 0.45);
+    }
+
+    50% {
+        box-shadow: 0 0 42px rgba(166, 123, 67, 0.16), inset 0 0 28px rgba(0, 0, 0, 0.45);
+    }
+}
+
+@keyframes emberPulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 0.88;
+        transform: scale(1.02);
+    }
 }
 
 </style>
-  </head>
-  <body>
-    <div class="page-shell">
-      <header class="hero panel">
-        <div class="hero-copy">
-          <p class="eyebrow">血染钟楼</p>
-          <h1>暗流涌动说书人台</h1>
-          <p class="hero-lead">
-            纯本地静态网页，围绕“圆桌建局 + 发牌 + 夜间提词 + 玩家控制卡”来做。
-            所有座位、身份、生死、鬼票和标记都会自动存到本地，浏览器误关后也能原样恢复。
-          </p>
-          <div class="hero-tags">
-            <span>纯本地运行</span>
-            <span>自动存档</span>
-            <span>暗流涌动基础板</span>
-            <span>支持手动改牌</span>
-          </div>
-        </div>
+</head>
+<body>
 
-        <div class="save-panel">
-          <div class="save-card">
-            <p class="save-kicker">自动存档</p>
-            <strong id="save-indicator">尚未保存</strong>
-            <p id="restore-indicator" class="save-note">所有改动会实时写入本地存储。</p>
-          </div>
-          <div class="save-card compact">
-            <p class="save-kicker">当前夜间模式</p>
-            <strong id="night-mode-indicator">未打开</strong>
-            <p class="save-note">点击“首夜提词”或“其他夜晚提词”进入说书流程。</p>
-          </div>
-        </div>
-      </header>
-
-      <main class="main-layout">
-        <section class="panel setup-panel">
-          <div class="section-heading">
-            <p class="kicker">建局</p>
-            <h2>建局与发牌</h2>
-          </div>
-
-          <div class="control-stack">
-            <label class="count-field">
-              <span>玩家人数</span>
-              <input id="player-count-input" type="number" min="5" max="15" step="1" />
-            </label>
-
-            <div class="button-row">
-              <button id="generate-seats" type="button">生成座位</button>
-              <button id="deal-roles" type="button" class="accent-button">随机发牌</button>
-              <button id="reroll-bluffs" type="button">重抽虚张声势</button>
-            </div>
-
-            <div class="button-row">
-              <button id="first-night-button" type="button">首夜提词</button>
-              <button id="other-night-button" type="button">其他夜晚提词</button>
-              <button id="clear-storage" type="button" class="danger-button">清空存档</button>
-            </div>
-          </div>
-
-          <div class="summary-grid">
-            <article>
-              <span class="label">预期构成</span>
-              <strong id="expected-composition">5 / 0 / 1 / 1</strong>
-              <p id="expected-note">会自动计入男爵之类的外来者修正。</p>
-            </article>
-            <article>
-              <span class="label">当前板面</span>
-              <strong id="actual-composition">0 / 0 / 0 / 0</strong>
-              <p id="actual-note">尚未发牌。</p>
-            </article>
-            <article>
-              <span class="label">存活人数</span>
-              <strong id="alive-count">0</strong>
-              <p id="ghost-note">死亡玩家会自动获得一张可用鬼票。</p>
-            </article>
-          </div>
-
-          <div class="bluff-card">
-            <div class="inline-head">
-              <div>
-                <p class="kicker">虚张声势</p>
-                <h3>小恶魔虚张声势</h3>
-              </div>
-              <span class="tiny-copy">默认从未在场的善方角色中抽三张</span>
-            </div>
-            <div id="bluff-list" class="bluff-list"></div>
-          </div>
-        </section>
-
-        <section class="panel table-panel">
-          <div class="section-heading">
-            <p class="kicker">白天圆桌</p>
-            <h2>圆桌视图</h2>
-          </div>
-
-          <div class="table-stage">
-            <div class="table-ring" id="table-ring"></div>
-            <div class="table-core">
-              <p class="core-script">暗流涌动</p>
-              <strong id="table-core-status">等待生成座位</strong>
-              <span id="table-core-substatus">点击圆桌座位可直接改名。</span>
-            </div>
-          </div>
-        </section>
-
-        <section class="panel night-panel">
-          <div class="section-heading">
-            <p class="kicker">夜间提词</p>
-            <h2>夜间提词器</h2>
-          </div>
-
-          <div class="night-toolbar">
-            <button id="night-prev" type="button">上一步</button>
-            <button id="night-next" type="button" class="accent-button">下一步</button>
-          </div>
-
-          <div id="night-current" class="night-current empty">
-            <p>先完成建局或发牌，再选择“首夜提词”或“其他夜晚提词”。</p>
-          </div>
-
-          <div id="night-conditional-warnings" class="warning-stack"></div>
-
-          <div class="night-list-wrap">
-            <div class="inline-head">
-              <h3>今晚步骤</h3>
-              <span id="night-step-count" class="tiny-copy">0 步</span>
-            </div>
-            <div id="night-step-list" class="night-step-list"></div>
-          </div>
-        </section>
-      </main>
-
-      <section class="panel players-panel">
-        <div class="section-heading">
-          <p class="kicker">玩家控制卡</p>
-          <h2>玩家卡片</h2>
-          <p class="section-copy">
-            每张卡都能切换生死、处理鬼票、手动改牌、标记状态与输入自定义标记。
-            点击圆桌座位可改名，卡片上的更改会立即同步回圆桌与夜间提词器。
-          </p>
-        </div>
-        <div id="player-cards" class="player-cards"></div>
-      </section>
-
-      <section class="panel notes-panel">
-        <div class="section-heading">
-          <p class="kicker">说书笔记</p>
-          <h2>记录区</h2>
-        </div>
-        <textarea
-          id="storyteller-notes"
-          rows="8"
-          placeholder="记录厨师数字、共情者结果、占卜师红鲱鱼、毒药师目标、今天被处决的是谁……"
-        ></textarea>
-      </section>
+    <div id="bluffsModal" class="modal-overlay" onclick="hideBluffsModal()">
+        <div class="modal-title">🎭 不在场的善良角色</div>
+        <div id="modalBluff1" class="modal-bluff-card"></div>
+        <div id="modalBluff2" class="modal-bluff-card"></div>
+        <div id="modalBluff3" class="modal-bluff-card"></div>
+        <div class="modal-close-tip">-- 点击屏幕任意处关闭并回到魔典 --</div>
     </div>
 
-    <script>
-const STORAGE_KEY = "botc-trouble-brewing-local-v1";
-
-const SCRIPT_NAME = "暗流涌动";
-const SMALL_GAME_NO_BLUFFS_MAX = 6;
-
-const setupByPlayers = {
-  5: { townsfolk: 3, outsider: 0, minions: 1, demon: 1 },
-  6: { townsfolk: 3, outsider: 1, minions: 1, demon: 1 },
-  7: { townsfolk: 5, outsider: 0, minions: 1, demon: 1 },
-  8: { townsfolk: 5, outsider: 1, minions: 1, demon: 1 },
-  9: { townsfolk: 5, outsider: 2, minions: 1, demon: 1 },
-  10: { townsfolk: 7, outsider: 0, minions: 2, demon: 1 },
-  11: { townsfolk: 7, outsider: 1, minions: 2, demon: 1 },
-  12: { townsfolk: 7, outsider: 2, minions: 2, demon: 1 },
-  13: { townsfolk: 9, outsider: 0, minions: 3, demon: 1 },
-  14: { townsfolk: 9, outsider: 1, minions: 3, demon: 1 },
-  15: { townsfolk: 9, outsider: 2, minions: 3, demon: 1 },
-};
-
-const typeLabels = {
-  townsfolk: "镇民",
-  outsider: "外来者",
-  minion: "爪牙",
-  demon: "恶魔",
-  fixed: "固定流程",
-};
-
-const tokenPresets = ["🧪 中毒", "🍺 醉酒", "🛡️ 保护", "👑 主人", "💀 今夜死"];
-
-const roles = [
-  {
-    id: "washerwoman",
-    label: "洗衣妇",
-    type: "townsfolk",
-    dealable: true,
-    ability: "首夜得知两名玩家，其中一人是某个在场镇民。",
-    note: "向她展示两名玩家与一个镇民身份，其中只有一人真正是该镇民。",
-    firstOrder: 20,
-    guideFirst: "唤醒后展示两名玩家，再告知一个在场镇民身份；其中仅一人符合。",
-  },
-  {
-    id: "librarian",
-    label: "图书管理员",
-    type: "townsfolk",
-    dealable: true,
-    ability: "首夜得知两名玩家，其中一人是某个在场外来者；或者得知本局没有外来者。",
-    note: "若本局没有外来者，可以直接明确告知。",
-    firstOrder: 30,
-    guideFirst: "若有外来者，展示两名玩家与外来者身份；若没有外来者，直接告诉她本局没有外来者。",
-  },
-  {
-    id: "investigator",
-    label: "调查员",
-    type: "townsfolk",
-    dealable: true,
-    ability: "首夜得知两名玩家，其中一人是某个在场爪牙。",
-    note: "向他展示两名玩家与一个爪牙身份。",
-    firstOrder: 40,
-    guideFirst: "唤醒后展示两名玩家与一个在场爪牙身份，其中只有一人真正是该爪牙。",
-  },
-  {
-    id: "chef",
-    label: "厨师",
-    type: "townsfolk",
-    dealable: true,
-    ability: "首夜得知有多少对相邻玩家同时是邪恶。",
-    note: "只数相邻的邪恶对数。",
-    firstOrder: 50,
-    guideFirst: "比出一个数字，表示相邻邪恶对有多少组。",
-  },
-  {
-    id: "empath",
-    label: "共情者",
-    type: "townsfolk",
-    dealable: true,
-    ability: "每晚得知你两侧存活邻座中有多少人是邪恶。",
-    note: "只看存活邻座。",
-    firstOrder: 60,
-    otherOrder: 20,
-    guideFirst: "比出一个数字，表示你两侧存活邻座里有多少邪恶。",
-    guideOther: "继续比出两侧存活邻座中的邪恶人数。",
-  },
-  {
-    id: "fortune-teller",
-    label: "占卜师",
-    type: "townsfolk",
-    dealable: true,
-    ability: "每晚选择两名玩家：若其中至少一人是恶魔则得知“是”；但有一名好人可能被视为恶魔。",
-    note: "记得提前确定红鲱鱼目标。",
-    firstOrder: 70,
-    otherOrder: 30,
-    guideFirst: "让她指两名玩家，再点头或摇头。记得红鲱鱼在整局内固定。",
-    guideOther: "继续让她指两名玩家，并给出“是”或“否”。",
-  },
-  {
-    id: "undertaker",
-    label: "送葬者",
-    type: "townsfolk",
-    dealable: true,
-    requiresTrigger: true,
-    ability: "每晚得知今天被处决玩家的角色。",
-    note: "只有今天真的发生了处决时才应唤醒。",
-    otherOrder: 40,
-    guideOther: "若今天有人被处决，向他展示那名被处决玩家的真实角色。",
-    warning: "只有今天真的发生处决时才应唤醒送葬者。",
-  },
-  {
-    id: "monk",
-    label: "僧侣",
-    type: "townsfolk",
-    dealable: true,
-    ability: "每晚选择一名其他玩家：今夜其受到保护。",
-    note: "通常不能保护自己。",
-    otherOrder: 50,
-    guideOther: "让他指一名其他玩家，并给目标贴上“🛡️ 保护”标记。",
-  },
-  {
-    id: "ravenkeeper",
-    label: "守鸦人",
-    type: "townsfolk",
-    dealable: true,
-    requiresTrigger: true,
-    ability: "若你夜里死亡，你会得知一名玩家的真实角色。",
-    note: "只有今夜死亡时才唤醒。",
-    otherOrder: 60,
-    guideOther: "若他今夜死亡，让他指一名玩家，并向他展示那名玩家的真实角色。",
-    warning: "只有守鸦人今夜死亡时才应唤醒。",
-  },
-  {
-    id: "virgin",
-    label: "圣女",
-    type: "townsfolk",
-    dealable: true,
-    ability: "若你首次被镇民提名，提名者会立刻被处决。",
-    note: "白天角色，不会出现在夜间提词器中。",
-  },
-  {
-    id: "slayer",
-    label: "屠魔者",
-    type: "townsfolk",
-    dealable: true,
-    oneUse: true,
-    ability: "每局一次，白天公开指定一名玩家；若其是恶魔，该玩家立即死亡。",
-    note: "白天角色，不会出现在夜间提词器中。",
-  },
-  {
-    id: "soldier",
-    label: "士兵",
-    type: "townsfolk",
-    dealable: true,
-    ability: "恶魔无法在夜里杀死你。",
-    note: "被毒或醉后依然可能被恶魔杀死。",
-  },
-  {
-    id: "mayor",
-    label: "市长",
-    type: "townsfolk",
-    dealable: true,
-    ability: "若最后只剩三人存活且今天无人处决，善良获胜；恶魔夜里可能误杀旁人而非你。",
-    note: "残局角色，不会出现在夜间提词器中。",
-  },
-  {
-    id: "butler",
-    label: "管家",
-    type: "outsider",
-    dealable: true,
-    ability: "每晚选择一名玩家作为主人；明天只有主人投票时你才能投票。",
-    note: "记得给目标贴“👑 主人”标记。",
-    firstOrder: 80,
-    otherOrder: 70,
-    guideFirst: "让管家选择主人，并给目标贴上“👑 主人”。",
-    guideOther: "继续选择明天的主人，并更新“👑 主人”标记。",
-  },
-  {
-    id: "drunk",
-    label: "酒鬼",
-    type: "outsider",
-    dealable: true,
-    ability: "你不知道自己是外来者，而是以为自己是某个镇民，但始终醉酒。",
-    note: "适合配合手动改牌与“🍺 醉酒”标记使用。",
-  },
-  {
-    id: "recluse",
-    label: "隐士",
-    type: "outsider",
-    dealable: true,
-    ability: "你可能会被侦测成邪恶或恶魔，即使你不是。",
-    note: "这会影响厨师、共情者、占卜师、调查员等信息。",
-  },
-  {
-    id: "saint",
-    label: "圣徒",
-    type: "outsider",
-    dealable: true,
-    ability: "若你被处决，善良立刻失败。",
-    note: "白天持续生效。",
-  },
-  {
-    id: "poisoner",
-    label: "毒药师",
-    type: "minion",
-    dealable: true,
-    ability: "每晚选择一名玩家：其今夜与明天白天中毒。",
-    note: "常用“🧪 中毒”标记追踪。",
-    firstOrder: 90,
-    otherOrder: 80,
-    guideFirst: "让毒药师选择一名玩家，并给目标贴“🧪 中毒”。",
-    guideOther: "继续选择中毒目标，并更新中毒标记。",
-  },
-  {
-    id: "spy",
-    label: "间谍",
-    type: "minion",
-    dealable: true,
-    ability: "每晚查看魔典；你可能被侦测成善良与镇民或外来者。",
-    note: "只需展示当前完整局面，不需要额外给数字。",
-    firstOrder: 100,
-    otherOrder: 90,
-    guideFirst: "让间谍查看整本魔典，然后闭眼。",
-    guideOther: "继续让间谍查看整本魔典。",
-  },
-  {
-    id: "scarlet-woman",
-    label: "猩红女郎",
-    type: "minion",
-    dealable: true,
-    ability: "若仍有5名以上玩家存活时恶魔死亡，你会变成恶魔。",
-    note: "持续被动，不出现在夜间提词器中。",
-  },
-  {
-    id: "baron",
-    label: "男爵",
-    type: "minion",
-    dealable: true,
-    outsiderModifier: 2,
-    ability: "[+2 外来者] 没有夜间动作。",
-    note: "放入后要减少2名镇民并增加2名外来者。",
-  },
-  {
-    id: "imp",
-    label: "小恶魔",
-    type: "demon",
-    dealable: true,
-    ability: "每晚选择一名玩家：其死亡。若你自杀，则一名爪牙会成为新的小恶魔。",
-    note: "5至6人局时，小恶魔开局不看爪牙，也不拿三张虚张声势。",
-    otherOrder: 100,
-    guideOther: "让小恶魔选择一名玩家死亡。若他选择自杀，立刻让一名爪牙接替为新的小恶魔。",
-  },
-];
-
-const roleMap = new Map(roles.map((role) => [role.id, role]));
-
-const pools = {
-  townsfolk: roles.filter((role) => role.dealable && role.type === "townsfolk"),
-  outsider: roles.filter((role) => role.dealable && role.type === "outsider"),
-  minion: roles.filter((role) => role.dealable && role.type === "minion"),
-  demon: roles.filter((role) => role.dealable && role.type === "demon"),
-};
-
-const elements = {
-  playerCountInput: document.querySelector("#player-count-input"),
-  generateSeats: document.querySelector("#generate-seats"),
-  dealRoles: document.querySelector("#deal-roles"),
-  rerollBluffs: document.querySelector("#reroll-bluffs"),
-  firstNightButton: document.querySelector("#first-night-button"),
-  otherNightButton: document.querySelector("#other-night-button"),
-  clearStorage: document.querySelector("#clear-storage"),
-  saveIndicator: document.querySelector("#save-indicator"),
-  restoreIndicator: document.querySelector("#restore-indicator"),
-  nightModeIndicator: document.querySelector("#night-mode-indicator"),
-  expectedComposition: document.querySelector("#expected-composition"),
-  expectedNote: document.querySelector("#expected-note"),
-  actualComposition: document.querySelector("#actual-composition"),
-  actualNote: document.querySelector("#actual-note"),
-  aliveCount: document.querySelector("#alive-count"),
-  ghostNote: document.querySelector("#ghost-note"),
-  bluffList: document.querySelector("#bluff-list"),
-  tableRing: document.querySelector("#table-ring"),
-  tableCoreStatus: document.querySelector("#table-core-status"),
-  tableCoreSubstatus: document.querySelector("#table-core-substatus"),
-  nightCurrent: document.querySelector("#night-current"),
-  nightConditionalWarnings: document.querySelector("#night-conditional-warnings"),
-  nightStepCount: document.querySelector("#night-step-count"),
-  nightStepList: document.querySelector("#night-step-list"),
-  nightPrev: document.querySelector("#night-prev"),
-  nightNext: document.querySelector("#night-next"),
-  playerCards: document.querySelector("#player-cards"),
-  notes: document.querySelector("#storyteller-notes"),
-};
-
-function clampPlayerCount(value) {
-  const number = Number(value);
-  if (!Number.isFinite(number)) {
-    return 8;
-  }
-  return Math.min(15, Math.max(5, Math.round(number)));
-}
-
-function makePlayer(seat, previous = {}) {
-  return {
-    id: previous.id || `seat-${seat}`,
-    seat,
-    name: previous.name || `${seat}号`,
-    roleId: previous.roleId || "",
-    drawnRoleId: previous.drawnRoleId || "",
-    alive: previous.alive !== false,
-    ghostVote: previous.ghostVote !== false,
-    abilityUsed: Boolean(previous.abilityUsed),
-    triggerTonight: Boolean(previous.triggerTonight),
-    keepsAbilityWhenDead: Boolean(previous.keepsAbilityWhenDead),
-    tokens: Array.isArray(previous.tokens) ? previous.tokens : [],
-  };
-}
-
-function buildPlayers(count, previousPlayers = []) {
-  return Array.from({ length: count }, (_, index) => makePlayer(index + 1, previousPlayers[index] || {}));
-}
-
-function getDefaultState() {
-  const playerCount = 8;
-  return {
-    playerCount,
-    players: buildPlayers(playerCount),
-    bluffs: [],
-    notes: "",
-    lastSavedAt: "",
-    restoreMessage: "所有改动会实时写入本地存储。",
-    sessionMessage: "已创建新的空白局。",
-    night: { mode: null, currentIndex: 0 },
-  };
-}
-
-function normalizeState(raw) {
-  const playerCount = clampPlayerCount(raw.playerCount);
-  return {
-    playerCount,
-    players: buildPlayers(playerCount, Array.isArray(raw.players) ? raw.players : []),
-    bluffs: Array.isArray(raw.bluffs) ? raw.bluffs.filter((id) => roleMap.has(id)) : [],
-    notes: typeof raw.notes === "string" ? raw.notes : "",
-    lastSavedAt: typeof raw.lastSavedAt === "string" ? raw.lastSavedAt : "",
-    restoreMessage:
-      typeof raw.restoreMessage === "string" ? raw.restoreMessage : "已从本地恢复上次局面。",
-    sessionMessage:
-      typeof raw.sessionMessage === "string" ? raw.sessionMessage : "已从本地恢复上次局面。",
-    night: {
-      mode: raw.night && (raw.night.mode === "first" || raw.night.mode === "other") ? raw.night.mode : null,
-      currentIndex:
-        raw.night && Number.isFinite(raw.night.currentIndex) ? Math.max(0, raw.night.currentIndex) : 0,
-    },
-  };
-}
-
-function formatTime(isoString) {
-  if (!isoString) {
-    return "尚未保存";
-  }
-  return new Intl.DateTimeFormat("zh-CN", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).format(new Date(isoString));
-}
-
-function loadState() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      return getDefaultState();
-    }
-    const nextState = normalizeState(JSON.parse(saved));
-    nextState.restoreMessage = nextState.lastSavedAt
-      ? `已恢复 ${formatTime(nextState.lastSavedAt)} 的本地局面。`
-      : "已从本地恢复上次局面。";
-    return nextState;
-  } catch (_error) {
-    return getDefaultState();
-  }
-}
-
-let state = loadState();
-
-function persistState() {
-  state.lastSavedAt = new Date().toISOString();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function commit(mutator, message) {
-  mutator();
-  if (message) {
-    state.sessionMessage = message;
-    state.restoreMessage = message;
-  }
-  persistState();
-  render();
-}
-
-function escapeHtml(value) {
-  return String(value)
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-function shuffle(list) {
-  const copy = [...list];
-  for (let index = copy.length - 1; index > 0; index -= 1) {
-    const target = Math.floor(Math.random() * (index + 1));
-    [copy[index], copy[target]] = [copy[target], copy[index]];
-  }
-  return copy;
-}
-
-function sampleMany(list, count) {
-  return shuffle(list).slice(0, count);
-}
-
-function getRole(player) {
-  return player.roleId ? roleMap.get(player.roleId) || null : null;
-}
-
-function getDrawnRole(player) {
-  return player.drawnRoleId ? roleMap.get(player.drawnRoleId) || null : null;
-}
-
-function getCounts(players = state.players) {
-  return players.reduce(
-    (result, player) => {
-      const role = getRole(player);
-      if (!role) {
-        return result;
-      }
-      result[role.type] += 1;
-      return result;
-    },
-    { townsfolk: 0, outsider: 0, minion: 0, demon: 0 },
-  );
-}
-
-function getExpectedComposition() {
-  const base = setupByPlayers[state.playerCount];
-  const modifier = state.players
-    .map((player) => getRole(player))
-    .filter((role) => role && role.outsiderModifier)
-    .reduce((sum, role) => sum + role.outsiderModifier, 0);
-
-  const outsider = Math.max(0, base.outsider + modifier);
-  const townsfolk = base.townsfolk - (outsider - base.outsider);
-  return {
-    townsfolk,
-    outsider,
-    minion: base.minions,
-    demon: base.demon,
-    modifier,
-  };
-}
-
-function formatComposition(counts) {
-  return `${counts.townsfolk} / ${counts.outsider} / ${counts.minion} / ${counts.demon}`;
-}
-
-function getAliveCount() {
-  return state.players.filter((player) => player.alive).length;
-}
-
-function getGhostSummary() {
-  const dead = state.players.filter((player) => !player.alive);
-  return {
-    total: dead.length,
-    active: dead.filter((player) => player.ghostVote).length,
-  };
-}
-
-function getRoleOptionsHtml() {
-  const groups = [
-    { label: "镇民", roles: roles.filter((role) => role.type === "townsfolk") },
-    { label: "外来者", roles: roles.filter((role) => role.type === "outsider") },
-    { label: "爪牙", roles: roles.filter((role) => role.type === "minion") },
-    { label: "恶魔", roles: roles.filter((role) => role.type === "demon") },
-  ];
-
-  return groups
-    .map(
-      (group) => `
-        <optgroup label="${group.label}">
-          ${group.roles
-            .map((role) => `<option value="${role.id}">${escapeHtml(role.label)}</option>`)
-            .join("")}
-        </optgroup>
-      `,
-    )
-    .join("");
-}
-
-const roleOptionsHtml = getRoleOptionsHtml();
-
-function getModifierNote() {
-  const modifiedRoles = state.players
-    .map((player) => getRole(player))
-    .filter((role) => role && role.outsiderModifier);
-
-  if (!modifiedRoles.length) {
-    return "当前没有外来者修正。";
-  }
-
-  return modifiedRoles
-    .map((role) => `${role.label} ${role.outsiderModifier > 0 ? "+" : ""}${role.outsiderModifier}`)
-    .join("，");
-}
-
-function getBluffCandidates() {
-  const inPlay = new Set(state.players.map((player) => player.roleId).filter(Boolean));
-  return roles.filter(
-    (role) =>
-      (role.type === "townsfolk" || role.type === "outsider") &&
-      role.dealable &&
-      !inPlay.has(role.id),
-  );
-}
-
-function rerollBluffs() {
-  if (state.playerCount <= SMALL_GAME_NO_BLUFFS_MAX) {
-    state.bluffs = [];
-    return;
-  }
-  state.bluffs = sampleMany(getBluffCandidates(), 3).map((role) => role.id);
-}
-
-function dealRandomRoles() {
-  const setup = setupByPlayers[state.playerCount];
-  const demon = sampleMany(pools.demon, 1)[0];
-  const minions = sampleMany(pools.minion, setup.minions);
-  const outsiderModifier =
-    (demon.outsiderModifier || 0) + minions.reduce((sum, role) => sum + (role.outsiderModifier || 0), 0);
-  const outsiderCount = Math.max(0, setup.outsider + outsiderModifier);
-  const townsfolkCount = setup.townsfolk - (outsiderCount - setup.outsider);
-
-  const deck = shuffle([
-    ...sampleMany(pools.townsfolk, townsfolkCount),
-    ...sampleMany(pools.outsider, outsiderCount),
-    ...minions,
-    demon,
-  ]);
-
-  state.players = buildPlayers(state.playerCount, state.players).map((player, index) => ({
-    ...player,
-    roleId: deck[index].id,
-    drawnRoleId: deck[index].id,
-    alive: true,
-    ghostVote: true,
-    abilityUsed: false,
-    triggerTonight: false,
-    keepsAbilityWhenDead: false,
-    tokens: [],
-  }));
-
-  rerollBluffs();
-  state.night = { mode: null, currentIndex: 0 };
-}
-
-function buildNightSequence(mode) {
-  const steps = [];
-  const warnings = [];
-
-  if (mode === "first") {
-    const bluffNames = state.bluffs.map((id) => roleMap.get(id)?.label).filter(Boolean).join(" / ");
-    const smallGame = state.playerCount <= SMALL_GAME_NO_BLUFFS_MAX;
-    steps.push({
-      id: "evil-info",
-      type: "fixed",
-      title: "邪恶阵营信息",
-      ability: "按首夜流程处理爪牙互认、小恶魔信息与虚张声势。",
-      guide: smallGame
-        ? "这是5至6人局。按小人数规则处理：小恶魔不看爪牙，也不拿三张虚张声势。"
-        : `先完成邪恶阵营互认，再向小恶魔展示三张虚张声势：${bluffNames || "尚未生成"}`,
-      order: 1,
-    });
-  }
-
-  state.players.forEach((player) => {
-    const role = getRole(player);
-    if (!role) {
-      return;
-    }
-
-    const order = mode === "first" ? role.firstOrder : role.otherOrder;
-    if (typeof order !== "number") {
-      return;
-    }
-
-    if (role.oneUse && player.abilityUsed) {
-      return;
-    }
-
-    if (role.requiresTrigger && !player.triggerTonight) {
-      warnings.push({
-        title: `${player.seat}号 ${player.name} · ${role.label}`,
-        text: `这个角色只在满足条件时才该唤醒。当前“今夜触发”没有打开，所以提词器已自动跳过。${role.warning ? ` ${role.warning}` : ""}`,
-      });
-      return;
-    }
-
-    if (!player.alive && !player.keepsAbilityWhenDead && !role.requiresTrigger) {
-      return;
-    }
-
-    steps.push({
-      id: `${mode}-${player.id}-${role.id}`,
-      playerSeat: player.seat,
-      playerName: player.name,
-      type: role.type,
-      title: `${player.seat}号 · ${player.name} · ${role.label}`,
-      ability: role.ability,
-      guide: mode === "first" ? role.guideFirst || role.note : role.guideOther || role.note,
-      warning: role.warning || "",
-      order,
-    });
-  });
-
-  steps.sort((a, b) => a.order - b.order || (a.playerSeat || 0) - (b.playerSeat || 0));
-  return { steps, warnings };
-}
-
-function renderSaveStatus() {
-  elements.saveIndicator.textContent = `最近保存：${formatTime(state.lastSavedAt)}`;
-  elements.restoreIndicator.textContent = state.restoreMessage || state.sessionMessage;
-}
-
-function renderSummary() {
-  const expected = getExpectedComposition();
-  const actual = getCounts();
-  const ghost = getGhostSummary();
-  const assigned = state.players.filter((player) => player.roleId).length;
-
-  elements.playerCountInput.value = String(state.playerCount);
-  elements.expectedComposition.textContent = formatComposition(expected);
-  elements.expectedNote.textContent = getModifierNote();
-  elements.actualComposition.textContent = formatComposition(actual);
-  elements.actualNote.textContent =
-    assigned === 0
-      ? "尚未发牌。"
-      : assigned === state.playerCount
-        ? "已为所有座位分配角色。"
-        : `已分配 ${assigned} / ${state.playerCount} 个座位。`;
-  elements.aliveCount.textContent = `${getAliveCount()}`;
-  elements.ghostNote.textContent =
-    ghost.total === 0 ? "当前无人死亡。" : `${ghost.active} 名死者仍有鬼票，${ghost.total - ghost.active} 名死者已用票。`;
-}
-
-function renderBluffs() {
-  if (state.playerCount <= SMALL_GAME_NO_BLUFFS_MAX) {
-    elements.bluffList.innerHTML = `
-      <div class="bluff-item">
-        <p class="empty-state">5至6人局按小人数规则处理，小恶魔开局不拿三张虚张声势。</p>
-      </div>
-    `;
-    return;
-  }
-
-  if (!state.bluffs.length) {
-    elements.bluffList.innerHTML = `
-      <div class="bluff-item">
-        <p class="empty-state">随机发牌后会自动抽出三张不在场的善方角色。</p>
-      </div>
-    `;
-    return;
-  }
-
-  elements.bluffList.innerHTML = state.bluffs
-    .map((id) => roleMap.get(id))
-    .filter(Boolean)
-    .map(
-      (role) => `
-        <article class="bluff-item">
-          <strong>${escapeHtml(role.label)}</strong>
-          <p class="ability-copy">${escapeHtml(role.ability)}</p>
-        </article>
-      `,
-    )
-    .join("");
-}
-
-function renderTable() {
-  const players = buildPlayers(state.playerCount, state.players);
-  state.players = players;
-
-  elements.tableCoreStatus.textContent = `${SCRIPT_NAME} · ${state.playerCount} 人局`;
-  elements.tableCoreSubstatus.textContent = `${getAliveCount()} 人存活，点击座位可改名。`;
-
-  elements.tableRing.innerHTML = players
-    .map((player, index) => {
-      const angle = (Math.PI * 2 * index) / players.length - Math.PI / 2;
-      const radius = players.length <= 8 ? 42 : players.length <= 12 ? 44 : 46;
-      const x = 50 + Math.cos(angle) * radius;
-      const y = 50 + Math.sin(angle) * radius;
-      const role = getRole(player);
-      const roleLabel = role ? role.label : "未发牌";
-      const type = role ? role.type : "fixed";
-      const tokenCount = player.tokens.length ? `<span class="seat-token-count">${player.tokens.length} 标记</span>` : "";
-      const status = player.alive
-        ? `<span class="seat-token-count">存活</span>`
-        : `<span class="seat-token-count">${player.ghostVote ? "👻 有票" : "❌ 无票"}</span>`;
-
-      return `
-        <button
-          class="seat ${player.alive ? "" : "dead"}"
-          data-seat-index="${index}"
-          data-type="${type}"
-          type="button"
-          style="--seat-x:${x}%; --seat-y:${y}%"
-          title="点击改名"
-        >
-          <span class="seat-number">${player.seat}</span>
-          <span class="seat-name">${escapeHtml(player.name)}</span>
-          <span class="seat-role">${escapeHtml(roleLabel)}</span>
-          <span class="seat-status">${status}${tokenCount}</span>
-        </button>
-      `;
-    })
-    .join("");
-}
-
-function renderNightPanel() {
-  if (!state.night.mode) {
-    elements.nightModeIndicator.textContent = "未打开";
-    elements.nightCurrent.className = "night-current empty";
-    elements.nightCurrent.innerHTML = "<p>先完成建局或发牌，再选择“首夜提词”或“其他夜晚提词”。</p>";
-    elements.nightStepCount.textContent = "0 步";
-    elements.nightConditionalWarnings.innerHTML = "";
-    elements.nightStepList.innerHTML = "";
-    return;
-  }
-
-  const { steps, warnings } = buildNightSequence(state.night.mode);
-  const total = steps.length;
-  const currentIndex = total ? Math.min(state.night.currentIndex, total - 1) : 0;
-  state.night.currentIndex = currentIndex;
-
-  elements.nightModeIndicator.textContent =
-    total === 0
-      ? `${state.night.mode === "first" ? "首夜" : "其他夜晚"} · 无步骤`
-      : `${state.night.mode === "first" ? "首夜" : "其他夜晚"} · ${currentIndex + 1}/${total}`;
-
-  elements.nightStepCount.textContent = `${total} 步`;
-
-  if (!total) {
-    elements.nightCurrent.className = "night-current empty";
-    elements.nightCurrent.innerHTML = "<p>当前没有符合这个阶段的夜间角色，或条件角色尚未标记触发。</p>";
-  } else {
-    const step = steps[currentIndex];
-    elements.nightCurrent.className = "night-current";
-    elements.nightCurrent.innerHTML = `
-      <div class="step-counter">步骤 ${currentIndex + 1} / ${total}</div>
-      <h3 class="step-title">${escapeHtml(step.title)}</h3>
-      <div class="step-meta">
-        <span class="type-badge" data-type="${step.type}">${typeLabels[step.type]}</span>
-        ${
-          step.playerSeat
-            ? `<span class="hint-badge">座位 ${step.playerSeat}</span><span class="hint-badge">${escapeHtml(step.playerName)}</span>`
-            : `<span class="hint-badge">固定流程</span>`
-        }
-      </div>
-      <p class="night-ability">${escapeHtml(step.ability)}</p>
-      <div class="guide-box">${escapeHtml(step.guide)}</div>
-      ${step.warning ? `<div class="warning-box">${escapeHtml(step.warning)}</div>` : ""}
-    `;
-  }
-
-  elements.nightConditionalWarnings.innerHTML = warnings
-    .map(
-      (warning) => `
-        <div class="warning-item">
-          <strong>${escapeHtml(warning.title)}</strong>
-          <p class="warning-copy">${escapeHtml(warning.text)}</p>
+    <div id="roleRevealModal" class="modal-overlay" onclick="hideRoleRevealModal()">
+        <div class="modal-title">🜂 向对方展示角色</div>
+        <div id="roleRevealCard" class="modal-bluff-card"></div>
+        <div id="roleRevealNote" class="modal-role-note"></div>
+        <div class="modal-close-tip">-- 点击屏幕任意处关闭 --</div>
+    </div>
+
+    <div id="seatTokenModal" class="modal-overlay" onclick="closeSeatTokenModal()">
+        <div id="seatTokenModalPanel" class="modal-panel">
+            <div class="seat-token-title" id="seatTokenTitle">座位标记</div>
+            <div class="seat-token-subtitle">点击切换状态标记，或直接处理处决、恶魔刀与复活。</div>
+            <div id="seatTokenGrid" class="seat-token-grid"></div>
         </div>
-      `,
-    )
-    .join("");
+        <div class="modal-close-tip">-- 点击空白处关闭 --</div>
+    </div>
 
-  elements.nightStepList.innerHTML = steps
-    .map(
-      (step, index) => `
-        <button class="night-step-item ${index === currentIndex ? "active" : ""}" type="button" data-night-index="${index}">
-          <strong>${index + 1}. ${escapeHtml(step.title)}</strong>
-          <p class="hint-copy">${escapeHtml(step.ability)}</p>
-        </button>
-      `,
-    )
-    .join("");
-}
-
-function renderCards() {
-  elements.playerCards.innerHTML = state.players
-    .map((player, index) => {
-      const role = getRole(player);
-      const drawnRole = getDrawnRole(player);
-      const roleLabel = role ? role.label : "未发牌";
-      const roleAbility = role ? role.ability : "尚未分配角色。";
-      const roleNote = role ? role.note || "无额外提醒。" : "可以先随机发牌，或手动指定角色。";
-      const canRestore = drawnRole && player.roleId && player.drawnRoleId !== player.roleId;
-      const showUsed = role && role.oneUse;
-      const showTrigger = role && role.requiresTrigger;
-
-      return `
-        <article class="player-card ${player.alive ? "" : "dead"}">
-          <div class="card-head">
-            <div>
-              <p class="kicker">${player.seat}号座位</p>
-              <strong>${escapeHtml(player.name)}</strong>
-              <p class="role-name">${escapeHtml(roleLabel)}</p>
+    <div id="seatAssignModal" class="modal-overlay" onclick="closeSeatAssignModal()">
+        <div id="seatAssignModalPanel" class="modal-panel">
+            <div class="seat-token-title" id="seatAssignTitle">选择入座玩家</div>
+            <div class="seat-token-subtitle">从已录入名单中选择玩家入座，也可以在下方手动录入一个名字。</div>
+            <div id="seatAssignList" class="seat-assign-list"></div>
+            <div class="seat-assign-manual">
+                <input type="text" id="seatAssignInput" class="add-token-input" placeholder="手动输入入座玩家姓名">
+                <div class="seat-assign-actions">
+                    <button type="button" class="seat-token-btn active" onclick="applySeatAssignmentFromInput()">✅ 确定入座</button>
+                    <button type="button" class="seat-token-btn clear" onclick="clearSeatAssignment()">↺ 清空座位名</button>
+                </div>
             </div>
-            <div class="card-badges">
-              <span class="card-badge ${player.alive ? "good" : "dead"}">${player.alive ? "存活" : "死亡"}</span>
-              <span class="card-badge ${!player.alive && player.ghostVote ? "good" : ""}">
-                ${player.alive ? "生者票正常" : player.ghostVote ? "👻 有鬼票" : "❌ 鬼票已用"}
-              </span>
-            </div>
-          </div>
+        </div>
+        <div class="modal-close-tip">-- 点击空白处关闭 --</div>
+    </div>
 
-          <div class="field-row">
-            <label>
-              <span class="label">玩家姓名</span>
-              <input type="text" data-name-input="${index}" value="${escapeHtml(player.name)}" />
-            </label>
-            <label>
-              <span class="label">当前角色</span>
-              <select data-role-select="${index}">
-                <option value="">未发牌</option>
-                ${roleOptionsHtml}
-              </select>
-            </label>
-          </div>
+    <main class="ritual-shell">
+        <header class="panel hero-panel">
+            <div class="hero-caption">Storyteller Ritual Console</div>
+            <h2>
+                <span class="title-text">📖 暗流魔典 v2.0</span>
+                <button class="reset-btn" onclick="clearData()">🔄 洗牌重开</button>
+            </h2>
+            <p class="hero-subtitle">夜烛之下，圆桌、伪装、唤醒与审判都在同一座祭坛上完成。</p>
+        </header>
 
-          <p class="hint-copy">原始牌：${drawnRole ? escapeHtml(drawnRole.label) : "尚未记录"}</p>
-          <p class="role-ability">${escapeHtml(roleAbility)}</p>
-          <p class="role-note">说书人提醒：${escapeHtml(roleNote)}</p>
+        <section class="panel control-panel text-center">
+            <label>设定玩家总数</label>
+            <input type="number" id="playerCountInput" min="5" max="15" value="8" oninput="updateRoleInfo()" onchange="updateRoleInfo()">
+            <div id="roleInfo" class="role-info">标准配置: 读取中...</div>
 
-          <div class="card-controls">
-            <button type="button" data-action="toggle-life" data-index="${index}" class="${player.alive ? "" : "is-active"}">
-              ${player.alive ? "标记死亡" : "复活"}
-            </button>
-            <button type="button" data-action="toggle-ghost" data-index="${index}" class="${!player.alive && player.ghostVote ? "is-active" : ""}" ${player.alive ? "disabled" : ""}>
-              ${player.alive ? "存活中" : player.ghostVote ? "消耗鬼票" : "恢复鬼票"}
-            </button>
-            <button type="button" data-action="toggle-keep-dead" data-index="${index}" class="${player.keepsAbilityWhenDead ? "is-active" : ""}">
-              ${player.keepsAbilityWhenDead ? "死后仍行动" : "标记死后仍行动"}
-            </button>
-            ${showUsed ? `<button type="button" data-action="toggle-used" data-index="${index}" class="${player.abilityUsed ? "is-active" : ""}">${player.abilityUsed ? "能力已用" : "标记已用能力"}</button>` : ""}
-            ${showTrigger ? `<button type="button" data-action="toggle-trigger" data-index="${index}" class="${player.triggerTonight ? "is-active" : ""}">${player.triggerTonight ? "今夜已触发" : "标记今夜触发"}</button>` : ""}
-            ${canRestore ? `<button type="button" data-action="restore-role" data-index="${index}">还原原始牌</button>` : ""}
-          </div>
-
-          <div class="token-zone">
-            <div class="token-presets">
-              ${tokenPresets
-                .map((token) => `<button type="button" class="token-preset" data-action="add-preset-token" data-index="${index}" data-token="${escapeHtml(token)}">+${escapeHtml(token)}</button>`)
-                .join("")}
+            <div class="roster-panel">
+                <div class="roster-label">🪑 录入玩家姓名</div>
+                <div class="roster-entry">
+                    <input type="text" id="rosterInput" class="roster-input" placeholder="输入姓名后加入名单" onkeypress="handleRosterInput(event)">
+                    <button type="button" class="bluff-random-btn roster-add-btn" onclick="addRosterName()">+ 加入名单</button>
+                </div>
+                <div id="rosterList" class="roster-list"></div>
             </div>
 
-            <form class="token-input-row" data-token-form="${index}">
-              <input type="text" name="token" placeholder="输入自定义标记，回车添加" />
-              <button type="submit">添加</button>
-            </form>
-
-            <div class="token-list">
-              ${
-                player.tokens.length
-                  ? player.tokens
-                      .map(
-                        (token) => `<button type="button" class="token removeable" data-action="remove-token" data-index="${index}" data-token-id="${escapeHtml(token.id)}" title="点击移除">${escapeHtml(token.label)}</button>`,
-                      )
-                      .join("")
-                  : `<span class="hint-copy">暂无标记。</span>`
-              }
+            <button class="action-btn" onclick="generateAndDeal()">✨ 一键布置并随机发牌</button>
+            
+            <div class="bluffs-header">
+                <label>🎭 恶魔的伪装</label>
+                <div class="bluff-actions">
+                    <button class="bluff-random-btn" onclick="randomizeBluffs()">🎲 随机3个</button>
+                    <button class="show-bluff-btn" onclick="showBluffsModal()">👁️ 全屏放大给恶魔</button>
+                </div>
             </div>
-          </div>
-        </article>
-      `;
-    })
-    .join("");
+            <div class="bluffs-container">
+                <select id="bluff1" class="bluff-select" onchange="saveData()"></select>
+                <select id="bluff2" class="bluff-select" onchange="saveData()"></select>
+                <select id="bluff3" class="bluff-select" onchange="saveData()"></select>
+            </div>
+        </section>
 
-  state.players.forEach((player, index) => {
-    const select = elements.playerCards.querySelector(`[data-role-select="${index}"]`);
-    if (select) {
-      select.value = player.roleId || "";
-    }
-  });
-}
+        <div id="circleStage" class="circle-stage" style="display: none;">
+            <div id="circleView" class="circle-container" style="display: none;"></div>
+        </div>
+        <div id="circleToolbar" class="panel circle-toolbar" style="display: none;">
+            <button id="renameToggleBtn" class="action-btn rename-toggle-btn" onclick="toggleRenameMode()">🪑 入座模式：关闭</button>
+            <div id="circleToolbarTip" class="circle-toolbar-tip">当前点座位会打开标记面板。</div>
+        </div>
+        <div id="storytellerHints" class="panel hints-panel" style="display: none;"></div>
 
-function renderNotes() {
-  if (elements.notes.value !== state.notes) {
-    elements.notes.value = state.notes;
-  }
-}
+        <div class="night-panel">
+            <button class="night-btn btn-first" onclick="generateNightOrder('first')">🌙 首夜降临</button>
+            <button class="night-btn btn-other" onclick="generateNightOrder('other')">🌘 其余夜晚</button>
+        </div>
 
-function render() {
-  renderSaveStatus();
-  renderSummary();
-  renderBluffs();
-  renderTable();
-  renderNightPanel();
-  renderCards();
-  renderNotes();
-}
+        <div id="nightOrderDisplay"></div>
+        <div id="playerListToolbar" class="panel playerlist-toolbar" style="display: none;">
+            <button id="playerListLayoutBtn" class="action-btn playerlist-layout-btn" onclick="togglePlayerListLayout()">🧾 角色栏：单栏</button>
+            <div id="playerListLayoutTip" class="circle-toolbar-tip">当前为单栏视图。</div>
+        </div>
+        <div id="playerList"></div>
+        <section class="panel display-panel">
+            <div class="display-panel-title">展示牌</div>
+            <div class="display-panel-row">
+                <select id="roleRevealSelect"></select>
+                <button class="show-bluff-btn" onclick="showSelectedRoleCard()">🜂 全屏展示角色牌</button>
+            </div>
+        </section>
 
-function renameSeat(index) {
-  const player = state.players[index];
-  if (!player) {
-    return;
-  }
+        <div class="panel timer-bottom-panel" id="timerPanel" style="display: none;">
+            <div class="timer-container">
+                <div class="timer-display" id="timerDisplay">05:00</div>
+                <div class="timer-controls">
+                    <button onclick="setTimer(60)">1分钟</button>
+                    <button onclick="setTimer(180)">3分钟</button>
+                    <button onclick="setTimer(300)">5分钟</button>
+                    <button onclick="setTimer(600)">10分钟</button>
+                    <button onclick="toggleTimer()" id="timerToggleBtn" class="primary">▶️ 开始/暂停计时</button>
+                </div>
+            </div>
+        </div>
+        <section class="panel score-panel">
+            <div class="display-panel-title">记分栏</div>
+            <div class="score-buttons">
+                <button class="action-btn score-btn-good" onclick="recordCampWin('good')">🕯️ 善良胜利</button>
+                <button class="action-btn score-btn-evil" onclick="recordCampWin('evil')">😈 邪恶胜利</button>
+            </div>
+            <div id="seriesSummary" class="score-summary">已记录 0 局，当前未结算 MVP。</div>
+            <div id="scoreBoardList" class="scoreboard-list"><div class="score-empty">暂无记分记录。</div></div>
+            <div class="score-mvp-row">
+                <select id="mvpSelect"></select>
+                <button class="show-bluff-btn" onclick="finalizeSeriesMvp()">🏁 结束并记录 MVP</button>
+            </div>
+            <div id="mvpSummary" class="score-summary">当前赛季 MVP：未选择</div>
+        </section>
+    </main>
 
-  const nextName = window.prompt(`修改 ${player.seat} 号玩家姓名`, player.name);
-  if (nextName === null) {
-    return;
-  }
+    <script>
+        let players = [];
+        let bluffs = ['❓ 未分配', '❓ 未分配', '❓ 未分配'];
+        
+        let timerInterval = null;
+        let timeLeft = 300; 
+        let isTimerRunning = false;
+        let isRenameMode = false;
+        let activeSeatTokenPlayerId = null;
+        let currentNightOrderType = '';
+        let playerListLayout = 'single';
+        let scoreBoard = {};
+        let seriesGames = 0;
+        let finalMvp = '';
+        let playerRoster = [];
+        let activeSeatAssignPlayerId = null;
+        const STORAGE_KEY = 'tb_v2_0_data';
+        const LEGACY_STORAGE_KEYS = ['tb_v9_7_data', 'tb_v9_6_data'];
 
-  commit(() => {
-    state.players[index].name = nextName.trim() || `${player.seat}号`;
-  }, `已更新 ${player.seat} 号玩家姓名。`);
-}
+        const allRoles = ['❓ 未分配', '镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：隐士', '外来者：圣徒', '爪牙：毒药师', '爪牙：间谍', '爪牙：荡妇', '爪牙：男爵', '恶魔：小恶魔'];
+        const poolGood = ['镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：隐士', '外来者：圣徒'];
+        const poolTownsfolk = poolGood.slice(0, 13);
+        const poolOutsiders = poolGood.slice(13);
+        const poolMinions = ['爪牙：毒药师', '爪牙：间谍', '爪牙：荡妇', '爪牙：男爵'];
+        const poolDemons = ['恶魔：小恶魔'];
 
-function openNight(mode) {
-  commit(() => {
-    state.night.mode = mode;
-    state.night.currentIndex = 0;
-  }, `已打开${mode === "first" ? "首夜" : "其他夜晚"}提词器。`);
-}
+        const roleDistribution = {
+            5: [3, 0, 1, 1], 6: [3, 1, 1, 1], 7: [5, 0, 1, 1], 8: [5, 1, 1, 1], 9: [5, 2, 1, 1], 10: [7, 0, 2, 1],
+            11: [7, 1, 2, 1], 12: [7, 2, 2, 1], 13: [9, 0, 3, 1], 14: [9, 1, 3, 1], 15: [9, 2, 3, 1]
+        };
 
-function moveNight(delta) {
-  if (!state.night.mode) {
-    return;
-  }
-  const { steps } = buildNightSequence(state.night.mode);
-  if (!steps.length) {
-    return;
-  }
-  commit(() => {
-    state.night.currentIndex = Math.min(steps.length - 1, Math.max(0, state.night.currentIndex + delta));
-  });
-}
+        const allRoleAbilities = {
+            '❓ 未分配': '暂无身份，命运尚未降临。',
+            '镇民：洗衣妇': '首夜得知具体的哪一个镇民角色在特定的两名玩家之中。',
+            '镇民：图书管理员': '首夜得知具体哪一个外来者在特定的两名玩家之中(或得知没有外来者)。',
+            '镇民：调查员': '首夜得知具体的哪一个爪牙在特定的两名玩家之中。',
+            '镇民：厨师': '首夜得知有几对邪恶玩家相邻。',
+            '镇民：共情者': '每晚得知相邻的两名存活玩家中有几名邪恶玩家。',
+            '镇民：占卜师': '每晚查验两名玩家中是否有恶魔(你的死敌会被误认为恶魔)。',
+            '镇民：送葬者': '每晚得知今天白天被处决的玩家的真实角色。',
+            '镇民：僧侣': '每晚保护一名除自己以外的玩家免受恶魔杀害。',
+            '镇民：守鸦人': '如果在夜晚遇害，被唤醒并查验一名玩家的真实角色。',
+            '镇民：贞洁者': '本局第一次被提名时，如果提名者是镇民，该镇民立刻被处决。',
+            '镇民：猎人': '每局限一次，白天选择一名玩家，如果是恶魔则将其杀死。',
+            '镇民：士兵': '免受恶魔的技能影响。',
+            '镇民：镇长': '白天仅3人存活且未处决任何人则好人获胜；夜晚遇害时，另一人可能代替你死。',
+            '外来者：管家': '每晚选一名主人，明天白天只有主人投票时你才能投票。',
+            '外来者：酒鬼': '自以为是镇民(不知情)，但技能可能会得到错误信息。',
+            '外来者：隐士': '即使是好人，也可能被视为邪恶阵营(爪牙或恶魔)。',
+            '外来者：圣徒': '如果你被处决，好人阵营立刻落败。',
+            '爪牙：毒药师': '每晚使一名玩家中毒(技能失效或得到错误信息)。',
+            '爪牙：间谍': '每晚可查看魔典。即使是坏人，也可能被视为善良阵营。',
+            '爪牙：荡妇': '如果恶魔死亡且场上至少5人存活，你立刻变成恶魔。',
+            '爪牙：男爵': '开局改变板子配置：外来者数量+2(替换2个镇民)。',
+            '恶魔：小恶魔': '每晚杀害一名玩家。若杀害自己，一名存活的爪牙会变成小恶魔。'
+        };
 
-function attachEvents() {
-  elements.generateSeats.addEventListener("click", () => {
-    commit(() => {
-      const count = clampPlayerCount(elements.playerCountInput.value);
-      state.playerCount = count;
-      state.players = buildPlayers(count, state.players);
-      rerollBluffs();
-    }, `已生成 ${clampPlayerCount(elements.playerCountInput.value)} 人圆桌座位。`);
-  });
+        const roleBasicPlay = {
+            '❓ 未分配': '等待身份分配后再决定发言与行动节奏。',
+            '镇民：洗衣妇': '优先记住首夜给出的两人范围，白天通过发言慢慢缩小身份可能。',
+            '镇民：图书管理员': '先记牢外来者范围，白天重点看谁更像主动承认或隐藏外来者。',
+            '镇民：调查员': '早期锁定两名可疑目标，白天借信息交换逼出爪牙反应。',
+            '镇民：厨师': '把邻座邪恶对数当作开局基准，再结合座位关系逐步反推。',
+            '镇民：共情者': '持续盯住两侧邻座变化，新的死亡信息会显著影响读数判断。',
+            '镇民：占卜师': '优先查高价值嫌疑人与其队友，死敌位要单独记录避免误判。',
+            '镇民：送葬者': '重点看白天处决结果，死人真身最适合验证团队白天站边。',
+            '镇民：僧侣': '优先保护高价值信息位，不要过于固定守同一人。',
+            '镇民：守鸦人': '白天尽量像普通镇民，别过早暴露自己是值得夜杀的信息位。',
+            '镇民：贞洁者': '第一次被提名前尽量低调，等局势更清晰再考虑表明身份。',
+            '镇民：猎人': '不要急着开枪，等恶魔嫌疑更集中时再用一次性技能换局势。',
+            '镇民：士兵': '可以适当强势发言吸刀，但也要提防被毒药师干扰。',
+            '镇民：镇长': '前期别轻易暴露，终盘三人局时你的存活价值最高。',
+            '外来者：管家': '尽快锁定一个你信任的主人，并观察他的投票和发言是否稳定。',
+            '外来者：酒鬼': '拿到的信息先别全信，更要依赖逻辑、票型和别人反馈交叉验证。',
+            '外来者：隐士': '你容易造成注册混乱，发言时要提醒别人留意隐士干扰的可能。',
+            '外来者：圣徒': '核心任务是避免被处决，越到后期越要主动让团队避开你。',
+            '爪牙：毒药师': '优先毒高价值信息位或保护位，持续制造信息冲突。',
+            '爪牙：间谍': '充分利用魔典和注册干扰能力，帮恶魔规划白天叙事。',
+            '爪牙：荡妇': '恶魔存活时像普通坏人协助推进，有接任机会时再准备伪装。',
+            '爪牙：男爵': '利用外来者增加带来的混乱，让好人把精力消耗在身份自证上。',
+            '恶魔：小恶魔': '优先处理高价值信息位并控制节奏，必要时再考虑自杀换恶魔。'
+        };
 
-  elements.dealRoles.addEventListener("click", () => {
-    commit(() => {
-      state.playerCount = clampPlayerCount(elements.playerCountInput.value);
-      state.players = buildPlayers(state.playerCount, state.players);
-      dealRandomRoles();
-    }, `已为 ${clampPlayerCount(elements.playerCountInput.value)} 人局随机发牌。`);
-  });
+        const roleAdvancedPlay = {
+            '❓ 未分配': '先观察桌面结构与配置变化，再决定你要走明牌还是暗牌路线。',
+            '镇民：洗衣妇': '不要只盯两人范围本身，更要结合谁敢主动撞身份、谁在刻意绕开该信息。',
+            '镇民：图书管理员': '若场上出现醉酒、男爵或隐士干扰，优先把“外来者是否异常增多”作为破局点。',
+            '镇民：调查员': '别急着直接拍死两人范围，可先用模糊压力看谁会过度防守或抢先编故事。',
+            '镇民：厨师': '把读数和座位、夜死顺序、可疑抱团发言一起看，常能在中期锁出恶魔落点。',
+            '镇民：共情者': '两侧一旦有人死亡就要立刻重算价值链，新的邻座关系往往比旧读数更关键。',
+            '镇民：占卜师': '善用“成对查验”逼恶魔阵营站边；死敌位既能误导你，也能反过来钓坏人发言。',
+            '镇民：送葬者': '最强用法不是报死者角色，而是把白天每次处刑都变成反向验证全桌发言的工具。',
+            '镇民：僧侣': '守护思路要结合恶魔视角，优先保那些“今晚最值得被刀但白天还没暴露过头”的位。',
+            '镇民：守鸦人': '高阶玩法是主动制造自己像普通信息位或关键执行位，让恶魔误判刀口收益。',
+            '镇民：贞洁者': '若你判断自己会被试探性提名，可以故意控制发言密度，把反制价值压到最痛的一次提名上。',
+            '镇民：猎人': '真正强势的开枪时机通常不是你最像好人的时候，而是恶魔已很难再通过票型翻盘的时候。',
+            '镇民：士兵': '可以利用“我可能吸刀却没死”的叙事牵引白天站边，但必须防止被坏人反做成挡刀伪装。',
+            '镇民：镇长': '高阶镇长要学会在残局前隐藏自己，同时让坏人不敢轻易赌你会触发替死或三人胜利。',
+            '外来者：管家': '你最有价值的不是投票限制本身，而是借主人位建立稳定的白天站边锚点。',
+            '外来者：酒鬼': '如果你怀疑自己是酒鬼，就把信息降权处理，主动把自己变成帮助别人校准信息的样本。',
+            '外来者：隐士': '高阶隐士要主动提醒“注册异常”存在，但不能提醒得太像为坏人脱罪。',
+            '外来者：圣徒': '你要让全桌形成共识：处决你是最低收益路线，从而逼坏人改走夜刀或舆论路线。',
+            '爪牙：毒药师': '最强毒法不是乱封技能，而是持续毒同一条信息链，让好人建立一整套错误世界观。',
+            '爪牙：间谍': '有魔典优势就要主动设计白天叙事，让好人误以为他们在依据真实链路推理。',
+            '爪牙：荡妇': '高阶玩法是预留一套“接任后立即能自圆其说”的身份故事，而不是等恶魔死后再想。',
+            '爪牙：男爵': '男爵最强价值在开局结构扭曲，你要不断把好人注意力往外来者链和自证链上拖。',
+            '恶魔：小恶魔': '高阶小恶魔要同时规划刀口、接班顺序和白天视角，确保任一爪牙接任后也能延续故事线。'
+        };
 
-  elements.rerollBluffs.addEventListener("click", () => {
-    commit(() => {
-      rerollBluffs();
-    }, "已重抽小恶魔虚张声势。");
-  });
+        const wheelAbilityShort = {
+            '❓ 未分配': '待分配',
+            '镇民：洗衣妇': '首夜知镇民',
+            '镇民：图书管理员': '首夜知外来者',
+            '镇民：调查员': '首夜知爪牙',
+            '镇民：厨师': '首夜知邪恶对数',
+            '镇民：共情者': '每晚知两侧邪恶',
+            '镇民：占卜师': '每晚验两人有无恶魔',
+            '镇民：送葬者': '每晚知处决真身',
+            '镇民：僧侣': '每晚保一人',
+            '镇民：守鸦人': '夜死后验一人',
+            '镇民：贞洁者': '首提名反制镇民',
+            '镇民：猎人': '白天一次点恶魔',
+            '镇民：士兵': '免疫恶魔刀',
+            '镇民：镇长': '终盘可改写胜负',
+            '外来者：管家': '每晚选主人',
+            '外来者：酒鬼': '信息可能全错',
+            '外来者：隐士': '可注册成邪恶',
+            '外来者：圣徒': '被处决则好人败',
+            '爪牙：毒药师': '每晚使一人中毒',
+            '爪牙：间谍': '每晚看魔典',
+            '爪牙：荡妇': '恶魔死时可接任',
+            '爪牙：男爵': '开局外来者+2',
+            '恶魔：小恶魔': '每晚杀1人'
+        };
 
-  elements.firstNightButton.addEventListener("click", () => openNight("first"));
-  elements.otherNightButton.addEventListener("click", () => openNight("other"));
-  elements.nightPrev.addEventListener("click", () => moveNight(-1));
-  elements.nightNext.addEventListener("click", () => moveNight(1));
+        const nightOrder = {
+            first: ['爪牙：毒药师', '爪牙：间谍', '【系统：爪牙互相确认】', '【系统：恶魔确认爪牙及3个伪装】', '镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '外来者：管家'],
+            other: ['爪牙：毒药师', '镇民：僧侣', '爪牙：荡妇', '恶魔：小恶魔', '镇民：守鸦人', '镇民：共情者', '镇民：占卜师', '外来者：管家', '爪牙：间谍', '镇民：送葬者']
+        };
 
-  elements.clearStorage.addEventListener("click", () => {
-    const confirmed = window.confirm("确认清空当前本地存档？这会删除所有座位、角色、标记与笔记。");
-    if (!confirmed) {
-      return;
-    }
-    localStorage.removeItem(STORAGE_KEY);
-    state = getDefaultState();
-    state.restoreMessage = "本地存档已清空，已回到空白局。";
-    persistState();
-    render();
-  });
+        const roleDetails = {
+            '【系统：爪牙互相确认】': { ability: '爪牙互认环节', action: '唤醒所有爪牙。展示“这是恶魔”提示牌，并指向恶魔。让他闭眼。' },
+            '【系统：恶魔确认爪牙及3个伪装】': { ability: '恶魔信息环节', action: '唤醒恶魔。展示“这些是你的爪牙”并指向爪牙。点击【全屏放大给恶魔】向其展示伪装。让他闭眼。' },
+            '爪牙：毒药师': { ability: '技能：每晚可选择一名玩家中毒。', action: '唤醒毒药师。让他指向一名玩家，为该玩家添加“🧪中毒”标记。让他闭眼。' },
+            '爪牙：间谍': { ability: '技能：每晚可查看魔典。', action: '唤醒间谍。向他展示你的魔典。让他闭眼。' },
+            '镇民：洗衣妇': { ability: '技能：首夜得知具体的哪一个镇民在特定两名玩家之中。', action: '唤醒洗衣妇。展示具体“镇民”角色标记，指向两名玩家。让他闭眼。' },
+            '镇民：图书管理员': { ability: '技能：首夜得知具体哪一个外来者在特定两名玩家之中。', action: '唤醒图书管理员。展示具体“外来者”标记，指向两名玩家。让他闭眼。' },
+            '镇民：调查员': { ability: '技能：首夜得知具体的哪一个爪牙在特定两名玩家之中。', action: '唤醒调查员。展示具体“爪牙”标记，指向两名玩家。让他闭眼。' },
+            '镇民：厨师': { ability: '技能：首夜得知有几对邪恶玩家相邻。', action: '唤醒厨师。用手势向他比出场上邪恶邻座对数。让他闭眼。' },
+            '镇民：共情者': { ability: '技能：每晚得知存活邻座中有几名邪恶阵营。', action: '唤醒共情者。用手势向他比出存活邻座中邪恶玩家数。让他闭眼。' },
+            '镇民：占卜师': { ability: '技能：每晚查验两名玩家中是否有恶魔。', action: '唤醒占卜师。让他指两名玩家。如果是恶魔(或死敌)，点头；否则摇头。' },
+            '外来者：管家': { ability: '技能：每晚选择一名玩家作主人。', action: '唤醒管家。让他指向一名玩家。为该玩家添加“👑主人”标记。让他闭眼。' },
+            '镇民：僧侣': { ability: '技能：每晚保护除自己外一名玩家。', action: '唤醒僧侣。让他指向一名玩家。为该玩家添加“🛡️保护”标记。让他闭眼。' },
+            '爪牙：荡妇': { ability: '技能：如果恶魔死亡且存活>=5人，你变成恶魔。', action: '悄悄替换恶魔标记。' },
+            '恶魔：小恶魔': { ability: '技能：每晚杀害一名玩家。', action: '唤醒小恶魔。让他指向一名玩家。放置死亡标记。让他闭眼。' },
+            '镇民：守鸦人': { ability: '技能：被杀时得知一名玩家真实角色。', action: '（⚠️仅当他今晚被恶魔杀害时唤醒）指向一名玩家，展示其真实角色。' },
+            '镇民：送葬者': { ability: '技能：得知白天被处决死亡玩家的真实角色。', action: '（⚠️仅当白天有人被处决才唤醒）展示死者真实角色标记。' }
+        };
 
-  elements.playerCountInput.addEventListener("change", () => {
-    commit(() => {
-      state.playerCount = clampPlayerCount(elements.playerCountInput.value);
-      state.players = buildPlayers(state.playerCount, state.players);
-      rerollBluffs();
-    });
-  });
-
-  elements.notes.addEventListener("input", (event) => {
-    commit(() => {
-      state.notes = event.target.value;
-    });
-  });
-
-  elements.tableRing.addEventListener("click", (event) => {
-    const seatButton = event.target.closest("[data-seat-index]");
-    if (!seatButton) {
-      return;
-    }
-    renameSeat(Number(seatButton.dataset.seatIndex));
-  });
-
-  elements.nightStepList.addEventListener("click", (event) => {
-    const target = event.target.closest("[data-night-index]");
-    if (!target) {
-      return;
-    }
-    commit(() => {
-      state.night.currentIndex = Number(target.dataset.nightIndex);
-    });
-  });
-
-  elements.playerCards.addEventListener("change", (event) => {
-    const nameIndex = event.target.dataset.nameInput;
-    const roleIndex = event.target.dataset.roleSelect;
-
-    if (typeof nameIndex !== "undefined") {
-      const index = Number(nameIndex);
-      commit(() => {
-        state.players[index].name = event.target.value.trim() || `${state.players[index].seat}号`;
-      });
-      return;
-    }
-
-    if (typeof roleIndex !== "undefined") {
-      const index = Number(roleIndex);
-      const nextRoleId = event.target.value;
-      commit(() => {
-        const player = state.players[index];
-        player.roleId = nextRoleId;
-        if (!player.drawnRoleId && nextRoleId) {
-          player.drawnRoleId = nextRoleId;
+        // --- 全屏放大伪装 ---
+        function showBluffsModal() {
+            const b1 = document.getElementById('bluff1').value;
+            const b2 = document.getElementById('bluff2').value;
+            const b3 = document.getElementById('bluff3').value;
+            const clean = str => str.split('：')[1] || str;
+            
+            document.getElementById('modalBluff1').innerText = clean(b1);
+            document.getElementById('modalBluff2').innerText = clean(b2);
+            document.getElementById('modalBluff3').innerText = clean(b3);
+            
+            document.getElementById('bluffsModal').style.display = 'flex';
         }
-        player.abilityUsed = false;
-        player.triggerTonight = false;
-        player.keepsAbilityWhenDead = false;
-        if (!nextRoleId) {
-          player.tokens = [];
+        function hideBluffsModal() {
+            document.getElementById('bluffsModal').style.display = 'none';
         }
-        rerollBluffs();
-      }, `已调整 ${state.players[index].seat} 号玩家的当前角色。`);
-    }
-  });
-
-  elements.playerCards.addEventListener("click", (event) => {
-    const button = event.target.closest("[data-action]");
-    if (!button) {
-      return;
-    }
-
-    const index = Number(button.dataset.index);
-    const player = state.players[index];
-    if (!player) {
-      return;
-    }
-
-    switch (button.dataset.action) {
-      case "toggle-life":
-        commit(() => {
-          player.alive = !player.alive;
-          if (!player.alive) {
-            player.ghostVote = true;
-          } else {
-            player.triggerTonight = false;
-            player.keepsAbilityWhenDead = false;
-          }
-        }, `${player.seat} 号玩家已${player.alive ? "复活" : "死亡"}。`);
-        break;
-      case "toggle-ghost":
-        if (player.alive) {
-          return;
+        function showRoleRevealModal(roleStr) {
+            const shortRole = (roleStr || '').split('：')[1] || roleStr || '未知角色';
+            const category = (roleStr || '').split('：')[0] || '';
+            document.getElementById('roleRevealCard').innerText = shortRole;
+            document.getElementById('roleRevealNote').innerText = category ? `类别：${category}` : '';
+            document.getElementById('roleRevealModal').style.display = 'flex';
         }
-        commit(() => {
-          player.ghostVote = !player.ghostVote;
-        }, `${player.seat} 号玩家鬼票状态已更新。`);
-        break;
-      case "toggle-keep-dead":
-        commit(() => {
-          player.keepsAbilityWhenDead = !player.keepsAbilityWhenDead;
-        }, `${player.seat} 号玩家“死后仍行动”已切换。`);
-        break;
-      case "toggle-used":
-        commit(() => {
-          player.abilityUsed = !player.abilityUsed;
-        }, `${player.seat} 号玩家能力使用状态已更新。`);
-        break;
-      case "toggle-trigger":
-        commit(() => {
-          player.triggerTonight = !player.triggerTonight;
-        }, `${player.seat} 号玩家“今夜触发”已更新。`);
-        break;
-      case "restore-role":
-        commit(() => {
-          player.roleId = player.drawnRoleId;
-          player.abilityUsed = false;
-          player.triggerTonight = false;
-          player.keepsAbilityWhenDead = false;
-          rerollBluffs();
-        }, `${player.seat} 号玩家已还原到原始牌。`);
-        break;
-      case "add-preset-token":
-        commit(() => {
-          player.tokens.push({
-            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            label: button.dataset.token,
-          });
-        }, `${player.seat} 号玩家已添加标记。`);
-        break;
-      case "remove-token":
-        commit(() => {
-          player.tokens = player.tokens.filter((token) => token.id !== button.dataset.tokenId);
-        }, `${player.seat} 号玩家已移除标记。`);
-        break;
-      default:
-        break;
-    }
-  });
+        function hideRoleRevealModal() {
+            document.getElementById('roleRevealModal').style.display = 'none';
+        }
+        function initRoleRevealSelect() {
+            const select = document.getElementById('roleRevealSelect');
+            if (!select) return;
+            const options = allRoles
+                .filter(role => role !== '❓ 未分配')
+                .map(role => `<option value="${role}">${role}</option>`)
+                .join('');
+            select.innerHTML = options;
+            if (!select.value) select.value = '镇民：洗衣妇';
+        }
+        function showSelectedRoleCard() {
+            const select = document.getElementById('roleRevealSelect');
+            if (!select || !select.value) return;
+            showRoleRevealModal(select.value);
+        }
+        function closeSeatTokenModal() {
+            activeSeatTokenPlayerId = null;
+            document.getElementById('seatTokenModal').style.display = 'none';
+        }
+        function getWheelAbilityText(roleStr) {
+            return wheelAbilityShort[normalizeRoleName(roleStr)] || '待定';
+        }
+        function getRoleBasicPlay(roleStr) {
+            return roleBasicPlay[normalizeRoleName(roleStr)] || '先把自己的身份信息和站边逻辑说清，再根据局势慢慢推进。';
+        }
+        function getRoleAdvancedPlay(roleStr) {
+            return roleAdvancedPlay[normalizeRoleName(roleStr)] || '进阶打法重点在于控制信息节奏，并让自己的发言和票型能持续服务胜利条件。';
+        }
+        function updatePlayerListLayoutUi() {
+            const toolbar = document.getElementById('playerListToolbar');
+            const btn = document.getElementById('playerListLayoutBtn');
+            const tip = document.getElementById('playerListLayoutTip');
+            const list = document.getElementById('playerList');
+            if (!toolbar || !btn || !tip || !list) return;
+            toolbar.style.display = players.length ? 'grid' : 'none';
+            list.classList.remove('single-column', 'double-column');
+            list.classList.add(playerListLayout === 'double' ? 'double-column' : 'single-column');
+            btn.innerText = playerListLayout === 'double' ? '🧾 角色栏：双栏' : '🧾 角色栏：单栏';
+            btn.classList.toggle('double', playerListLayout === 'double');
+            tip.innerText = playerListLayout === 'double' ? '当前为双栏视图。' : '当前为单栏视图。';
+        }
+        function togglePlayerListLayout() {
+            playerListLayout = playerListLayout === 'double' ? 'single' : 'double';
+            saveData();
+            updatePlayerListLayoutUi();
+        }
+        function updateMvpSelect() {
+            const select = document.getElementById('mvpSelect');
+            if (!select) return;
+            const playerNames = players.map(player => player.name).filter(Boolean);
+            const uniqueNames = [...new Set(playerNames)];
+            const options = uniqueNames.length
+                ? uniqueNames.map(name => `<option value="${name}" ${finalMvp === name ? 'selected' : ''}>${name}</option>`).join('')
+                : '<option value="">暂无玩家</option>';
+            select.innerHTML = options;
+            if (finalMvp && uniqueNames.includes(finalMvp)) select.value = finalMvp;
+        }
+        function renderScoreBoard() {
+            const list = document.getElementById('scoreBoardList');
+            const summary = document.getElementById('seriesSummary');
+            const mvpSummary = document.getElementById('mvpSummary');
+            if (!list || !summary || !mvpSummary) return;
+            const entries = Object.entries(scoreBoard).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'));
+            list.innerHTML = entries.length
+                ? entries.map(([name, score]) => `<div class="scoreboard-item"><span class="scoreboard-name">${name}</span><span class="scoreboard-score">${score} 分</span></div>`).join('')
+                : '<div class="score-empty">暂无记分记录。</div>';
+            summary.innerText = `已记录 ${seriesGames} 局，当前共有 ${entries.length} 名玩家进入记分。`;
+            mvpSummary.innerText = `当前赛季 MVP：${finalMvp || '未选择'}`;
+            updateMvpSelect();
+        }
+        function addScoreToPlayer(name, amount = 1) {
+            if (!name) return;
+            scoreBoard[name] = (scoreBoard[name] || 0) + amount;
+        }
+        function recordCampWin(camp) {
+            if (!players.length) return alert('请先布置本局玩家和身份。');
+            const winners = players.filter(player => {
+                const roleName = normalizeRoleName(player.role);
+                if (roleName === '❓ 未分配') return false;
+                return camp === 'evil' ? isEvil(roleName) : !isEvil(roleName);
+            });
+            if (!winners.length) return alert('当前没有可计分的胜利阵营玩家。');
+            winners.forEach(player => addScoreToPlayer(player.name, 1));
+            seriesGames += 1;
+            saveData();
+            renderScoreBoard();
+            alert(`${camp === 'evil' ? '邪恶阵营' : '善良阵营'}已加分。`);
+        }
+        function finalizeSeriesMvp() {
+            const select = document.getElementById('mvpSelect');
+            if (!select || !select.value) return alert('请先选择一名 MVP 选手。');
+            finalMvp = select.value;
+            saveData();
+            renderScoreBoard();
+            alert(`本轮赛季 MVP：${finalMvp}`);
+        }
+        function migratePlayerScoreName(oldName, newName) {
+            if (!oldName || !newName || oldName === newName || !(oldName in scoreBoard)) return;
+            scoreBoard[newName] = (scoreBoard[newName] || 0) + scoreBoard[oldName];
+            delete scoreBoard[oldName];
+        }
+        function fallbackCopyText(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            textarea.style.pointerEvents = 'none';
+            document.body.appendChild(textarea);
+            textarea.select();
+            textarea.setSelectionRange(0, textarea.value.length);
+            let succeeded = false;
+            try {
+                succeeded = document.execCommand('copy');
+            } catch (error) {
+                succeeded = false;
+            }
+            document.body.removeChild(textarea);
+            return succeeded;
+        }
+        async function copyRoleProfile(id) {
+            const player = players.find(item => item.id === id);
+            if (!player) return;
+            const roleName = normalizeRoleName(player.role);
+            const copyText = [
+                `角色名：${roleName}`,
+                `技能：${allRoleAbilities[roleName] || '无技能描述'}`,
+                `初级玩法：${getRoleBasicPlay(roleName)}`,
+                `进阶玩法：${getRoleAdvancedPlay(roleName)}`
+            ].join('\n');
 
-  elements.playerCards.addEventListener("submit", (event) => {
-    const form = event.target.closest("[data-token-form]");
-    if (!form) {
-      return;
-    }
-    event.preventDefault();
-    const index = Number(form.dataset.tokenForm);
-    const input = form.querySelector('input[name="token"]');
-    const label = input.value.trim();
-    if (!label) {
-      return;
-    }
-    commit(() => {
-      state.players[index].tokens.push({
-        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-        label,
-      });
-    }, `${state.players[index].seat} 号玩家已添加自定义标记。`);
-    input.value = "";
-  });
-}
+            let copied = false;
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(copyText);
+                    copied = true;
+                } catch (error) {
+                    copied = fallbackCopyText(copyText);
+                }
+            } else {
+                copied = fallbackCopyText(copyText);
+            }
+            alert(copied ? '已复制角色资料。' : '复制失败，请重试。');
+        }
+        function renderRosterList() {
+            const list = document.getElementById('rosterList');
+            if (!list) return;
+            if (playerRoster.length === 0) {
+                list.innerHTML = '<span class="roster-empty">暂无已录入玩家。</span>';
+                return;
+            }
+            list.innerHTML = playerRoster.map(name => {
+                const seat = getAssignedSeatByName(name);
+                const seatText = seat ? getDefaultSeatName(seat.id) : '未入座';
+                const encodedName = encodeURIComponent(name);
+                return `
+                    <div class="roster-chip ${seat ? 'assigned' : ''}">
+                        <span class="roster-chip-name">${escapeHtml(name)}</span>
+                        <span class="roster-chip-seat">${escapeHtml(seatText)}</span>
+                        <button type="button" class="roster-chip-remove" onclick="removeRosterName(decodeURIComponent('${encodedName}'))">×</button>
+                    </div>
+                `;
+            }).join('');
+        }
+        function addRosterName() {
+            const input = document.getElementById('rosterInput');
+            if (!input) return;
+            const name = input.value.trim();
+            if (!name) return;
+            if (!playerRoster.includes(name)) playerRoster.push(name);
+            input.value = '';
+            saveData();
+            renderAll();
+        }
+        function handleRosterInput(event) {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            addRosterName();
+        }
+        function removeRosterName(name) {
+            const seat = getAssignedSeatByName(name);
+            const promptText = seat
+                ? `移除玩家 [${name}] 后，会同时清空 ${getDefaultSeatName(seat.id)} 的座位名。确定继续吗？`
+                : `确定从名单移除玩家 [${name}] 吗？`;
+            if (!confirm(promptText)) return;
+            playerRoster = playerRoster.filter(item => item !== name);
+            players.forEach(player => {
+                if (player.name === name) player.name = getDefaultSeatName(player.id);
+            });
+            closeSeatAssignModal();
+            saveData();
+            renderAll();
+        }
+        function assignSeatName(id, name) {
+            const player = players.find(item => item.id === id);
+            const cleanName = `${name || ''}`.trim();
+            if (!player || !cleanName) return;
+            const otherSeat = players.find(item => item.id !== id && item.name === cleanName);
+            if (otherSeat) otherSeat.name = getDefaultSeatName(otherSeat.id);
+            player.name = cleanName;
+            if (!playerRoster.includes(cleanName)) playerRoster.push(cleanName);
+            saveData();
+            renderAll();
+            closeSeatAssignModal();
+        }
+        function openSeatAssignModal(id) {
+            const player = players.find(item => item.id === id);
+            if (!player) return;
+            activeSeatAssignPlayerId = id;
+            const modal = document.getElementById('seatAssignModal');
+            const title = document.getElementById('seatAssignTitle');
+            const list = document.getElementById('seatAssignList');
+            const input = document.getElementById('seatAssignInput');
+            title.innerText = `${getDefaultSeatName(id)} 选择入座玩家`;
+            input.value = isDefaultSeatName(player.name, player.id) ? '' : player.name;
+            list.innerHTML = playerRoster.length > 0
+                ? playerRoster.map(name => {
+                    const assignedSeat = getAssignedSeatByName(name);
+                    const isActive = player.name === name;
+                    const occupiedElsewhere = assignedSeat && assignedSeat.id !== id;
+                    const meta = assignedSeat
+                        ? occupiedElsewhere ? `${getDefaultSeatName(assignedSeat.id)} 已入座` : '当前已入座'
+                        : '未入座';
+                    const encodedName = encodeURIComponent(name);
+                    return `
+                        <button type="button" class="seat-assign-btn ${isActive ? 'active' : ''} ${occupiedElsewhere ? 'occupied' : ''}" onclick="assignRosterToActiveSeat(decodeURIComponent('${encodedName}'))">
+                            <span>${escapeHtml(name)}</span>
+                            <span class="seat-assign-meta">${escapeHtml(meta)}</span>
+                        </button>
+                    `;
+                }).join('')
+                : '<div class="seat-assign-empty">还没有录入任何玩家姓名。先在上方面板加入名单，再点座位安排入座。</div>';
+            modal.style.display = 'flex';
+        }
+        function closeSeatAssignModal() {
+            activeSeatAssignPlayerId = null;
+            const modal = document.getElementById('seatAssignModal');
+            if (modal) modal.style.display = 'none';
+        }
+        function assignRosterToActiveSeat(name) {
+            if (activeSeatAssignPlayerId === null) return;
+            assignSeatName(activeSeatAssignPlayerId, name);
+        }
+        function applySeatAssignmentFromInput() {
+            if (activeSeatAssignPlayerId === null) return;
+            const input = document.getElementById('seatAssignInput');
+            if (!input) return;
+            const name = input.value.trim();
+            if (!name) {
+                alert('请输入要入座的玩家姓名。');
+                return;
+            }
+            assignSeatName(activeSeatAssignPlayerId, name);
+        }
+        function clearSeatAssignment() {
+            if (activeSeatAssignPlayerId === null) return;
+            const player = players.find(item => item.id === activeSeatAssignPlayerId);
+            if (!player) return;
+            player.name = getDefaultSeatName(player.id);
+            saveData();
+            renderAll();
+            closeSeatAssignModal();
+        }
+        function updateRenameModeUi() {
+            const toolbar = document.getElementById('circleToolbar');
+            const btn = document.getElementById('renameToggleBtn');
+            const tip = document.getElementById('circleToolbarTip');
+            if (!toolbar || !btn || !tip) return;
+            if (players.length === 0) {
+                toolbar.style.display = 'none';
+                return;
+            }
+            toolbar.style.display = 'grid';
+            btn.innerText = isRenameMode ? '🪑 入座模式：开启' : '🪑 入座模式：关闭';
+            btn.classList.toggle('mode-on', isRenameMode);
+            tip.innerText = isRenameMode
+                ? '当前点轮盘座位会弹出入座面板，可从已录入名单中选择玩家入座。'
+                : '当前点轮盘座位会弹出面板，可快速切换状态并处理处决、恶魔刀、复活。';
+        }
+        function toggleRenameMode() {
+            isRenameMode = !isRenameMode;
+            if (isRenameMode) closeSeatTokenModal();
+            else closeSeatAssignModal();
+            updateRenameModeUi();
+        }
+        function handleSeatClick(id) {
+            if (isRenameMode) {
+                openSeatAssignModal(id);
+                return;
+            }
+            openSeatTokenModal(id);
+        }
+        function toggleMasterToken(id) {
+            const alreadyMaster = players.find(player => player.id === id)?.tokens.includes('👑 主人');
+            players.forEach(player => {
+                player.tokens = player.tokens.filter(token => token !== '👑 主人' && token !== '👑主人');
+            });
+            if (!alreadyMaster) {
+                const target = players.find(player => player.id === id);
+                if (target) target.tokens.push('👑 主人');
+            }
+        }
+        function toggleSeatToken(tokenStr) {
+            const player = players.find(item => item.id === activeSeatTokenPlayerId);
+            if (!player) return;
+            if (tokenStr === '👑 主人') {
+                toggleMasterToken(player.id);
+            } else {
+                const variants = [tokenStr, tokenStr.replace(' ', '')];
+                const hasToken = player.tokens.some(token => variants.includes(token));
+                player.tokens = player.tokens.filter(token => !variants.includes(token));
+                if (!hasToken) player.tokens.push(tokenStr);
+            }
+            saveData();
+            renderAll();
+            openSeatTokenModal(player.id);
+        }
+        function clearSeatMarkers() {
+            const player = players.find(item => item.id === activeSeatTokenPlayerId);
+            if (!player) return;
+            player.tokens = [];
+            saveData();
+            renderAll();
+            openSeatTokenModal(player.id);
+        }
+        function setSeatDeathState(deathType) {
+            const player = players.find(item => item.id === activeSeatTokenPlayerId);
+            if (!player) return;
+            if (deathType === 'demon' && isProtectedFromDemon(player)) return;
+            player.isAlive = false;
+            player.hasGhostVote = true;
+            player.deathType = deathType;
+            saveData();
+            renderAll();
+            openSeatTokenModal(player.id);
+        }
+        function reviveSeatFromModal() {
+            const player = players.find(item => item.id === activeSeatTokenPlayerId);
+            if (!player) return;
+            player.isAlive = true;
+            player.hasGhostVote = false;
+            player.deathType = '';
+            saveData();
+            renderAll();
+            openSeatTokenModal(player.id);
+        }
+        function openSeatTokenModal(id) {
+            const player = players.find(item => item.id === id);
+            if (!player) return;
+            activeSeatTokenPlayerId = id;
+            const modal = document.getElementById('seatTokenModal');
+            const title = document.getElementById('seatTokenTitle');
+            const grid = document.getElementById('seatTokenGrid');
+            const tokenOptions = [
+                { token: '🧪 中毒', label: '🧪 中毒' },
+                { token: '🍺 醉酒', label: '🍺 醉酒' },
+                { token: '🛡️ 保护', label: '🛡️ 保护' },
+                { token: '🔮 死敌', label: '🔮 死敌' },
+                { token: '👑 主人', label: '👑 主人' }
+            ];
+            const demonBlocked = player.isAlive && isProtectedFromDemon(player);
+            title.innerText = `${player.name} 的状态标记`;
+            const tokenButtons = tokenOptions.map(option => {
+                const variants = [option.token, option.token.replace(' ', '')];
+                const active = player.tokens.some(token => variants.includes(token));
+                return `<button type="button" class="seat-token-btn ${active ? 'active' : ''}" onclick="toggleSeatToken('${option.token}')">${option.label}</button>`;
+            }).join('');
+            const deathButtons = player.isAlive
+                ? `
+                    <button type="button" class="seat-token-btn death" onclick="setSeatDeathState('execution')">☠️ 处决</button>
+                    <button type="button" class="seat-token-btn demon ${demonBlocked ? 'blocked' : ''}" onclick="${demonBlocked ? '' : "setSeatDeathState('demon')"}" ${demonBlocked ? 'disabled' : ''}>${demonBlocked ? '🗡️ 免疫' : '🗡️ 恶魔刀'}</button>
+                `
+                : `
+                    <button type="button" class="seat-token-btn death ${player.deathType === 'execution' ? 'active' : ''}" onclick="setSeatDeathState('execution')">☠️ 已处决</button>
+                    <button type="button" class="seat-token-btn demon ${player.deathType === 'demon' ? 'active' : ''}" onclick="${isProtectedFromDemon(player) ? '' : "setSeatDeathState('demon')"}" ${isProtectedFromDemon(player) ? 'disabled' : ''}>${isProtectedFromDemon(player) ? '🗡️ 免疫' : '🗡️ 恶魔刀'}</button>
+                    <button type="button" class="seat-token-btn revive wide" onclick="reviveSeatFromModal()">✨ 复活</button>
+                `;
+            grid.innerHTML = tokenButtons + deathButtons + `<button type="button" class="seat-token-btn clear" onclick="clearSeatMarkers()">清空状态标记</button>`;
+            modal.style.display = 'flex';
+        }
 
-function init() {
-  render();
-  attachEvents();
-}
+        // --- 杂项 ---
+        function getRoleCategory(roleStr) {
+            if(roleStr.startsWith('镇民')) return 'Townsfolk';
+            if(roleStr.startsWith('外来者')) return 'Outsider';
+            if(roleStr.startsWith('爪牙')) return 'Minion';
+            if(roleStr.startsWith('恶魔')) return 'Demon';
+            return 'Unknown';
+        }
+        function isEvil(roleStr) { return roleStr.startsWith('爪牙') || roleStr.startsWith('恶魔'); }
+        function getDefaultSeatName(id) { return `座位 ${id + 1}`; }
+        function isDefaultSeatName(name, id) { return `${name || ''}`.trim() === getDefaultSeatName(id); }
+        function normalizeRosterList(list) {
+            const result = [];
+            (Array.isArray(list) ? list : []).forEach(item => {
+                const name = `${item || ''}`.trim();
+                if (name && !result.includes(name)) result.push(name);
+            });
+            return result;
+        }
+        function inferRosterFromPlayers(sourcePlayers = players) {
+            return normalizeRosterList((sourcePlayers || []).map(player => {
+                const name = `${player.name || ''}`.trim();
+                return isDefaultSeatName(name, player.id) ? '' : name;
+            }));
+        }
+        function getAssignedSeatByName(name) {
+            return players.find(player => player.name === name);
+        }
+        function escapeHtml(str) {
+            return `${str || ''}`
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+        function tokenVariants(tokenStr) {
+            return [tokenStr, tokenStr.replace(' ', '')];
+        }
+        function hasPlayerToken(player, tokenStr) {
+            return tokenVariants(tokenStr).some(token => player.tokens.includes(token));
+        }
+        function getPlayerImpairment(player) {
+            const flags = [];
+            if (hasPlayerToken(player, '🧪 中毒')) flags.push('中毒');
+            if (hasPlayerToken(player, '🍺 醉酒')) flags.push('醉酒');
+            return flags.join(' / ');
+        }
+        function isPlayerImpaired(player) {
+            return !!getPlayerImpairment(player);
+        }
+        function normalizeRoleName(roleStr) {
+            if (roleStr === '镇民：处女') return '镇民：贞洁者';
+            if (roleStr === '镇民：杀手') return '镇民：猎人';
+            return roleStr || '❓ 未分配';
+        }
+        function normalizePlayerData(player, index) {
+            return {
+                id: typeof player.id === 'number' ? player.id : index,
+                name: player.name || getDefaultSeatName(index),
+                role: normalizeRoleName(player.role),
+                isAlive: player.isAlive !== false,
+                hasGhostVote: !!player.hasGhostVote,
+                hasNominated: !!player.hasNominated,
+                hasBeenNominated: !!player.hasBeenNominated,
+                tokens: Array.isArray(player.tokens) ? player.tokens : [],
+                deathType: player.deathType || (player.isAlive === false ? 'execution' : '')
+            };
+        }
+        function createPlayer(id, preservedName = '') {
+            return {
+                id,
+                name: preservedName || getDefaultSeatName(id),
+                role: '❓ 未分配',
+                isAlive: true,
+                hasGhostVote: false,
+                hasNominated: false,
+                hasBeenNominated: false,
+                tokens: [],
+                deathType: ''
+            };
+        }
+        function hasRole(roleStr) {
+            return players.some(player => normalizeRoleName(player.role) === roleStr);
+        }
+        function getSpyPlayer() {
+            return players.find(player => normalizeRoleName(player.role) === '爪牙：间谍');
+        }
+        function hasSpyInPlay() {
+            return !!getSpyPlayer();
+        }
+        function registersAsEvil(player, includeSpyAsEvil = true) {
+            const role = normalizeRoleName(player.role);
+            if (!includeSpyAsEvil && role === '爪牙：间谍') return false;
+            return isEvil(role);
+        }
+        function getChefPairs(includeSpyAsEvil = true) {
+            let pairs = 0;
+            for (let i = 0; i < players.length; i++) {
+                if (registersAsEvil(players[i], includeSpyAsEvil) && registersAsEvil(players[(i + 1) % players.length], includeSpyAsEvil)) pairs++;
+            }
+            return pairs;
+        }
+        function getAliveNeighbors(playerId) {
+            const n = players.length;
+            const idx = players.findIndex(x => x.id === playerId);
+            let left = (idx - 1 + n) % n;
+            while (left !== idx && !players[left].isAlive) left = (left - 1 + n) % n;
+            let right = (idx + 1) % n;
+            while (right !== idx && !players[right].isAlive) right = (right + 1) % n;
+            return { left, right };
+        }
+        function getEmpathCount(playerId, includeSpyAsEvil = true) {
+            const idx = players.findIndex(x => x.id === playerId);
+            if (idx === -1) return { count: 0, names: [] };
+            const { left, right } = getAliveNeighbors(playerId);
+            let count = 0;
+            const names = [];
+            if (left !== idx) {
+                names.push(players[left].name);
+                if (registersAsEvil(players[left], includeSpyAsEvil)) count++;
+            }
+            if (right !== idx) {
+                names.push(players[right].name);
+                if (registersAsEvil(players[right], includeSpyAsEvil)) count++;
+            }
+            return { count, names };
+        }
+        function getAvailableGoodBluffs() {
+            const activeRoles = players.map(player => normalizeRoleName(player.role));
+            const source = players.length > 0 ? poolGood.filter(role => !activeRoles.includes(role)) : [...poolGood];
+            return shuffle([...source]);
+        }
+        function isProtectedFromDemon(player) {
+            return normalizeRoleName(player.role) === '镇民：士兵' || hasPlayerToken(player, '🛡️ 保护');
+        }
+        function getLibrarianTargets(currentPlayerId) {
+            const targets = [];
+            const seen = new Set();
+            players.forEach(player => {
+                if (player.id === currentPlayerId) return;
+                let revealRole = '';
+                if (hasPlayerToken(player, '🍺 醉酒')) revealRole = '外来者：酒鬼';
+                else if (getRoleCategory(normalizeRoleName(player.role)) === 'Outsider') revealRole = normalizeRoleName(player.role);
+                if (!revealRole) return;
+                const key = `${player.id}|${revealRole}`;
+                if (seen.has(key)) return;
+                seen.add(key);
+                targets.push({ id: player.id, name: player.name, role: normalizeRoleName(player.role), revealRole });
+            });
+            return targets;
+        }
+        function getNonTargetDecoys(currentPlayerId, excludedIds, predicate) {
+            let decoys = players.filter(player => player.id !== currentPlayerId && !excludedIds.includes(player.id) && predicate(player));
+            if (!decoys.length) decoys = players.filter(player => player.id !== currentPlayerId && !excludedIds.includes(player.id));
+            return decoys;
+        }
+        function randomizeBluffs() {
+            const pool = getAvailableGoodBluffs();
+            bluffs = [pool[0] || '❓ 未分配', pool[1] || '❓ 未分配', pool[2] || '❓ 未分配'];
+            initBluffSelects();
+            saveData();
+        }
+        function getSeatBadgesHtml(player) {
+            const badgeMap = {
+                __execution: { icon: '☠️', className: 'execution' },
+                __demonDeath: { icon: '🗡️', className: 'demon-death' },
+                '🧪 中毒': { icon: '🧪', className: 'poison' },
+                '🧪中毒': { icon: '🧪', className: 'poison' },
+                '🍺 醉酒': { icon: '🍺', className: 'drunk' },
+                '🍺醉酒': { icon: '🍺', className: 'drunk' },
+                '🛡️ 保护': { icon: '🛡️', className: 'protect' },
+                '🛡️保护': { icon: '🛡️', className: 'protect' },
+                '🔮 死敌': { icon: '🔮', className: 'rival' },
+                '🔮死敌': { icon: '🔮', className: 'rival' },
+                '👑 主人': { icon: '👑', className: 'master' },
+                '👑主人': { icon: '👑', className: 'master' }
+            };
+            const badges = [];
+            if (player.deathType === 'execution') badges.push(badgeMap.__execution);
+            if (player.deathType === 'demon') badges.push(badgeMap.__demonDeath);
+            badges.push(...player.tokens
+                .map(token => badgeMap[token])
+                .filter(Boolean));
+            const visibleBadges = badges.slice(0, 5);
+            if (!visibleBadges.length) return '';
+            return `<div class="seat-badges">${visibleBadges.map(badge => `<div class="seat-badge ${badge.className}">${badge.icon}</div>`).join('')}</div>`;
+        }
+        function renderRevealButton(roleStr) {
+            const shortRole = roleStr.split('：')[1] || roleStr;
+            const escapedRole = roleStr.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            return `<button type="button" class="inline-reveal-btn" onclick="showRoleRevealModal('${escapedRole}')">[${shortRole}]</button>`;
+        }
+        function renderSuggestionBox(title, options) {
+            return `
+                <div class="ai-suggestion">
+                    <div class="ai-suggestion-title">${title}</div>
+                    ${options.map((option, index) => `<div class="ai-option"><b>${index + 1}.</b> ${option}</div>`).join('')}
+                </div>
+            `;
+        }
+        function buildRevealOptions(targets, decoys, currentPlayerId, limit = 4) {
+            const options = [];
+            const seen = new Set();
+            targets.slice(0, 4).forEach(target => {
+                const revealRole = target.revealRole || target.role;
+                decoys.slice(0, 6).forEach(decoy => {
+                    if (target.id === decoy.id || decoy.id === currentPlayerId) return;
+                    const key = `${revealRole}|${target.id}|${decoy.id}`;
+                    if (seen.has(key) || options.length >= limit) return;
+                    seen.add(key);
+                    options.push(`向其展示 ${renderRevealButton(revealRole)}，并指向 <b>[${target.name}]</b> 和 <b>[${decoy.name}]</b>。`);
+                });
+            });
+            return options;
+        }
+        function getAlternativeCount(realValue, minValue, maxValue) {
+            for (const delta of [1, -1, 2, -2]) {
+                const candidate = realValue + delta;
+                if (candidate >= minValue && candidate <= maxValue) return candidate;
+            }
+            return realValue === minValue ? maxValue : minValue;
+        }
+        function getAlternativeCountExcluding(realValue, minValue, maxValue, exclusions = []) {
+            for (const delta of [1, -1, 2, -2, 3, -3]) {
+                const candidate = realValue + delta;
+                if (candidate >= minValue && candidate <= maxValue && !exclusions.includes(candidate)) return candidate;
+            }
+            for (let candidate = minValue; candidate <= maxValue; candidate++) {
+                if (!exclusions.includes(candidate)) return candidate;
+            }
+            return realValue;
+        }
+        function pickFalseReveal(rolePool, currentPlayerId) {
+            const normalizedRoles = players.map(player => normalizeRoleName(player.role));
+            const fakeRole = rolePool.find(role => !normalizedRoles.includes(role))
+                || rolePool.find(role => players.filter(player => player.id !== currentPlayerId && normalizeRoleName(player.role) !== role).length >= 2)
+                || rolePool[0];
+            if (!fakeRole) return null;
+            let falseTargets = players.filter(player => player.id !== currentPlayerId && normalizeRoleName(player.role) !== fakeRole);
+            if (falseTargets.length < 2) falseTargets = players.filter(player => player.id !== currentPlayerId);
+            if (falseTargets.length < 2) return null;
+            return { fakeRole, falseTargets: falseTargets.slice(0, 2) };
+        }
+        function getRoleRecommendationData(roleStr, currentPlayer) {
+            if (roleStr === '镇民：图书管理员') {
+                const targets = getLibrarianTargets(currentPlayer.id);
+                const decoys = getNonTargetDecoys(currentPlayer.id, targets.map(target => target.id), player => !hasPlayerToken(player, '🍺 醉酒') && getRoleCategory(normalizeRoleName(player.role)) !== 'Outsider');
+                if (targets.length > 0 && decoys.length > 0) {
+                    return { title: '💡 推荐指引：可从下面几组中任选一组展示。', options: buildRevealOptions(targets, decoys, currentPlayer.id) };
+                }
+                return { title: '💡 提示', options: [`当前无外来者或无法构成有效两人组，请直接比出 <b>0</b> 的手势。`] };
+            }
+            if (roleStr === '镇民：洗衣妇') {
+                const targets = players
+                    .filter(player => getRoleCategory(normalizeRoleName(player.role)) === 'Townsfolk' && player.id !== currentPlayer.id)
+                    .map(player => ({ ...player, revealRole: normalizeRoleName(player.role) }));
+                const decoys = getNonTargetDecoys(currentPlayer.id, targets.map(target => target.id), player => getRoleCategory(normalizeRoleName(player.role)) !== 'Townsfolk');
+                if (targets.length > 0 && decoys.length > 0) {
+                    return { title: '💡 推荐指引：可从下面几组中任选一组展示。', options: buildRevealOptions(targets, decoys, currentPlayer.id) };
+                }
+            }
+            if (roleStr === '镇民：调查员') {
+                const targets = players
+                    .filter(player => getRoleCategory(normalizeRoleName(player.role)) === 'Minion')
+                    .map(player => ({ ...player, revealRole: normalizeRoleName(player.role) }));
+                const decoys = getNonTargetDecoys(currentPlayer.id, targets.map(target => target.id), player => getRoleCategory(normalizeRoleName(player.role)) !== 'Minion');
+                if (targets.length > 0 && decoys.length > 0) {
+                    return { title: '💡 推荐指引：可从下面几组中任选一组展示。', options: buildRevealOptions(targets, decoys, currentPlayer.id) };
+                }
+            }
+            if (roleStr === '镇民：厨师') {
+                const realPairs = getChefPairs(true);
+                if (hasSpyInPlay()) {
+                    const spyPairs = getChefPairs(false);
+                    return {
+                        title: '💡 计算结果',
+                        options: realPairs === spyPairs
+                            ? [`场上邪恶邻座共有 <b>${realPairs}</b> 对。间谍在本局不会改变厨师读数。`]
+                            : [`真实值为 <b>${realPairs}</b> 对。`, `若让间谍按善良注册，可给出 <b>${spyPairs}</b> 对。`]
+                    };
+                }
+                return { title: '💡 计算结果', options: [`场上邪恶邻座共有 <b>${realPairs}</b> 对。`] };
+            }
+            if (roleStr === '镇民：共情者') {
+                const real = getEmpathCount(currentPlayer.id, true);
+                if (hasSpyInPlay()) {
+                    const spy = getEmpathCount(currentPlayer.id, false);
+                    return {
+                        title: '💡 计算结果',
+                        options: real.count === spy.count
+                            ? [`存活邻座 [${real.names.join('] 和 [')}]，邪恶共有 <b>${real.count}</b> 人。间谍在本局不会改变共情者读数。`]
+                            : [`存活邻座 [${real.names.join('] 和 [')}]，真实值为 <b>${real.count}</b>。`, `若让间谍按善良注册，可给出 <b>${spy.count}</b>。`]
+                    };
+                }
+                return { title: '💡 计算结果', options: [`存活邻座 [${real.names.join('] 和 [')}]，邪恶共有 <b>${real.count}</b> 人。`] };
+            }
+            if (roleStr === '镇民：占卜师') {
+                return { title: '💡 结算提示', options: ['若其今夜点中恶魔或死敌，则点头；否则摇头。'] };
+            }
+            if (roleStr === '外来者：管家') {
+                const master = players.find(player => hasPlayerToken(player, '👑 主人'));
+                return {
+                    title: '💡 结算提示',
+                    options: [master ? `当前可把 <b>[${master.name}]</b> 视为主人。` : '当前还没有主人标记，可在轮盘上先指定一名主人。']
+                };
+            }
+            return null;
+        }
 
-init();
+        function getRoleFalseOptions(roleStr, currentPlayer) {
+            if (roleStr === '镇民：洗衣妇') {
+                const reveal = pickFalseReveal(poolTownsfolk, currentPlayer.id);
+                return reveal ? [`展示 ${renderRevealButton(reveal.fakeRole)}，并指向 <b>[${reveal.falseTargets[0].name}]</b> 与 <b>[${reveal.falseTargets[1].name}]</b>。`] : [];
+            }
+            if (roleStr === '镇民：图书管理员') {
+                const effectiveRoles = getLibrarianTargets(currentPlayer.id).map(target => target.revealRole);
+                const fakeRole = poolOutsiders.find(role => !effectiveRoles.includes(role)) || poolOutsiders[0];
+                let falseTargets = players.filter(player => player.id !== currentPlayer.id && normalizeRoleName(player.role) !== fakeRole);
+                if (falseTargets.length < 2) falseTargets = players.filter(player => player.id !== currentPlayer.id);
+                return falseTargets.length >= 2 ? [`展示 ${renderRevealButton(fakeRole)}，并指向 <b>[${falseTargets[0].name}]</b> 与 <b>[${falseTargets[1].name}]</b>。`] : [];
+            }
+            if (roleStr === '镇民：调查员') {
+                const reveal = pickFalseReveal(poolMinions, currentPlayer.id);
+                return reveal ? [`展示 ${renderRevealButton(reveal.fakeRole)}，并指向 <b>[${reveal.falseTargets[0].name}]</b> 与 <b>[${reveal.falseTargets[1].name}]</b>。`] : [];
+            }
+            if (roleStr === '镇民：厨师') {
+                const realPairs = getChefPairs(true);
+                const spyPairs = hasSpyInPlay() ? getChefPairs(false) : realPairs;
+                const maxPairs = Math.max(0, Math.floor(players.length / 2));
+                const fakePairs = getAlternativeCountExcluding(realPairs, 0, maxPairs, [realPairs, spyPairs]);
+                return [`你也可以把厨师读数报成 <b>${fakePairs}</b> 对。`];
+            }
+            if (roleStr === '镇民：共情者') {
+                const real = getEmpathCount(currentPlayer.id, true);
+                const spy = hasSpyInPlay() ? getEmpathCount(currentPlayer.id, false) : real;
+                const fakeCount = getAlternativeCountExcluding(real.count, 0, 2, [real.count, spy.count]);
+                return [`对存活邻座 [${real.names.join('] 和 [')}] 也可以报 <b>${fakeCount}</b> 人邪恶。`];
+            }
+            if (roleStr === '镇民：占卜师') {
+                return ['你也可以反着给：命中恶魔或死敌时摇头，未命中时点头。'];
+            }
+            if (roleStr === '镇民：送葬者' || roleStr === '镇民：守鸦人') {
+                const fakeRole = getAvailableGoodBluffs()[0] || poolTownsfolk[0];
+                return [`展示一个错误角色标记，例如 ${renderRevealButton(fakeRole)}。`];
+            }
+            if (roleStr === '外来者：管家') {
+                const fallbackTarget = players.find(player => player.id !== currentPlayer.id);
+                return fallbackTarget ? [`可让其错误地认定 <b>[${fallbackTarget.name}]</b> 为主人，或直接让本次指定不生效。`] : [];
+            }
+            return [];
+        }
 
-</script>
-  </body>
+        function getImpairedNightSuggestion(roleStr, currentPlayer) {
+            const impairment = getPlayerImpairment(currentPlayer);
+            if (!impairment) return '';
+            const normalData = getRoleRecommendationData(roleStr, currentPlayer);
+            const correctOptions = (normalData?.options?.length ? normalData.options : ['该技能本夜若要结算，请按真实信息正常给出。'])
+                .map(option => `正确结果（${impairment}）：${option}`);
+            const falseOptions = getRoleFalseOptions(roleStr, currentPlayer)
+                .map(option => `错误结果建议：${option}`);
+            return renderSuggestionBox(`⚠️ ${currentPlayer.name} 当前为${impairment}结算`, [...correctOptions, ...falseOptions]);
+        }
+
+        function getAIRecommendation(roleStr, currentPlayer) {
+            const impairedHtml = getImpairedNightSuggestion(roleStr, currentPlayer);
+            if (impairedHtml) return impairedHtml;
+            const recommendationData = getRoleRecommendationData(roleStr, currentPlayer);
+            return recommendationData ? renderSuggestionBox(recommendationData.title, recommendationData.options) : '';
+        }
+
+        function updateRoleInfo() {
+            let count = parseInt(document.getElementById('playerCountInput').value);
+            if(isNaN(count) || count < 5) count = 5; if(count > 15) count = 15;
+            const dist = roleDistribution[count];
+            if(dist) document.getElementById('roleInfo').innerHTML = `基础配置: ${dist[0]}镇民 | ${dist[1]}外来者 | ${dist[2]}爪牙 | ${dist[3]}恶魔`;
+        }
+
+        function updateTimerDisplay() {
+            const display = document.getElementById('timerDisplay');
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0'); const s = (timeLeft % 60).toString().padStart(2, '0');
+            display.innerText = `${m}:${s}`;
+            if (timeLeft <= 10 && timeLeft > 0) display.classList.add('danger'); else display.classList.remove('danger');
+            if (timeLeft === 0 && isTimerRunning) {
+                display.classList.add('danger'); pauseTimer(); 
+                if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 500]);
+                setTimeout(() => alert("⏳ 时间到！请打断玩家发言。"), 100);
+            }
+        }
+        function setTimer(seconds) { pauseTimer(); timeLeft = seconds; updateTimerDisplay(); }
+        function toggleTimer() {
+            const btn = document.getElementById('timerToggleBtn');
+            if (isTimerRunning) { pauseTimer(); } else {
+                if(timeLeft <= 0) return; isTimerRunning = true;
+                btn.innerText = '⏸️ 暂停计时'; btn.classList.add('is-running');
+                timerInterval = setInterval(() => { timeLeft--; updateTimerDisplay(); }, 1000);
+            }
+        }
+        function pauseTimer() {
+            isTimerRunning = false; clearInterval(timerInterval);
+            const btn = document.getElementById('timerToggleBtn');
+            btn.innerText = '▶️ 开始/暂停计时'; btn.classList.remove('is-running');
+        }
+
+        function initBluffSelects() {
+            const selects = [document.getElementById('bluff1'), document.getElementById('bluff2'), document.getElementById('bluff3')];
+            let options = poolGood.map(r => `<option value="${r}">${r.split('：')[1] || r}</option>`).join('');
+            options = `<option value="❓ 未分配">未分配</option>` + options;
+            selects.forEach((s, idx) => { s.innerHTML = options; s.value = bluffs[idx]; });
+        }
+
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) { randomIndex = Math.floor(Math.random() * currentIndex); currentIndex--; [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]]; }
+            return array;
+        }
+
+        function generateAndDeal() {
+            let count = parseInt(document.getElementById('playerCountInput').value);
+            if (isNaN(count) || count < 5 || count > 15) return alert("人数必须在 5 到 15 人之间！");
+            if(players.length > 0 && !confirm("重新开局将重置身份、状态和伪装并重新发牌，座位名会保留，确定吗？")) return;
+
+            const preservedNames = players.map(player => player.name);
+            isRenameMode = false;
+            closeSeatTokenModal();
+            closeSeatAssignModal();
+            players = []; bluffs = ['❓ 未分配', '❓ 未分配', '❓ 未分配'];
+            for (let i = 0; i < count; i++) players.push(createPlayer(i, preservedNames[i]));
+
+            const dist = roleDistribution[count];
+            let selectedRoles = [].concat(shuffle([...poolTownsfolk]).slice(0, dist[0]), shuffle([...poolOutsiders]).slice(0, dist[1]), shuffle([...poolMinions]).slice(0, dist[2]), shuffle([...poolDemons]).slice(0, dist[3]));
+            selectedRoles = shuffle(selectedRoles);
+            for (let i = 0; i < count; i++) players[i].role = selectedRoles[i];
+
+            const outOfPlayGood = getAvailableGoodBluffs();
+            bluffs = [outOfPlayGood[0], outOfPlayGood[1], outOfPlayGood[2]];
+
+            setTimer(300); document.getElementById('timerPanel').style.display = 'block'; 
+            initBluffSelects();
+            currentNightOrderType = 'first';
+            saveData(); renderAll(); alert("✅ 魔典布置完毕！座位、身份及恶魔伪装已自动生成。");
+        }
+
+        function editName(id) { openSeatAssignModal(id); }
+        function markDeath(id, deathType) { const player = players.find(p => p.id === id); if (!player || !player.isAlive) return; if (deathType === 'demon' && isProtectedFromDemon(player)) return; player.isAlive = false; player.hasGhostVote = true; player.deathType = deathType; saveData(); renderAll(); }
+        function revivePlayer(id) { const player = players.find(p => p.id === id); if (!player || player.isAlive) return; player.isAlive = true; player.hasGhostVote = false; player.deathType = ''; saveData(); renderAll(); }
+        function toggleGhostVote(id) { const player = players.find(p => p.id === id); if (!player.isAlive) { player.hasGhostVote = !player.hasGhostVote; saveData(); renderAll(); } }
+        function updateRole(id, newRole) { players.find(p => p.id === id).role = normalizeRoleName(newRole); saveData(); renderAll(); }
+        function addToken(id, event) { if (event.key === 'Enter' && event.target.value.trim()) { const player = players.find(p => p.id === id); if (!player.tokens.includes(event.target.value.trim())) { player.tokens.push(event.target.value.trim()); saveData(); renderAll(); } } }
+        function addSpecificToken(id, tokenStr) {
+            if (tokenStr === '👑 主人') {
+                toggleMasterToken(id);
+                saveData();
+                renderAll();
+                return;
+            }
+            const player = players.find(p => p.id === id);
+            if (!player.tokens.includes(tokenStr)) { player.tokens.push(tokenStr); saveData(); renderAll(); }
+        }
+        function removeToken(id, tokenIndex) { players.find(p => p.id === id).tokens.splice(tokenIndex, 1); saveData(); renderAll(); }
+        function clearData() { if(confirm("确定要洗牌重开吗？这会清空座位名、身份和所有标记。")) { players = []; bluffs = ['❓ 未分配', '❓ 未分配', '❓ 未分配']; currentNightOrderType = ''; isRenameMode = false; closeSeatTokenModal(); closeSeatAssignModal(); document.getElementById('nightOrderDisplay').style.display = 'none'; document.getElementById('timerPanel').style.display = 'none'; pauseTimer(); setTimer(300); initBluffSelects(); saveData(); renderAll(); } }
+        function renderHints() {
+            const panel = document.getElementById('storytellerHints');
+            if (players.length === 0) {
+                panel.style.display = 'none';
+                panel.innerHTML = '';
+                return;
+            }
+
+            const hints = [];
+            if (hasRole('镇民：占卜师')) hints.push({ type: 'warning', text: '本局有占卜师：开始夜晚前先设定一名死敌，并提前记好“🔮 死敌”标记。' });
+            if (hasRole('爪牙：男爵')) hints.push({ type: 'warning', text: '本局有男爵：外来者数量 +2，请以两名外来者替换两名镇民。' });
+            if (hasSpyInPlay() && (hasRole('镇民：厨师') || hasRole('镇民：共情者'))) hints.push({ type: 'system', text: '本局有间谍：夜晚顺序中的厨师/共情者会给出真实值与注册值两种结果，按说书人裁定任选其一。' });
+            if (hints.length === 0) hints.push({ type: 'normal', text: '当前无特殊开局提醒，可直接进入夜晚流程。' });
+
+            panel.innerHTML = `
+                <div class="hints-title">说书人提示</div>
+                <div class="hints-list">
+                    ${hints.map(hint => `<div class="hint-item ${hint.type}">${hint.text}</div>`).join('')}
+                </div>
+            `;
+            panel.style.display = 'block';
+        }
+
+        function generateNightOrder(type, options = {}) {
+            if(players.length === 0) return;
+            currentNightOrderType = type;
+            const display = document.getElementById('nightOrderDisplay');
+            const activeRoles = players.map(p => normalizeRoleName(p.role));
+            let html = `<h3 class="night-order-title">${type === 'first' ? '🌙 首夜降临' : '🌘 其余夜晚'}</h3><ul class="night-list">`;
+            let stepCount = 1;
+
+            nightOrder[type].forEach(role => {
+                const details = roleDetails[role] || { ability: '', action: '无详细操作说明' };
+                if (role.startsWith('【')) {
+                    html += `<li class="night-item"><div class="night-header">${stepCount}. <span class="system-prompt">${role}</span></div><div class="storyteller-action">👉 <b>说书人：</b>${details.action}</div></li>`;
+                    stepCount++;
+                } else if (activeRoles.includes(role)) {
+                    players.filter(p => normalizeRoleName(p.role) === role).forEach(p => {
+                        const status = p.isAlive ? '' : ' <span class="status-dead">(已死亡)</span>';
+                        const shortRole = role.split('：')[1]; 
+                        const aiHtml = getAIRecommendation(role, p);
+
+                        html += `
+                        <li class="night-item">
+                            <div class="night-header">${stepCount}. 唤醒 <span class="highlight">${shortRole}</span> [${p.name}] ${status}</div>
+                            <div class="role-ability">${details.ability}</div>
+                            <div class="storyteller-action">👉 <b>说书人：</b>${details.action}</div>
+                            ${aiHtml}
+                        </li>`;
+                        stepCount++;
+                    });
+                }
+            });
+            html += '</ul>';
+            display.innerHTML = html; display.style.display = 'block';
+            if (options.scroll !== false) display.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function saveData() { 
+            bluffs[0] = document.getElementById('bluff1').value; bluffs[1] = document.getElementById('bluff2').value; bluffs[2] = document.getElementById('bluff3').value;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, bluffs, currentNightOrderType, playerListLayout, scoreBoard, seriesGames, finalMvp, playerRoster })); 
+        }
+
+        function loadData() { 
+            const saved = localStorage.getItem(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(key => localStorage.getItem(key)).find(Boolean); 
+            if (saved) { 
+                const data = JSON.parse(saved);
+                players = (data.players || []).map((player, index) => normalizePlayerData(player, index));
+                bluffs = (data.bluffs || ['❓ 未分配', '❓ 未分配', '❓ 未分配']).map(normalizeRoleName);
+                currentNightOrderType = data.currentNightOrderType || '';
+                playerListLayout = data.playerListLayout || (window.innerWidth >= 720 ? 'double' : 'single');
+                scoreBoard = data.scoreBoard || {};
+                seriesGames = typeof data.seriesGames === 'number' ? data.seriesGames : 0;
+                finalMvp = data.finalMvp || '';
+                playerRoster = normalizeRosterList(data.playerRoster);
+                if (playerRoster.length === 0) playerRoster = inferRosterFromPlayers(players);
+                if(players.length > 0) document.getElementById('timerPanel').style.display = 'block';
+            } else {
+                playerListLayout = window.innerWidth >= 720 ? 'double' : 'single';
+                playerRoster = [];
+            }
+            initBluffSelects(); initRoleRevealSelect(); renderAll(); updateTimerDisplay();
+        }
+        function setupUiGuards() {
+            const seatTokenPanel = document.getElementById('seatTokenModalPanel');
+            if (seatTokenPanel && !seatTokenPanel.dataset.bound) {
+                seatTokenPanel.addEventListener('click', event => event.stopPropagation());
+                seatTokenPanel.dataset.bound = '1';
+            }
+            const seatAssignPanel = document.getElementById('seatAssignModalPanel');
+            if (seatAssignPanel && !seatAssignPanel.dataset.bound) {
+                seatAssignPanel.addEventListener('click', event => event.stopPropagation());
+                seatAssignPanel.dataset.bound = '1';
+            }
+            const seatAssignInput = document.getElementById('seatAssignInput');
+            if (seatAssignInput && !seatAssignInput.dataset.bound) {
+                seatAssignInput.addEventListener('keydown', event => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        applySeatAssignmentFromInput();
+                    }
+                });
+                seatAssignInput.dataset.bound = '1';
+            }
+        }
+
+        function refreshNightOrderIfOpen() {
+            if (players.length === 0 || !currentNightOrderType) return;
+            generateNightOrder(currentNightOrderType, { scroll: false });
+        }
+
+        function renderAll() { renderRosterList(); renderCircle(); renderHints(); renderList(); updateRenameModeUi(); updatePlayerListLayoutUi(); renderScoreBoard(); refreshNightOrderIfOpen(); }
+
+        function renderCircle() {
+            const stage = document.getElementById('circleStage');
+            const container = document.getElementById('circleView');
+            if (players.length === 0) {
+                stage.style.display = 'none';
+                container.style.display = 'none';
+                return;
+            }
+            stage.style.display = 'block';
+            container.style.display = 'block';
+            container.innerHTML = '';
+            const stageStyle = window.getComputedStyle(stage);
+            const horizontalPadding = parseFloat(stageStyle.paddingLeft) + parseFloat(stageStyle.paddingRight);
+            const availableWidth = Math.max(250, stage.clientWidth - horizontalPadding);
+            const size = availableWidth < 300 ? availableWidth : Math.min(availableWidth, 420);
+            const seatSize = Math.min(players.length >= 12 ? 56 : players.length >= 9 ? 60 : 66, Math.floor(size * 0.21));
+            container.style.setProperty('--altar-size', `${size}px`);
+            container.style.setProperty('--seat-size', `${seatSize}px`);
+            container.style.setProperty('--seat-name-size', `${Math.max(11, Math.round(seatSize * 0.22))}px`);
+            container.style.setProperty('--seat-role-size', `${Math.max(9, Math.round(seatSize * 0.17))}px`);
+            const center = size / 2;
+            const radius = center - seatSize / 2 - 18;
+            const angleStep = (2 * Math.PI) / players.length;
+            players.forEach((p, index) => {
+                const angle = index * angleStep - Math.PI / 2;
+                const x = center + radius * Math.cos(angle); const y = center + radius * Math.sin(angle);
+                const noteRadius = radius + seatSize * 1.02;
+                const noteX = center + noteRadius * Math.cos(angle);
+                const noteY = center + noteRadius * Math.sin(angle);
+                const seat = document.createElement('div');
+                const roleCategory = getRoleCategory(normalizeRoleName(p.role)).toLowerCase();
+                const seatRoleClass = roleCategory === 'minion' ? 'seat-minion' : roleCategory === 'demon' ? 'seat-demon' : '';
+                seat.className = `seat ${seatRoleClass} ${p.isAlive ? '' : 'dead-seat'}`.trim();
+                seat.style.cssText = `left: ${x}px; top: ${y}px;`;
+                seat.onclick = () => handleSeatClick(p.id);
+                const roleName = normalizeRoleName(p.role);
+                const shortRole = roleName === '❓ 未分配' ? '待分配' : roleName.split('：')[1] || roleName;
+                const badgeHtml = getSeatBadgesHtml(p);
+                const abilityNote = document.createElement('div');
+                abilityNote.className = `seat-ability ${roleCategory === 'demon' ? 'demon' : roleCategory === 'minion' ? 'evil' : ''}`.trim();
+                abilityNote.style.cssText = `left: ${noteX}px; top: ${noteY}px;`;
+                abilityNote.innerText = getWheelAbilityText(roleName);
+
+                seat.innerHTML = `
+                    ${badgeHtml}
+                    <div class="seat-name">${p.name}</div>
+                    <div class="seat-role">${shortRole}</div>
+                `;
+                container.appendChild(abilityNote);
+                container.appendChild(seat);
+            });
+        }
+
+        function renderList() {
+            const list = document.getElementById('playerList'); list.innerHTML = '';
+            players.forEach(p => {
+                const card = document.createElement('div'); card.className = `player-card ${p.isAlive ? '' : 'dead'}`;
+                const roleName = normalizeRoleName(p.role);
+                let roleOptions = allRoles.map(r => `<option value="${r}" ${roleName === r ? 'selected' : ''}>${r}</option>`).join('');
+                let ghostBtnHtml = p.isAlive ? '' : `<button class="${p.hasGhostVote ? 'ghost-btn' : 'no-ghost'}" onclick="toggleGhostVote(${p.id})">${p.hasGhostVote ? '👻 有票' : '❌ 无票'}</button>`;
+                let abilityDesc = allRoleAbilities[roleName] || '无技能描述';
+                const deathLabel = p.deathType === 'demon' ? '🗡️ 恶魔刀' : '☠️ 已处决';
+                const deathClass = p.deathType === 'demon' ? 'demon-mark' : 'execution-mark';
+                const actionHtml = p.isAlive
+                    ? ''
+                    : `<div class="actions">${ghostBtnHtml}<button class="revive-btn" onclick="revivePlayer(${p.id})">✨ 复活</button><button class="death-mark ${deathClass}" disabled>${deathLabel}</button></div>`;
+
+                card.innerHTML = `
+                    <div class="row"><span class="player-name">${p.name}</span>${actionHtml}</div>
+                    <div class="row" style="margin-bottom: 4px;"><select onchange="updateRole(${p.id}, this.value)">${roleOptions}</select></div>
+                    <div class="role-desc">ℹ️ ${abilityDesc}</div>
+                    <button class="copy-role-btn" onclick="copyRoleProfile(${p.id})">📋 复制角色资料</button>
+                `;
+                list.appendChild(card);
+            });
+        }
+        
+        updateRoleInfo();
+        window.onload = () => { setupUiGuards(); loadData(); };
+        window.addEventListener('resize', renderCircle);
+    </script>
+</body>
 </html>
 
