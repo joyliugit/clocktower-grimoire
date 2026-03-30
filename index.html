@@ -131,15 +131,64 @@ body::after {
     background: radial-gradient(circle at top, rgba(197, 165, 106, 0.08), transparent 58%);
 }
 
+.hero-topbar {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
 .hero-caption {
     position: relative;
     z-index: 1;
-    margin-bottom: 10px;
+    margin-bottom: 0;
     color: var(--steel);
     font-size: 0.74rem;
     letter-spacing: 0.34em;
     text-transform: uppercase;
     text-align: center;
+}
+
+.hero-topbar .hero-caption {
+    flex: 1 1 auto;
+    text-align: left;
+}
+
+.script-switcher {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border: 1px solid rgba(197, 165, 106, 0.16);
+    border-radius: 999px;
+    background: rgba(18, 14, 17, 0.56);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.script-switcher-label {
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.script-select {
+    width: auto;
+    min-width: 118px;
+    padding: 6px 10px;
+    border: 1px solid rgba(197, 165, 106, 0.16);
+    border-radius: 999px;
+    color: var(--text-main);
+    font-size: 0.82rem;
+    background: linear-gradient(180deg, rgba(37, 28, 33, 0.96), rgba(22, 18, 21, 0.99));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 h2 {
@@ -1711,12 +1760,21 @@ button.night-btn {
 
     <main class="ritual-shell">
         <header class="panel hero-panel">
-            <div class="hero-caption">Storyteller Ritual Console</div>
+            <div class="hero-topbar">
+                <div class="hero-caption">Storyteller Ritual Console</div>
+                <div class="script-switcher">
+                    <span class="script-switcher-label">剧本</span>
+                    <select id="scriptSelect" class="script-select" onchange="changeScript(this.value)">
+                        <option value="tb">暗流魔典</option>
+                        <option value="dycs">黯月初升</option>
+                    </select>
+                </div>
+            </div>
             <h2>
-                <span class="title-text">📖 暗流魔典 v2.0</span>
+                <span id="appTitleText" class="title-text">📖 暗流魔典 v2.0</span>
                 <button class="reset-btn" onclick="clearData()">🔄 洗牌重开</button>
             </h2>
-            <p class="hero-subtitle">夜烛之下，圆桌、伪装、唤醒与审判都在同一座祭坛上完成。</p>
+            <p id="appSubtitle" class="hero-subtitle">夜烛之下，圆桌、伪装、唤醒与审判都在同一座祭坛上完成。</p>
         </header>
 
         <section class="panel control-panel text-center">
@@ -1819,10 +1877,28 @@ button.night-btn {
         let scoreBoard = {};
         let seriesGames = 0;
         let finalMvp = '';
+        let selectedScript = 'tb';
         let playerRoster = [];
         let activeSeatAssignPlayerId = null;
         const STORAGE_KEY = 'tb_v2_0_data';
         const LEGACY_STORAGE_KEYS = ['tb_v9_7_data', 'tb_v9_6_data'];
+
+        const scriptMeta = {
+            tb: {
+                title: '📖 暗流魔典 v2.0',
+                subtitle: '夜烛之下，圆桌、伪装、唤醒与审判都在同一座祭坛上完成。',
+                pageTitle: '血染钟楼 - 暗流魔典 v2.0',
+                minPlayers: 5,
+                maxPlayers: 15
+            },
+            dycs: {
+                title: '📖 黯月初升 v2.0',
+                subtitle: '死而复生、醉酒与多重夜杀并存的剧本，适合偏向混乱、翻盘与高戏剧性的夜晚。',
+                pageTitle: '血染钟楼 - 黯月初升 v2.0',
+                minPlayers: 7,
+                maxPlayers: 15
+            }
+        };
 
         const allRoles = ['❓ 未分配', '镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：隐士', '外来者：圣徒', '爪牙：毒药师', '爪牙：间谍', '爪牙：荡妇', '爪牙：男爵', '恶魔：小恶魔'];
         const poolGood = ['镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：隐士', '外来者：圣徒'];
@@ -1964,6 +2040,180 @@ button.night-btn {
             '镇民：送葬者': { ability: '技能：得知白天被处决死亡玩家的真实角色。', action: '（⚠️仅当白天有人被处决才唤醒）展示死者真实角色标记。' }
         };
 
+        const dycsAllRoles = ['❓ 未分配', '镇民：祖母', '镇民：水手', '镇民：侍女', '镇民：驱魔人', '镇民：旅店老板', '镇民：赌徒', '镇民：造谣者', '镇民：侍臣', '镇民：教授', '镇民：吟游诗人', '镇民：茶艺师', '镇民：和平主义者', '镇民：弄臣', '外来者：莽夫', '外来者：疯子', '外来者：修补匠', '外来者：月之子', '爪牙：教父', '爪牙：魔鬼代言人', '爪牙：刺客', '爪牙：主谋', '恶魔：僵怖', '恶魔：普卡', '恶魔：沙巴洛斯', '恶魔：朴'];
+        const dycsPoolGood = ['镇民：祖母', '镇民：水手', '镇民：侍女', '镇民：驱魔人', '镇民：旅店老板', '镇民：赌徒', '镇民：造谣者', '镇民：侍臣', '镇民：教授', '镇民：吟游诗人', '镇民：茶艺师', '镇民：和平主义者', '镇民：弄臣', '外来者：莽夫', '外来者：疯子', '外来者：修补匠', '外来者：月之子'];
+        const dycsPoolTownsfolk = dycsPoolGood.slice(0, 13);
+        const dycsPoolOutsiders = dycsPoolGood.slice(13);
+        const dycsPoolMinions = ['爪牙：教父', '爪牙：魔鬼代言人', '爪牙：刺客', '爪牙：主谋'];
+        const dycsPoolDemons = ['恶魔：僵怖', '恶魔：普卡', '恶魔：沙巴洛斯', '恶魔：朴'];
+
+        const dycsRoleAbilities = {
+            '❓ 未分配': '暂无身份，命运尚未降临。',
+            '镇民：祖母': '首夜得知一名善良玩家及其角色；若恶魔杀死了他，你也会死亡。',
+            '镇民：水手': '每晚选择一名存活玩家：你或他其中一人会醉酒直到下个黄昏；你不会死亡。',
+            '镇民：侍女': '每晚选择除你外的两名存活玩家：你会得知他们中有几人在当晚因自身能力被唤醒。',
+            '镇民：驱魔人': '每晚选择一名玩家且不能连续两晚同一人：若他是恶魔，他今晚不会被唤醒。',
+            '镇民：旅店老板': '每晚选择两名玩家：他们今晚不会死亡，但其中一人会醉酒直到下个黄昏。',
+            '镇民：赌徒': '每晚选择一名玩家并猜测其角色：若猜错，你会死亡。',
+            '镇民：造谣者': '每个白天，你可以公开发表一条声明；若声明正确，当晚会有一名玩家死亡。',
+            '镇民：侍臣': '每局限一次，于夜晚选择一个角色：若该角色在场，则会从当晚开始醉酒三天三夜。',
+            '镇民：教授': '每局限一次，于夜晚选择一名已死亡玩家：若他是镇民，则会被复活。',
+            '镇民：吟游诗人': '当一名爪牙死于处决时，除你和旅者外的其他玩家都会醉酒直到明天黄昏。',
+            '镇民：茶艺师': '若与你相邻的两名存活玩家都是善良阵营，他们不会死亡。',
+            '镇民：和平主义者': '被处决的善良玩家可能不会死亡。',
+            '镇民：弄臣': '当你首次将要死亡时，你不会死亡。',
+            '外来者：莽夫': '每晚首个以自身能力选择你的玩家会醉酒直到下个黄昏；你会转变为他的阵营。',
+            '外来者：疯子': '你以为自己是恶魔，但其实不是；真正的恶魔知道你是疯子，以及你每晚选择了哪些玩家。',
+            '外来者：修补匠': '你随时可能死亡。',
+            '外来者：月之子': '当你得知自己死亡时，需公开选择一名存活玩家；若他是善良阵营，他会在当晚死亡。',
+            '爪牙：教父': '首夜得知场上有哪些外来者；若今天有外来者死亡，你今夜可选择一名玩家死亡。开局外来者数量 -1 或 +1。',
+            '爪牙：魔鬼代言人': '每晚选择一名存活玩家且不能连续两晚同一人：若他明天被处决，则不会死亡。',
+            '爪牙：刺客': '每局限一次，于夜晚选择一名玩家：他死亡，即使因任何原因本不应死亡。',
+            '爪牙：主谋': '若恶魔因处决而本应导致游戏结束，则额外进行一个夜晚和一个白天；若那天有人被处决，邪恶获胜。',
+            '恶魔：僵怖': '每个夜晚*，若今天白天无人死亡，选择一名玩家：他死亡。你首次死亡时仍然存活，但会被视作死亡。',
+            '恶魔：普卡': '每晚选择一名玩家：他中毒；上个夜晚被你毒到的玩家会死亡并恢复健康。',
+            '恶魔：沙巴洛斯': '每个夜晚*，选择两名玩家：他们死亡；你先前杀死的一名玩家可能会被反刍复活。',
+            '恶魔：朴': '每个夜晚*，你可以选择不杀人；若你上次没有杀人，则今夜要选择三名玩家死亡。'
+        };
+
+        const dycsRoleBasicPlay = {
+            '镇民：祖母': '尽快记住你看到的善良链，白天优先围绕这条链做站边。',
+            '镇民：水手': '优先找高价值位碰撞，利用不死和醉酒双重特性制造信息差。',
+            '镇民：侍女': '优先点夜间可能会动的角色位，连续几晚比单次读数更有价值。',
+            '镇民：驱魔人': '紧盯恶魔嫌疑位，连续封醒往往比盲查更有压制力。',
+            '镇民：旅店老板': '优先保高价值位，但要记住其中一人会醉酒，别把保护读成纯收益。',
+            '镇民：赌徒': '别急着夜一乱赌，先靠白天信息把猜测范围收窄。',
+            '镇民：造谣者': '声明要具体且可验证，真假都会牵动夜晚死亡。',
+            '镇民：侍臣': '优先点恶魔、关键爪牙或最强信息角色，三天醉酒价值很高。',
+            '镇民：教授': '复活对象优先选能立刻改变局势的镇民，不必贪身份本身强度。',
+            '镇民：吟游诗人': '留意爪牙处决后的全场醉酒窗口，那是重新校准信息链的关键。',
+            '镇民：茶艺师': '你最重要的是位置价值，尽量让两侧都站成善良链。',
+            '镇民：和平主义者': '处决没死人时别急着自证，先让桌面接受你存在的可能。',
+            '镇民：弄臣': '首次不死价值很高，适合在中前期承担危险发言位。',
+            '外来者：莽夫': '你会扰乱夜间能力链，发言时要不断提醒别人考虑阵营翻转。',
+            '外来者：疯子': '把自己当恶魔演，但别忘了你提供的信息未必属于真实世界。',
+            '外来者：修补匠': '你随时暴毙并不说明任何阵营信息，白天主要任务是稳住桌面判断。',
+            '外来者：月之子': '避免在信息混乱时死去，否则你的公开点名会被坏人借力。',
+            '爪牙：教父': '外来者死讯是你的爆发窗口，白天要主动推动外来者叙事。',
+            '爪牙：魔鬼代言人': '保护位最好落在明天可能被推的人，而不是今天最像好人的人。',
+            '爪牙：刺客': '别把技能浪费在低收益刀口，一次无视防御的击杀适合处理核心位。',
+            '爪牙：主谋': '你的价值在于把已经结束的局拉回一天，因此要提前布局那个白天的处决。',
+            '恶魔：僵怖': '善用假死与注册成死人的优势，让好人误判你的存在状态。',
+            '恶魔：普卡': '毒与死之间有一晚间隔，最适合制造连环错误信息。',
+            '恶魔：沙巴洛斯': '双刀压力极强，但反刍复活会反噬你，杀人顺序要能自圆其说。',
+            '恶魔：朴': '蓄力夜是你的节奏开关，不杀人的那晚要提前准备第二天的发言理由。'
+        };
+
+        const dycsRoleAdvancedPlay = {
+            '镇民：祖母': '祖母不是单纯的善良确认位，你的死亡往往能反向锚定恶魔刀口逻辑。',
+            '镇民：水手': '高阶水手要接受自己和目标之一醉酒这个代价，把不死换成对白天叙事的控制。',
+            '镇民：侍女': '侍女最强不是报数字，而是结合夜死、复活和醉酒链找出谁真正被唤醒过。',
+            '镇民：驱魔人': '你不一定要夜夜命中恶魔，只要持续逼迫恶魔改变夜晚节奏就已经赚了。',
+            '镇民：旅店老板': '保护与醉酒同时存在意味着你更像节奏角色，不是单纯防刀角色。',
+            '镇民：赌徒': '优秀赌徒会把自己的死亡也纳入团队收益，只在错了也能推进局势时下注。',
+            '镇民：造谣者': '最强造谣不是说真话，而是让真话和死亡结果一起改变全桌站边。',
+            '镇民：侍臣': '三日醉酒的目标应该服务整局结构，而不是只服务单晚收益。',
+            '镇民：教授': '教授复活最怕无收益复活，先想清楚复活后能否立刻改票型与叙事。',
+            '镇民：吟游诗人': '吟游诗人窗口期里所有信息都要降权，你的任务是带领大家接受这一点。',
+            '镇民：茶艺师': '茶艺师是一种位置控制角色，强度来自两侧玩家，而不只是你自己。',
+            '镇民：和平主义者': '处决保人时不要急着抢身份，先看谁会因这个结果过度受益。',
+            '镇民：弄臣': '你第一次不死后，真正的价值在于你对白天节奏的二次掌控。',
+            '外来者：莽夫': '阵营翻转会摧毁很多线性推理，所以你要学会主动制造“注册与阵营不稳定”的共识。',
+            '外来者：疯子': '疯子的高阶玩法是把自己当成一条被恶魔利用的信息管道来观察全局。',
+            '外来者：修补匠': '修补匠暴毙最怕被过度解读，你要尽量把死因从阵营讨论里剥离出去。',
+            '外来者：月之子': '你的点名本质上是恶魔可利用的公共武器，所以死亡前就要铺好可信度。',
+            '爪牙：教父': '教父的杀人不是独立收益，而是要和外来者数量改动一起扰乱整个白天结构。',
+            '爪牙：魔鬼代言人': '真正强的代言人保护，是让好人以为自己掌握了处决控制权。',
+            '爪牙：刺客': '刺客最强一刀通常不是杀最强角色，而是杀最能稳定全桌逻辑的那个角色。',
+            '爪牙：主谋': '主谋日的关键不在于拖一天，而在于让那一天的任何处决都变成坏人的胜势。',
+            '恶魔：僵怖': '僵怖要把“我死了没有”这件事变成全桌最不确定的问题。',
+            '恶魔：普卡': '普卡的连环毒杀最适合拆解强信息链，让好人每一晚都晚一步知道真相。',
+            '恶魔：沙巴洛斯': '沙巴洛斯不仅要规划双刀，还要提前设计好哪一名玩家被反刍最合理。',
+            '恶魔：朴': '朴的蓄力夜不是空过，而是把下一晚的三刀叙事提前种进白天。'
+        };
+
+        const dycsWheelAbilityShort = {
+            '❓ 未分配': '待分配',
+            '镇民：祖母': '首夜知善良与角色',
+            '镇民：水手': '每晚点人并致醉',
+            '镇民：侍女': '每晚知两人是否醒',
+            '镇民：驱魔人': '每晚可封恶魔',
+            '镇民：旅店老板': '每晚保两人一醉',
+            '镇民：赌徒': '每晚猜错会死',
+            '镇民：造谣者': '真话夜里会死人',
+            '镇民：侍臣': '一次点角色醉三天',
+            '镇民：教授': '一次复活镇民',
+            '镇民：吟游诗人': '爪牙处决后全场醉',
+            '镇民：茶艺师': '善良邻座不会死',
+            '镇民：和平主义者': '善良处决或不死',
+            '镇民：弄臣': '首次将死不会死',
+            '外来者：莽夫': '被选后转阵营',
+            '外来者：疯子': '以为自己是恶魔',
+            '外来者：修补匠': '可能随时暴毙',
+            '外来者：月之子': '死后公开点人',
+            '爪牙：教父': '外来者死后夜杀',
+            '爪牙：魔鬼代言人': '保处决不死',
+            '爪牙：刺客': '一次夜里必杀',
+            '爪牙：主谋': '恶魔处决后续天',
+            '恶魔：僵怖': '首死不真死',
+            '恶魔：普卡': '先毒后杀',
+            '恶魔：沙巴洛斯': '双刀并可反刍',
+            '恶魔：朴': '蓄力后杀三人'
+        };
+
+        const dycsNightOrder = {
+            first: ['爪牙：教父', '【系统：爪牙互相确认】', '【系统：恶魔确认爪牙及3个伪装】', '外来者：疯子', '镇民：祖母', '镇民：水手', '镇民：侍女', '镇民：驱魔人', '镇民：旅店老板', '镇民：侍臣'],
+            other: ['爪牙：魔鬼代言人', '镇民：水手', '镇民：侍女', '镇民：驱魔人', '镇民：旅店老板', '镇民：赌徒', '镇民：侍臣', '镇民：教授', '【系统：造谣者真话判定】', '外来者：疯子', '恶魔：普卡', '恶魔：僵怖', '恶魔：沙巴洛斯', '恶魔：朴', '爪牙：教父', '爪牙：刺客']
+        };
+
+        const dycsRoleDetails = {
+            '【系统：爪牙互相确认】': { ability: '爪牙互认环节', action: '唤醒所有爪牙。展示“这是恶魔”提示牌，并指向恶魔。让他们闭眼。' },
+            '【系统：恶魔确认爪牙及3个伪装】': { ability: '恶魔信息环节', action: '唤醒恶魔。展示“这些是你的爪牙”，并向其展示 3 个不在场善良角色伪装。让他闭眼。' },
+            '【系统：造谣者真话判定】': { ability: '造谣者公开声明结算', action: '回顾今天所有造谣者声明。若其中存在真实声明，可在今晚安排一名玩家死亡。' },
+            '爪牙：教父': { ability: '技能：首夜得知外来者；若今天有外来者死亡，今夜可杀一人。', action: '首夜展示外来者在场信息。若今天有外来者死亡，则在今夜唤醒教父，令其选择一名玩家死亡。' },
+            '爪牙：魔鬼代言人': { ability: '技能：每晚保护一名玩家免于明日被处决死亡。', action: '唤醒魔鬼代言人，让他选择一名存活玩家。若该玩家明天被处决，则不死。' },
+            '爪牙：刺客': { ability: '技能：每局限一次，夜晚选择一名玩家死亡，无视防御。', action: '若刺客声明发动，唤醒刺客，令其选择一名玩家；该玩家死亡，即使本应不会死亡。' },
+            '爪牙：主谋': { ability: '技能：恶魔被处决导致游戏本应结束时，额外进行主谋日。', action: '若恶魔因处决死亡并本应结算好人获胜，则宣布进入额外的一个夜晚和一个白天。主谋日若再有玩家被处决，邪恶获胜。' },
+            '镇民：祖母': { ability: '技能：首夜得知一名善良玩家及其角色。', action: '唤醒祖母。展示一名善良玩家与其角色。若该玩家之后被恶魔杀死，祖母也会死亡。' },
+            '镇民：水手': { ability: '技能：每晚选择一名玩家；你或他其中一人醉酒，但你不会死亡。', action: '唤醒水手，让他选择一名存活玩家。标记“醉酒”给你或目标之一，并确保水手今晚不会死亡。' },
+            '镇民：侍女': { ability: '技能：每晚选择两名玩家，得知他们中有几人因自身能力被唤醒。', action: '唤醒侍女，让她选择两名非自己的存活玩家。比出其中今夜因自身能力被唤醒的人数。' },
+            '镇民：驱魔人': { ability: '技能：每晚选择一名玩家；若他是恶魔，恶魔今晚不会被唤醒。', action: '唤醒驱魔人，让他选择一名玩家且不可连续两晚同一人。若选中恶魔，本夜跳过该恶魔的唤醒。' },
+            '镇民：旅店老板': { ability: '技能：每晚选择两名玩家；他们不会死亡，但其中一人会醉酒。', action: '唤醒旅店老板，让他选择两名玩家。为两人赋予今晚不死效果，并令其中一人醉酒直到下个黄昏。' },
+            '镇民：赌徒': { ability: '技能：每晚选择一名玩家并猜角色；若猜错，你死亡。', action: '唤醒赌徒，让他指定玩家并报出猜测角色。若猜错，则在夜末让赌徒死亡。' },
+            '镇民：造谣者': { ability: '技能：白天公开声明；若声明正确，今夜会死人。', action: '此角色通常不在夜间单独唤醒，夜里只需判定其白天声明是否真实，并据此安排一名死亡。' },
+            '镇民：侍臣': { ability: '技能：每局限一次，指定一个在场角色醉酒三天三夜。', action: '若侍臣发动，唤醒侍臣，让他选择一个角色。若该角色在场，则从今夜开始持续醉酒三天三夜。' },
+            '镇民：教授': { ability: '技能：每局限一次，复活一名死去的镇民。', action: '若教授发动，唤醒教授，让他选择一名已死亡玩家。若该玩家是镇民，则令其复活。' },
+            '镇民：吟游诗人': { ability: '技能：爪牙死于处决时，其余玩家醉酒到明天黄昏。', action: '若今天被处决的是爪牙，则从处决后到明天黄昏，让除吟游诗人与旅者外的其他玩家全部醉酒。' },
+            '镇民：茶艺师': { ability: '技能：若你两侧存活邻座都为善良，他们不会死亡。', action: '夜间结算死亡时，若茶艺师两侧存活邻座都为善良，则这两位玩家不会死亡。' },
+            '镇民：和平主义者': { ability: '技能：善良玩家被处决时可能不会死亡。', action: '白天结算处决时，若被处决者为善良，可由说书人裁定其不死。' },
+            '镇民：弄臣': { ability: '技能：首次将要死亡时不会死亡。', action: '当弄臣首次将要死亡时，取消这次死亡并标记其已失去保护。' },
+            '外来者：莽夫': { ability: '技能：每晚首个选择你的玩家醉酒；你转变为其阵营。', action: '记录今夜第一个以自身能力选择莽夫的玩家。该玩家醉酒到下个黄昏，莽夫转入该玩家阵营。' },
+            '外来者：疯子': { ability: '技能：以为自己是恶魔。', action: '按疯子误以为的恶魔身份照常唤醒疯子，并把选择内容传达给真正的恶魔作参考。' },
+            '外来者：修补匠': { ability: '技能：你随时可能死亡。', action: '说书人可在合适时机直接令修补匠死亡。' },
+            '外来者：月之子': { ability: '技能：得知自己死亡时，公开指定一名玩家；若其为善良，则当晚死亡。', action: '当月之子得知自己死亡时，令其立刻公开指定一名存活玩家。若该玩家为善良，则在当晚死亡。' },
+            '恶魔：僵怖': { ability: '技能：若今天无人死亡，则今夜杀一人；首次死亡时仍活着但注册为死亡。', action: '若今天白天无人死亡，则唤醒僵怖，让其选择一名玩家死亡。首次应死时，不真正死亡，但按死亡状态处理公开信息。' },
+            '恶魔：普卡': { ability: '技能：每晚选择一人中毒；上一晚被毒者今夜死亡并恢复健康。', action: '唤醒普卡，让其选择一名玩家中毒。将上一晚被普卡毒中的玩家于今夜杀死，并移除其中毒状态。' },
+            '恶魔：沙巴洛斯': { ability: '技能：每晚选择两人死亡；之前被你杀死的一人可能反刍复活。', action: '唤醒沙巴洛斯，让其选择两名玩家死亡。说书人可裁定先前被其杀死的一名玩家反刍复活。' },
+            '恶魔：朴': { ability: '技能：可选择不杀人；若上一晚未杀人，则本夜杀三人。', action: '唤醒朴。若其上一晚选择不杀，则本夜选择三名玩家死亡；否则本夜可选择继续蓄力不杀或正常击杀。' }
+        };
+
+        function getCurrentAllRoles() { return selectedScript === 'dycs' ? dycsAllRoles : allRoles; }
+        function getCurrentPlayerRange() {
+            const meta = scriptMeta[selectedScript] || scriptMeta.tb;
+            return { min: meta.minPlayers || 5, max: meta.maxPlayers || 15 };
+        }
+        function getCurrentPoolGood() { return selectedScript === 'dycs' ? dycsPoolGood : poolGood; }
+        function getCurrentPoolTownsfolk() { return selectedScript === 'dycs' ? dycsPoolTownsfolk : poolTownsfolk; }
+        function getCurrentPoolOutsiders() { return selectedScript === 'dycs' ? dycsPoolOutsiders : poolOutsiders; }
+        function getCurrentPoolMinions() { return selectedScript === 'dycs' ? dycsPoolMinions : poolMinions; }
+        function getCurrentPoolDemons() { return selectedScript === 'dycs' ? dycsPoolDemons : poolDemons; }
+        function getCurrentRoleAbilities() { return selectedScript === 'dycs' ? dycsRoleAbilities : allRoleAbilities; }
+        function getCurrentRoleBasicMap() { return selectedScript === 'dycs' ? dycsRoleBasicPlay : roleBasicPlay; }
+        function getCurrentRoleAdvancedMap() { return selectedScript === 'dycs' ? dycsRoleAdvancedPlay : roleAdvancedPlay; }
+        function getCurrentWheelAbilityMap() { return selectedScript === 'dycs' ? dycsWheelAbilityShort : wheelAbilityShort; }
+        function getCurrentNightOrder() { return selectedScript === 'dycs' ? dycsNightOrder : nightOrder; }
+        function getCurrentRoleDetails() { return selectedScript === 'dycs' ? dycsRoleDetails : roleDetails; }
+
         // --- 全屏放大伪装 ---
         function showBluffsModal() {
             const b1 = document.getElementById('bluff1').value;
@@ -1993,30 +2243,82 @@ button.night-btn {
         function initRoleRevealSelect() {
             const select = document.getElementById('roleRevealSelect');
             if (!select) return;
-            const options = allRoles
+            const options = getCurrentAllRoles()
                 .filter(role => role !== '❓ 未分配')
                 .map(role => `<option value="${role}">${role}</option>`)
                 .join('');
             select.innerHTML = options;
-            if (!select.value) select.value = '镇民：洗衣妇';
+            if (!select.value || !getCurrentAllRoles().includes(select.value)) {
+                select.value = getCurrentAllRoles().find(role => role !== '❓ 未分配') || '';
+            }
         }
         function showSelectedRoleCard() {
             const select = document.getElementById('roleRevealSelect');
             if (!select || !select.value) return;
             showRoleRevealModal(select.value);
         }
+        function updateScriptUi() {
+            const meta = scriptMeta[selectedScript] || scriptMeta.tb;
+            const select = document.getElementById('scriptSelect');
+            const title = document.getElementById('appTitleText');
+            const subtitle = document.getElementById('appSubtitle');
+            const playerCountInput = document.getElementById('playerCountInput');
+            if (select) select.value = selectedScript;
+            if (title) title.innerText = meta.title;
+            if (subtitle) subtitle.innerText = meta.subtitle;
+            if (playerCountInput) {
+                playerCountInput.min = meta.minPlayers || 5;
+                playerCountInput.max = meta.maxPlayers || 15;
+                const currentValue = parseInt(playerCountInput.value, 10);
+                if (Number.isNaN(currentValue) || currentValue < playerCountInput.min) playerCountInput.value = playerCountInput.min;
+                if (currentValue > playerCountInput.max) playerCountInput.value = playerCountInput.max;
+            }
+            document.title = meta.pageTitle;
+            updateRoleInfo();
+        }
+        function changeScript(value) {
+            const nextScript = scriptMeta[value] ? value : 'tb';
+            if (nextScript === selectedScript) {
+                updateScriptUi();
+                return;
+            }
+            if (players.length && !confirm('切换剧本会清空当前身份、标记、夜晚顺序与恶魔伪装，但保留座位名、玩家名单和记分。确定切换吗？')) {
+                updateScriptUi();
+                return;
+            }
+            selectedScript = nextScript;
+            if (players.length) {
+                const preservedNames = players.map(player => player.name);
+                players = players.map((player, index) => createPlayer(index, preservedNames[index]));
+                bluffs = ['❓ 未分配', '❓ 未分配', '❓ 未分配'];
+                currentNightOrderType = '';
+                isRenameMode = false;
+                closeSeatTokenModal();
+                closeSeatAssignModal();
+                document.getElementById('nightOrderDisplay').style.display = 'none';
+                document.getElementById('timerPanel').style.display = 'none';
+                pauseTimer();
+                setTimer(300);
+            }
+            updateScriptUi();
+            initBluffSelects();
+            initRoleRevealSelect();
+            updateRoleInfo();
+            renderAll();
+            saveData();
+        }
         function closeSeatTokenModal() {
             activeSeatTokenPlayerId = null;
             document.getElementById('seatTokenModal').style.display = 'none';
         }
         function getWheelAbilityText(roleStr) {
-            return wheelAbilityShort[normalizeRoleName(roleStr)] || '待定';
+            return getCurrentWheelAbilityMap()[normalizeRoleName(roleStr)] || '待定';
         }
         function getRoleBasicPlay(roleStr) {
-            return roleBasicPlay[normalizeRoleName(roleStr)] || '先把自己的身份信息和站边逻辑说清，再根据局势慢慢推进。';
+            return getCurrentRoleBasicMap()[normalizeRoleName(roleStr)] || '先把自己的身份信息和站边逻辑说清，再根据局势慢慢推进。';
         }
         function getRoleAdvancedPlay(roleStr) {
-            return roleAdvancedPlay[normalizeRoleName(roleStr)] || '进阶打法重点在于控制信息节奏，并让自己的发言和票型能持续服务胜利条件。';
+            return getCurrentRoleAdvancedMap()[normalizeRoleName(roleStr)] || '进阶打法重点在于控制信息节奏，并让自己的发言和票型能持续服务胜利条件。';
         }
         function updatePlayerListLayoutUi() {
             const toolbar = document.getElementById('playerListToolbar');
@@ -2136,7 +2438,7 @@ button.night-btn {
             const roleName = normalizeRoleName(player.role);
             const copyText = [
                 `角色名：${roleName}`,
-                `技能：${allRoleAbilities[roleName] || '无技能描述'}`,
+                `技能：${getCurrentRoleAbilities()[roleName] || '无技能描述'}`,
                 `初级玩法：${getRoleBasicPlay(roleName)}`,
                 `进阶玩法：${getRoleAdvancedPlay(roleName)}`
             ].join('\n');
@@ -2443,9 +2745,21 @@ button.night-btn {
             return !!getPlayerImpairment(player);
         }
         function normalizeRoleName(roleStr) {
-            if (roleStr === '镇民：处女') return '镇民：贞洁者';
-            if (roleStr === '镇民：杀手') return '镇民：猎人';
-            return roleStr || '❓ 未分配';
+            const aliasMap = {
+                '镇民：处女': '镇民：贞洁者',
+                '镇民：杀手': '镇民：猎人',
+                '镇民：驱魔师': '镇民：驱魔人',
+                '镇民：茶女郎': '镇民：茶艺师',
+                '外来者：打手': '外来者：莽夫',
+                '爪牙：黑手党首领': '爪牙：教父',
+                '爪牙：恶魔拥护者': '爪牙：魔鬼代言人',
+                '爪牙：幕后主谋': '爪牙：主谋',
+                '恶魔：丧尸': '恶魔：僵怖',
+                '恶魔：纯种恶魔': '恶魔：普卡',
+                '恶魔：巨颚': '恶魔：沙巴洛斯',
+                '恶魔：恶之花': '恶魔：朴'
+            };
+            return aliasMap[roleStr] || roleStr || '❓ 未分配';
         }
         function normalizePlayerData(player, index) {
             return {
@@ -2521,7 +2835,8 @@ button.night-btn {
         }
         function getAvailableGoodBluffs() {
             const activeRoles = players.map(player => normalizeRoleName(player.role));
-            const source = players.length > 0 ? poolGood.filter(role => !activeRoles.includes(role)) : [...poolGood];
+            const activePoolGood = getCurrentPoolGood();
+            const source = players.length > 0 ? activePoolGood.filter(role => !activeRoles.includes(role)) : [...activePoolGood];
             return shuffle([...source]);
         }
         function isProtectedFromDemon(player) {
@@ -2703,18 +3018,19 @@ button.night-btn {
 
         function getRoleFalseOptions(roleStr, currentPlayer) {
             if (roleStr === '镇民：洗衣妇') {
-                const reveal = pickFalseReveal(poolTownsfolk, currentPlayer.id);
+                const reveal = pickFalseReveal(getCurrentPoolTownsfolk(), currentPlayer.id);
                 return reveal ? [`展示 ${renderRevealButton(reveal.fakeRole)}，并指向 <b>[${reveal.falseTargets[0].name}]</b> 与 <b>[${reveal.falseTargets[1].name}]</b>。`] : [];
             }
             if (roleStr === '镇民：图书管理员') {
                 const effectiveRoles = getLibrarianTargets(currentPlayer.id).map(target => target.revealRole);
-                const fakeRole = poolOutsiders.find(role => !effectiveRoles.includes(role)) || poolOutsiders[0];
+                const activeOutsiders = getCurrentPoolOutsiders();
+                const fakeRole = activeOutsiders.find(role => !effectiveRoles.includes(role)) || activeOutsiders[0];
                 let falseTargets = players.filter(player => player.id !== currentPlayer.id && normalizeRoleName(player.role) !== fakeRole);
                 if (falseTargets.length < 2) falseTargets = players.filter(player => player.id !== currentPlayer.id);
                 return falseTargets.length >= 2 ? [`展示 ${renderRevealButton(fakeRole)}，并指向 <b>[${falseTargets[0].name}]</b> 与 <b>[${falseTargets[1].name}]</b>。`] : [];
             }
             if (roleStr === '镇民：调查员') {
-                const reveal = pickFalseReveal(poolMinions, currentPlayer.id);
+                const reveal = pickFalseReveal(getCurrentPoolMinions(), currentPlayer.id);
                 return reveal ? [`展示 ${renderRevealButton(reveal.fakeRole)}，并指向 <b>[${reveal.falseTargets[0].name}]</b> 与 <b>[${reveal.falseTargets[1].name}]</b>。`] : [];
             }
             if (roleStr === '镇民：厨师') {
@@ -2734,7 +3050,7 @@ button.night-btn {
                 return ['你也可以反着给：命中恶魔或死敌时摇头，未命中时点头。'];
             }
             if (roleStr === '镇民：送葬者' || roleStr === '镇民：守鸦人') {
-                const fakeRole = getAvailableGoodBluffs()[0] || poolTownsfolk[0];
+                const fakeRole = getAvailableGoodBluffs()[0] || getCurrentPoolTownsfolk()[0];
                 return [`展示一个错误角色标记，例如 ${renderRevealButton(fakeRole)}。`];
             }
             if (roleStr === '外来者：管家') {
@@ -2763,10 +3079,12 @@ button.night-btn {
         }
 
         function updateRoleInfo() {
+            const { min, max } = getCurrentPlayerRange();
             let count = parseInt(document.getElementById('playerCountInput').value);
-            if(isNaN(count) || count < 5) count = 5; if(count > 15) count = 15;
+            if(isNaN(count) || count < min) count = min; if(count > max) count = max;
+            document.getElementById('playerCountInput').value = count;
             const dist = roleDistribution[count];
-            if(dist) document.getElementById('roleInfo').innerHTML = `基础配置: ${dist[0]}镇民 | ${dist[1]}外来者 | ${dist[2]}爪牙 | ${dist[3]}恶魔`;
+            if(dist) document.getElementById('roleInfo').innerHTML = `支持 ${min}-${max} 人 | 基础配置: ${dist[0]}镇民 | ${dist[1]}外来者 | ${dist[2]}爪牙 | ${dist[3]}恶魔`;
         }
 
         function updateTimerDisplay() {
@@ -2797,9 +3115,15 @@ button.night-btn {
 
         function initBluffSelects() {
             const selects = [document.getElementById('bluff1'), document.getElementById('bluff2'), document.getElementById('bluff3')];
-            let options = poolGood.map(r => `<option value="${r}">${r.split('：')[1] || r}</option>`).join('');
+            const activePoolGood = getCurrentPoolGood();
+            let options = activePoolGood.map(r => `<option value="${r}">${r.split('：')[1] || r}</option>`).join('');
             options = `<option value="❓ 未分配">未分配</option>` + options;
-            selects.forEach((s, idx) => { s.innerHTML = options; s.value = bluffs[idx]; });
+            selects.forEach((s, idx) => {
+                s.innerHTML = options;
+                const targetValue = activePoolGood.includes(bluffs[idx]) || bluffs[idx] === '❓ 未分配' ? bluffs[idx] : '❓ 未分配';
+                s.value = targetValue;
+                bluffs[idx] = targetValue;
+            });
         }
 
         function shuffle(array) {
@@ -2809,8 +3133,9 @@ button.night-btn {
         }
 
         function generateAndDeal() {
+            const { min, max } = getCurrentPlayerRange();
             let count = parseInt(document.getElementById('playerCountInput').value);
-            if (isNaN(count) || count < 5 || count > 15) return alert("人数必须在 5 到 15 人之间！");
+            if (isNaN(count) || count < min || count > max) return alert(`人数必须在 ${min} 到 ${max} 人之间！`);
             if(players.length > 0 && !confirm("重新开局将重置身份、状态和伪装并重新发牌，座位名会保留，确定吗？")) return;
 
             const preservedNames = players.map(player => player.name);
@@ -2821,7 +3146,12 @@ button.night-btn {
             for (let i = 0; i < count; i++) players.push(createPlayer(i, preservedNames[i]));
 
             const dist = roleDistribution[count];
-            let selectedRoles = [].concat(shuffle([...poolTownsfolk]).slice(0, dist[0]), shuffle([...poolOutsiders]).slice(0, dist[1]), shuffle([...poolMinions]).slice(0, dist[2]), shuffle([...poolDemons]).slice(0, dist[3]));
+            let selectedRoles = [].concat(
+                shuffle([...getCurrentPoolTownsfolk()]).slice(0, dist[0]),
+                shuffle([...getCurrentPoolOutsiders()]).slice(0, dist[1]),
+                shuffle([...getCurrentPoolMinions()]).slice(0, dist[2]),
+                shuffle([...getCurrentPoolDemons()]).slice(0, dist[3])
+            );
             selectedRoles = shuffle(selectedRoles);
             for (let i = 0; i < count; i++) players[i].role = selectedRoles[i];
 
@@ -2880,11 +3210,13 @@ button.night-btn {
             currentNightOrderType = type;
             const display = document.getElementById('nightOrderDisplay');
             const activeRoles = players.map(p => normalizeRoleName(p.role));
+            const activeNightOrder = getCurrentNightOrder();
+            const activeRoleDetails = getCurrentRoleDetails();
             let html = `<h3 class="night-order-title">${type === 'first' ? '🌙 首夜降临' : '🌘 其余夜晚'}</h3><ul class="night-list">`;
             let stepCount = 1;
 
-            nightOrder[type].forEach(role => {
-                const details = roleDetails[role] || { ability: '', action: '无详细操作说明' };
+            activeNightOrder[type].forEach(role => {
+                const details = activeRoleDetails[role] || { ability: '', action: '无详细操作说明' };
                 if (role.startsWith('【')) {
                     html += `<li class="night-item"><div class="night-header">${stepCount}. <span class="system-prompt">${role}</span></div><div class="storyteller-action">👉 <b>说书人：</b>${details.action}</div></li>`;
                     stepCount++;
@@ -2912,7 +3244,7 @@ button.night-btn {
 
         function saveData() { 
             bluffs[0] = document.getElementById('bluff1').value; bluffs[1] = document.getElementById('bluff2').value; bluffs[2] = document.getElementById('bluff3').value;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, bluffs, currentNightOrderType, playerListLayout, scoreBoard, seriesGames, finalMvp, playerRoster })); 
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, bluffs, currentNightOrderType, playerListLayout, scoreBoard, seriesGames, finalMvp, playerRoster, selectedScript })); 
         }
 
         function loadData() { 
@@ -2927,13 +3259,15 @@ button.night-btn {
                 seriesGames = typeof data.seriesGames === 'number' ? data.seriesGames : 0;
                 finalMvp = data.finalMvp || '';
                 playerRoster = normalizeRosterList(data.playerRoster);
+                selectedScript = scriptMeta[data.selectedScript] ? data.selectedScript : 'tb';
                 if (playerRoster.length === 0) playerRoster = inferRosterFromPlayers(players);
                 if(players.length > 0) document.getElementById('timerPanel').style.display = 'block';
             } else {
                 playerListLayout = window.innerWidth >= 720 ? 'double' : 'single';
                 playerRoster = [];
+                selectedScript = 'tb';
             }
-            initBluffSelects(); initRoleRevealSelect(); renderAll(); updateTimerDisplay();
+            initBluffSelects(); initRoleRevealSelect(); updateScriptUi(); renderAll(); updateTimerDisplay();
         }
         function setupUiGuards() {
             const seatTokenPanel = document.getElementById('seatTokenModalPanel');
@@ -3023,9 +3357,9 @@ button.night-btn {
             players.forEach(p => {
                 const card = document.createElement('div'); card.className = `player-card ${p.isAlive ? '' : 'dead'}`;
                 const roleName = normalizeRoleName(p.role);
-                let roleOptions = allRoles.map(r => `<option value="${r}" ${roleName === r ? 'selected' : ''}>${r}</option>`).join('');
+                let roleOptions = getCurrentAllRoles().map(r => `<option value="${r}" ${roleName === r ? 'selected' : ''}>${r}</option>`).join('');
                 let ghostBtnHtml = p.isAlive ? '' : `<button class="${p.hasGhostVote ? 'ghost-btn' : 'no-ghost'}" onclick="toggleGhostVote(${p.id})">${p.hasGhostVote ? '👻 有票' : '❌ 无票'}</button>`;
-                let abilityDesc = allRoleAbilities[roleName] || '无技能描述';
+                let abilityDesc = getCurrentRoleAbilities()[roleName] || '无技能描述';
                 const deathLabel = p.deathType === 'demon' ? '🗡️ 恶魔刀' : '☠️ 已处决';
                 const deathClass = p.deathType === 'demon' ? 'demon-mark' : 'execution-mark';
                 const actionHtml = p.isAlive
