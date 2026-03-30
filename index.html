@@ -230,7 +230,8 @@ h2 {
 
 button,
 input,
-select {
+select,
+textarea {
     font: inherit;
 }
 
@@ -242,7 +243,8 @@ button {
 
 button:focus-visible,
 input:focus-visible,
-select:focus-visible {
+select:focus-visible,
+textarea:focus-visible {
     outline: none;
     box-shadow: 0 0 0 3px rgba(197, 165, 106, 0.1);
 }
@@ -394,6 +396,71 @@ button.night-btn:active,
     color: var(--text-muted);
     font-size: 0.82rem;
     font-style: italic;
+}
+
+.traveler-panel {
+    margin: 18px 0 12px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(197, 165, 106, 0.14);
+}
+
+.traveler-grid,
+.traveler-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.traveler-grid {
+    margin-top: 10px;
+}
+
+.traveler-meta-input,
+.traveler-ability-input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    border-radius: 14px;
+    color: var(--text-main);
+    background: linear-gradient(180deg, rgba(12, 10, 13, 0.9), rgba(20, 15, 18, 0.96));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+    caret-color: var(--gold);
+    -webkit-text-fill-color: var(--text-main);
+}
+
+.traveler-meta-input:disabled,
+.traveler-ability-input:disabled {
+    cursor: not-allowed;
+    color: var(--text-muted);
+    background: linear-gradient(180deg, rgba(23, 20, 22, 0.88), rgba(18, 15, 18, 0.94));
+}
+
+.traveler-ability-input {
+    min-height: 102px;
+    margin-top: 10px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.traveler-meta-input::placeholder,
+.traveler-ability-input::placeholder {
+    color: var(--text-muted);
+    opacity: 1;
+}
+
+.traveler-actions {
+    margin-top: 10px;
+}
+
+.traveler-action-btn {
+    width: 100%;
+}
+
+.traveler-hint {
+    margin-top: 10px;
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    line-height: 1.6;
 }
 
 input[type="number"],
@@ -902,6 +969,21 @@ button.action-btn {
     color: #f4d899;
 }
 
+.seat-traveler {
+    border-color: rgba(134, 164, 191, 0.84);
+    background: radial-gradient(circle at 35% 24%, rgba(121, 149, 181, 0.48), rgba(42, 52, 64, 0.98) 60%, rgba(13, 14, 18, 0.99) 100%);
+    box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.56), 0 0 0 3px rgba(90, 113, 142, 0.24), 0 0 28px rgba(118, 150, 182, 0.28), 0 12px 22px rgba(0, 0, 0, 0.38);
+}
+
+.seat-traveler .seat-name {
+    color: #eef6ff;
+    text-shadow: 0 0 14px rgba(145, 177, 207, 0.34);
+}
+
+.seat-traveler .seat-role {
+    color: #cfe1f2;
+}
+
 .seat-name {
     max-width: calc(var(--seat-size) - 12px);
     color: #fff8ee;
@@ -953,6 +1035,12 @@ button.action-btn {
     color: #f2ddab;
     border-color: rgba(197, 165, 106, 0.2);
     background: rgba(57, 38, 18, 0.74);
+}
+
+.seat-ability.traveler {
+    color: #d7e6f2;
+    border-color: rgba(122, 150, 178, 0.22);
+    background: rgba(26, 35, 44, 0.78);
 }
 
 .seat-badges {
@@ -1385,6 +1473,35 @@ button.night-btn {
     background: rgba(9, 8, 10, 0.28);
 }
 
+.traveler-editor {
+    display: grid;
+    gap: 10px;
+    margin: 4px 0 10px;
+    padding: 12px;
+    border: 1px solid rgba(122, 150, 178, 0.16);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(18, 22, 28, 0.52), rgba(14, 15, 19, 0.36));
+}
+
+.traveler-editor-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.traveler-editor-label {
+    color: #cbd6e2;
+    font-size: 0.74rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.traveler-editor .traveler-ability-input {
+    min-height: 92px;
+    margin-top: 0;
+    font-size: 0.88rem;
+}
+
 .copy-role-btn {
     width: 100%;
     margin-top: auto;
@@ -1676,6 +1793,11 @@ button.night-btn {
         min-width: 120px;
     }
 
+    .traveler-grid,
+    .traveler-editor-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .circle-stage {
         padding: 56px 46px 68px;
     }
@@ -1849,6 +1971,27 @@ button.night-btn {
                 <div id="rosterList" class="roster-list"></div>
             </div>
 
+            <div class="traveler-panel">
+                <div class="roster-label">🧳 添加旅行者</div>
+                <div class="traveler-grid">
+                    <select id="travelerSeatSelect" class="traveler-meta-input" onchange="syncTravelerEditorFromSeat()"></select>
+                    <input type="text" id="travelerNameInput" class="traveler-meta-input" placeholder="旅行者名称，例如 枪手">
+                </div>
+                <div class="traveler-grid">
+                    <select id="travelerCampSelect" class="traveler-meta-input">
+                        <option value="undecided">旅行者阵营：未定</option>
+                        <option value="good">旅行者阵营：善良</option>
+                        <option value="evil">旅行者阵营：邪恶</option>
+                    </select>
+                    <button id="travelerApplyBtn" type="button" class="bluff-random-btn traveler-action-btn" onclick="applyTravelerToSelectedSeat()">+ 设为旅行者</button>
+                </div>
+                <textarea id="travelerAbilityInput" class="traveler-ability-input" placeholder="输入旅行者技能说明，保存后会同步到轮盘、角色栏和角色卡。"></textarea>
+                <div class="traveler-actions">
+                    <button id="travelerClearBtn" type="button" class="show-bluff-btn traveler-action-btn" onclick="clearTravelerFromSelectedSeat()">清除旅行者</button>
+                </div>
+                <div id="travelerHint" class="traveler-hint">旅行者不参与随机发牌，请先布置座位后再指定。</div>
+            </div>
+
             <button class="action-btn" onclick="generateAndDeal()">✨ 一键布置并随机发牌</button>
             
             <div class="bluffs-header">
@@ -1943,6 +2086,18 @@ button.night-btn {
         let latestRoleCardFileName = '';
         const STORAGE_KEY = 'tb_v2_0_data';
         const LEGACY_STORAGE_KEYS = ['tb_v9_7_data', 'tb_v9_6_data'];
+        const TRAVELER_ROLE = '旅行者：旅行者';
+        const travelerCampLabels = {
+            undecided: '未定',
+            good: '善良',
+            evil: '邪恶'
+        };
+        const travelerRoleTexts = {
+            ability: '旅行者不参与随机发牌；请手动填写旅行者名称、阵营与能力，并由说书人按对应旅行者规则裁定。',
+            basic: '旅行者适合临时加入本局的玩家，建议先公开其旅行者身份、阵营与能力边界，再让所有人围绕其公开信息站边。',
+            advanced: '高阶旅行者的价值在于改写白天票型与叙事结构；说书人应先讲清技能边界，再让旅行者公开影响桌面。',
+            wheel: '旅行者'
+        };
 
         const scriptMeta = {
             tb: {
@@ -1961,11 +2116,11 @@ button.night-btn {
             }
         };
 
-        const allRoles = ['❓ 未分配', '镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：隐士', '外来者：圣徒', '爪牙：毒药师', '爪牙：间谍', '爪牙：荡妇', '爪牙：男爵', '恶魔：小恶魔'];
+        const allRoles = ['❓ 未分配', '镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：隐士', '外来者：圣徒', '爪牙：投毒者', '爪牙：间谍', '爪牙：荡妇', '爪牙：男爵', '恶魔：小恶魔', TRAVELER_ROLE];
         const poolGood = ['镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：隐士', '外来者：圣徒'];
         const poolTownsfolk = poolGood.slice(0, 13);
         const poolOutsiders = poolGood.slice(13);
-        const poolMinions = ['爪牙：毒药师', '爪牙：间谍', '爪牙：荡妇', '爪牙：男爵'];
+        const poolMinions = ['爪牙：投毒者', '爪牙：间谍', '爪牙：荡妇', '爪牙：男爵'];
         const poolDemons = ['恶魔：小恶魔'];
 
         const roleDistribution = {
@@ -1992,7 +2147,7 @@ button.night-btn {
             '外来者：酒鬼': '自以为是镇民(不知情)，但技能可能会得到错误信息。',
             '外来者：隐士': '即使是好人，也可能被视为邪恶阵营(爪牙或恶魔)。',
             '外来者：圣徒': '如果你被处决，好人阵营立刻落败。',
-            '爪牙：毒药师': '每晚使一名玩家中毒(技能失效或得到错误信息)。',
+            '爪牙：投毒者': '每晚使一名玩家中毒(技能失效或得到错误信息)。',
             '爪牙：间谍': '每晚可查看魔典。即使是坏人，也可能被视为善良阵营。',
             '爪牙：荡妇': '如果恶魔死亡且场上至少5人存活，你立刻变成恶魔。',
             '爪牙：男爵': '开局改变板子配置：外来者数量+2(替换2个镇民)。',
@@ -2012,13 +2167,13 @@ button.night-btn {
             '镇民：守鸦人': '白天尽量像普通镇民，别过早暴露自己是值得夜杀的信息位。',
             '镇民：贞洁者': '第一次被提名前尽量低调，等局势更清晰再考虑表明身份。',
             '镇民：猎人': '不要急着开枪，等恶魔嫌疑更集中时再用一次性技能换局势。',
-            '镇民：士兵': '可以适当强势发言吸刀，但也要提防被毒药师干扰。',
+            '镇民：士兵': '可以适当强势发言吸刀，但也要提防被投毒者干扰。',
             '镇民：镇长': '前期别轻易暴露，终盘三人局时你的存活价值最高。',
             '外来者：管家': '尽快锁定一个你信任的主人，并观察他的投票和发言是否稳定。',
             '外来者：酒鬼': '拿到的信息先别全信，更要依赖逻辑、票型和别人反馈交叉验证。',
             '外来者：隐士': '你容易造成注册混乱，发言时要提醒别人留意隐士干扰的可能。',
             '外来者：圣徒': '核心任务是避免被处决，越到后期越要主动让团队避开你。',
-            '爪牙：毒药师': '优先毒高价值信息位或保护位，持续制造信息冲突。',
+            '爪牙：投毒者': '优先毒高价值信息位或保护位，持续制造信息冲突。',
             '爪牙：间谍': '充分利用魔典和注册干扰能力，帮恶魔规划白天叙事。',
             '爪牙：荡妇': '恶魔存活时像普通坏人协助推进，有接任机会时再准备伪装。',
             '爪牙：男爵': '利用外来者增加带来的混乱，让好人把精力消耗在身份自证上。',
@@ -2044,7 +2199,7 @@ button.night-btn {
             '外来者：酒鬼': '如果你怀疑自己是酒鬼，就把信息降权处理，主动把自己变成帮助别人校准信息的样本。',
             '外来者：隐士': '高阶隐士要主动提醒“注册异常”存在，但不能提醒得太像为坏人脱罪。',
             '外来者：圣徒': '你要让全桌形成共识：处决你是最低收益路线，从而逼坏人改走夜刀或舆论路线。',
-            '爪牙：毒药师': '最强毒法不是乱封技能，而是持续毒同一条信息链，让好人建立一整套错误世界观。',
+            '爪牙：投毒者': '最强毒法不是乱封技能，而是持续毒同一条信息链，让好人建立一整套错误世界观。',
             '爪牙：间谍': '有魔典优势就要主动设计白天叙事，让好人误以为他们在依据真实链路推理。',
             '爪牙：荡妇': '高阶玩法是预留一套“接任后立即能自圆其说”的身份故事，而不是等恶魔死后再想。',
             '爪牙：男爵': '男爵最强价值在开局结构扭曲，你要不断把好人注意力往外来者链和自证链上拖。',
@@ -2070,7 +2225,7 @@ button.night-btn {
             '外来者：酒鬼': '信息可能全错',
             '外来者：隐士': '可注册成邪恶',
             '外来者：圣徒': '被处决则好人败',
-            '爪牙：毒药师': '每晚使一人中毒',
+            '爪牙：投毒者': '每晚使一人中毒',
             '爪牙：间谍': '每晚看魔典',
             '爪牙：荡妇': '恶魔死时可接任',
             '爪牙：男爵': '开局外来者+2',
@@ -2078,14 +2233,14 @@ button.night-btn {
         };
 
         const nightOrder = {
-            first: ['爪牙：毒药师', '爪牙：间谍', '【系统：爪牙互相确认】', '【系统：恶魔确认爪牙及3个伪装】', '镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '外来者：管家'],
-            other: ['爪牙：毒药师', '镇民：僧侣', '爪牙：荡妇', '恶魔：小恶魔', '镇民：守鸦人', '镇民：共情者', '镇民：占卜师', '外来者：管家', '爪牙：间谍', '镇民：送葬者']
+            first: ['爪牙：投毒者', '爪牙：间谍', '【系统：爪牙互相确认】', '【系统：恶魔确认爪牙及3个伪装】', '镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '外来者：管家'],
+            other: ['爪牙：投毒者', '镇民：僧侣', '爪牙：荡妇', '恶魔：小恶魔', '镇民：守鸦人', '镇民：共情者', '镇民：占卜师', '外来者：管家', '爪牙：间谍', '镇民：送葬者']
         };
 
         const roleDetails = {
             '【系统：爪牙互相确认】': { ability: '爪牙互认环节', action: '唤醒所有爪牙。展示“这是恶魔”提示牌，并指向恶魔。让他闭眼。' },
             '【系统：恶魔确认爪牙及3个伪装】': { ability: '恶魔信息环节', action: '唤醒恶魔。展示“这些是你的爪牙”并指向爪牙。点击【全屏放大给恶魔】向其展示伪装。让他闭眼。' },
-            '爪牙：毒药师': { ability: '技能：每晚可选择一名玩家中毒。', action: '唤醒毒药师。让他指向一名玩家，为该玩家添加“🧪中毒”标记。让他闭眼。' },
+            '爪牙：投毒者': { ability: '技能：每晚可选择一名玩家中毒。', action: '唤醒投毒者。让他指向一名玩家，为该玩家添加“🧪中毒”标记。让他闭眼。' },
             '爪牙：间谍': { ability: '技能：每晚可查看魔典。', action: '唤醒间谍。向他展示你的魔典。让他闭眼。' },
             '镇民：洗衣妇': { ability: '技能：首夜得知具体的哪一个镇民在特定两名玩家之中。', action: '唤醒洗衣妇。展示具体“镇民”角色标记，指向两名玩家。让他闭眼。' },
             '镇民：图书管理员': { ability: '技能：首夜得知具体哪一个外来者在特定两名玩家之中。', action: '唤醒图书管理员。展示具体“外来者”标记，指向两名玩家。让他闭眼。' },
@@ -2101,7 +2256,7 @@ button.night-btn {
             '镇民：送葬者': { ability: '技能：得知白天被处决死亡玩家的真实角色。', action: '（⚠️仅当白天有人被处决才唤醒）展示死者真实角色标记。' }
         };
 
-        const dycsAllRoles = ['❓ 未分配', '镇民：祖母', '镇民：水手', '镇民：侍女', '镇民：驱魔人', '镇民：旅店老板', '镇民：赌徒', '镇民：造谣者', '镇民：侍臣', '镇民：教授', '镇民：吟游诗人', '镇民：茶艺师', '镇民：和平主义者', '镇民：弄臣', '外来者：莽夫', '外来者：疯子', '外来者：修补匠', '外来者：月之子', '爪牙：教父', '爪牙：魔鬼代言人', '爪牙：刺客', '爪牙：主谋', '恶魔：僵怖', '恶魔：普卡', '恶魔：沙巴洛斯', '恶魔：朴'];
+        const dycsAllRoles = ['❓ 未分配', '镇民：祖母', '镇民：水手', '镇民：侍女', '镇民：驱魔人', '镇民：旅店老板', '镇民：赌徒', '镇民：造谣者', '镇民：侍臣', '镇民：教授', '镇民：吟游诗人', '镇民：茶艺师', '镇民：和平主义者', '镇民：弄臣', '外来者：莽夫', '外来者：疯子', '外来者：修补匠', '外来者：月之子', '爪牙：教父', '爪牙：魔鬼代言人', '爪牙：刺客', '爪牙：主谋', '恶魔：僵怖', '恶魔：普卡', '恶魔：沙巴洛斯', '恶魔：朴', TRAVELER_ROLE];
         const dycsPoolGood = ['镇民：祖母', '镇民：水手', '镇民：侍女', '镇民：驱魔人', '镇民：旅店老板', '镇民：赌徒', '镇民：造谣者', '镇民：侍臣', '镇民：教授', '镇民：吟游诗人', '镇民：茶艺师', '镇民：和平主义者', '镇民：弄臣', '外来者：莽夫', '外来者：疯子', '外来者：修补匠', '外来者：月之子'];
         const dycsPoolTownsfolk = dycsPoolGood.slice(0, 13);
         const dycsPoolOutsiders = dycsPoolGood.slice(13);
@@ -2304,18 +2459,34 @@ button.night-btn {
         function initRoleRevealSelect() {
             const select = document.getElementById('roleRevealSelect');
             if (!select) return;
-            const options = getCurrentAllRoles()
+            const roleOptions = getCurrentAllRoles()
                 .filter(role => role !== '❓ 未分配')
-                .map(role => `<option value="${role}">${role}</option>`)
+                .map(role => `<option value="${role}">${role === TRAVELER_ROLE ? '旅行者：自定义' : role}</option>`)
                 .join('');
-            select.innerHTML = options;
-            if (!select.value || !getCurrentAllRoles().includes(select.value)) {
-                select.value = getCurrentAllRoles().find(role => role !== '❓ 未分配') || '';
+            const travelerOptions = players
+                .filter(player => isTravelerPlayer(player))
+                .map(player => `<option value="traveler:${player.id}">旅行者：${escapeHtml(getTravelerName(player))}</option>`)
+                .join('');
+            const validValues = [
+                ...getCurrentAllRoles().filter(role => role !== '❓ 未分配'),
+                ...players.filter(player => isTravelerPlayer(player)).map(player => `traveler:${player.id}`)
+            ];
+            select.innerHTML = roleOptions + travelerOptions;
+            if (!select.value || !validValues.includes(select.value)) {
+                select.value = validValues[0] || '';
             }
         }
         function showSelectedRoleCard() {
             const select = document.getElementById('roleRevealSelect');
             if (!select || !select.value) return;
+            if (select.value.startsWith('traveler:')) {
+                const travelerId = Number(select.value.split(':')[1]);
+                const traveler = players.find(player => player.id === travelerId);
+                if (traveler) {
+                    showRoleRevealModal(getPlayerRoleLabel(traveler));
+                    return;
+                }
+            }
             showRoleRevealModal(select.value);
         }
         function updateScriptUi() {
@@ -2372,13 +2543,19 @@ button.night-btn {
             activeSeatTokenPlayerId = null;
             document.getElementById('seatTokenModal').style.display = 'none';
         }
-        function getWheelAbilityText(roleStr) {
+        function getWheelAbilityText(roleStr, player = null) {
+            if ((player && isTravelerPlayer(player)) || isTravelerRole(roleStr)) {
+                const camp = player ? getTravelerCampValue(player) : 'undecided';
+                return camp === 'undecided' ? travelerRoleTexts.wheel : `${travelerRoleTexts.wheel}·${getTravelerCampLabel(camp)}`;
+            }
             return getCurrentWheelAbilityMap()[normalizeRoleName(roleStr)] || '待定';
         }
-        function getRoleBasicPlay(roleStr) {
+        function getRoleBasicPlay(roleStr, player = null) {
+            if ((player && isTravelerPlayer(player)) || isTravelerRole(roleStr)) return travelerRoleTexts.basic;
             return getCurrentRoleBasicMap()[normalizeRoleName(roleStr)] || '先把自己的身份信息和站边逻辑说清，再根据局势慢慢推进。';
         }
-        function getRoleAdvancedPlay(roleStr) {
+        function getRoleAdvancedPlay(roleStr, player = null) {
+            if ((player && isTravelerPlayer(player)) || isTravelerRole(roleStr)) return travelerRoleTexts.advanced;
             return getCurrentRoleAdvancedMap()[normalizeRoleName(roleStr)] || '进阶打法重点在于控制信息节奏，并让自己的发言和票型能持续服务胜利条件。';
         }
         function updatePlayerListLayoutUi() {
@@ -2451,7 +2628,7 @@ button.night-btn {
             const winners = players.filter(player => {
                 const roleName = normalizeRoleName(player.role);
                 if (roleName === '❓ 未分配') return false;
-                return camp === 'evil' ? isEvil(roleName) : !isEvil(roleName);
+                return isPlayerOnCamp(player, camp);
             });
             if (!winners.length) return alert('当前没有可计分的胜利阵营玩家。');
             winners.forEach(player => addScoreToPlayer(player.name, 1));
@@ -2663,6 +2840,26 @@ button.night-btn {
                         rune: 'rgba(177, 197, 219, 0.9)',
                         runeGlow: 'rgba(124, 148, 176, 0.18)'
                     };
+                case 'Traveler':
+                    return {
+                        accent: '#b7c9db',
+                        accentSoft: '#748ca3',
+                        bgTop: '#1a1f27',
+                        bgMid: '#12151b',
+                        bgBottom: '#0a0c10',
+                        glowA: 'rgba(148, 176, 205, 0.18)',
+                        glowB: 'rgba(76, 98, 122, 0.12)',
+                        sectionFill: 'rgba(54, 71, 90, 0.20)',
+                        sectionEdge: 'rgba(136, 165, 194, 0.22)',
+                        hookFill: 'rgba(64, 81, 101, 0.18)',
+                        hookEdge: 'rgba(136, 165, 194, 0.22)',
+                        badgeFill: 'rgba(148, 176, 205, 0.15)',
+                        badgeText: '#e2eef7',
+                        body: '#e8eef2',
+                        bodyDim: '#c2ced8',
+                        rune: 'rgba(188, 210, 230, 0.92)',
+                        runeGlow: 'rgba(148, 176, 205, 0.2)'
+                    };
                 case 'Minion':
                     return {
                         accent: '#c45d70',
@@ -2817,6 +3014,28 @@ button.night-btn {
                 ctx.lineTo(0, radius * 0.48);
                 ctx.lineTo(radius * 0.22, radius * 0.1);
                 ctx.stroke();
+            } else if (category === 'Traveler') {
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.42, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, -radius * 0.72);
+                ctx.lineTo(0, radius * 0.72);
+                ctx.moveTo(-radius * 0.72, 0);
+                ctx.lineTo(radius * 0.72, 0);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, -radius * 0.72);
+                ctx.lineTo(-radius * 0.12, -radius * 0.46);
+                ctx.lineTo(radius * 0.12, -radius * 0.46);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(radius * 0.72, 0);
+                ctx.lineTo(radius * 0.46, -radius * 0.12);
+                ctx.lineTo(radius * 0.46, radius * 0.12);
+                ctx.closePath();
+                ctx.stroke();
             } else {
                 ctx.beginPath();
                 ctx.moveTo(-radius * 0.48, -radius * 0.48);
@@ -2834,9 +3053,11 @@ button.night-btn {
         function createRoleProfileCanvasV2(player) {
             if (!player) return null;
             const roleName = normalizeRoleName(player.role);
+            const isTraveler = isTravelerPlayer(player);
             const parts = `${roleName}`.split('：');
-            const categoryLabel = parts.length > 1 ? parts[0] : '身份';
-            const shortRoleName = parts.length > 1 ? parts[1] : roleName;
+            const travelerCampLabel = getTravelerCampValue(player) === 'undecided' ? '' : ` · ${getTravelerCampLabel(player)}`;
+            const categoryLabel = isTraveler ? `旅行者${travelerCampLabel}` : (parts.length > 1 ? parts[0] : '身份');
+            const shortRoleName = isTraveler ? getTravelerName(player) : (parts.length > 1 ? parts[1] : roleName);
             const scriptName = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
             const palette = getRoleCardPalette(roleName);
             const portrait = isMobileLikeDevice();
@@ -2851,9 +3072,9 @@ button.night-btn {
             const sectionPadY = portrait ? 22 : 20;
             const emblemRadius = portrait ? 88 : 98;
             const sections = [
-                { label: '技能', text: getCurrentRoleAbilities()[roleName] || '无技能描述。' },
-                { label: '初级玩法', text: getRoleBasicPlay(roleName) },
-                { label: '进阶玩法', text: getRoleAdvancedPlay(roleName) }
+                { label: '技能', text: getPlayerAbilityText(player) },
+                { label: '初级玩法', text: getRoleBasicPlay(roleName, player) },
+                { label: '进阶玩法', text: getRoleAdvancedPlay(roleName, player) }
             ];
 
             const canvas = document.createElement('canvas');
@@ -3010,13 +3231,13 @@ button.night-btn {
             if (!player) return null;
             const roleName = normalizeRoleName(player.role);
             const roleParts = `${roleName}`.split('：');
-            const category = roleParts.length > 1 ? roleParts[0] : '身份';
-            const shortRoleName = roleParts.length > 1 ? roleParts[1] : roleName;
+            const category = isTravelerPlayer(player) ? '旅行者' : (roleParts.length > 1 ? roleParts[0] : '身份');
+            const shortRoleName = isTravelerPlayer(player) ? getTravelerName(player) : (roleParts.length > 1 ? roleParts[1] : roleName);
             const scriptName = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
             const sections = [
-                { label: '技能', text: getCurrentRoleAbilities()[roleName] || '无技能描述' },
-                { label: '初级玩法', text: getRoleBasicPlay(roleName) },
-                { label: '进阶玩法', text: getRoleAdvancedPlay(roleName) }
+                { label: '技能', text: getPlayerAbilityText(player) },
+                { label: '初级玩法', text: getRoleBasicPlay(roleName, player) },
+                { label: '进阶玩法', text: getRoleAdvancedPlay(roleName, player) }
             ];
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -3142,16 +3363,17 @@ button.night-btn {
             const player = players.find(item => item.id === id);
             if (!player) return;
             const roleName = normalizeRoleName(player.role);
+            const roleLabel = getPlayerRoleLabel(player);
             const copyText = [
-                `角色名：${roleName}`,
-                `技能：${getCurrentRoleAbilities()[roleName] || '无技能描述'}`,
-                `初级玩法：${getRoleBasicPlay(roleName)}`,
-                `进阶玩法：${getRoleAdvancedPlay(roleName)}`
+                `角色名：${roleLabel}`,
+                `技能：${getPlayerAbilityText(player)}`,
+                `初级玩法：${getRoleBasicPlay(roleName, player)}`,
+                `进阶玩法：${getRoleAdvancedPlay(roleName, player)}`
             ].join('\n');
             const canvas = createRoleProfileCanvasV2(player);
             const imageBlob = await canvasToBlob(canvas);
             const scriptNameForFile = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
-            const imageFileName = `${sanitizeFileName(scriptNameForFile)}_${sanitizeFileName(roleName)}_角色卡.png`;
+            const imageFileName = `${sanitizeFileName(scriptNameForFile)}_${sanitizeFileName(roleLabel)}_角色卡.png`;
             const isMobileLike = isMobileLikeDevice();
 
             if (imageBlob && (isMobileLike || !navigator.clipboard || !window.isSecureContext || typeof ClipboardItem === 'undefined') && openRoleCardPreviewModal(canvas, imageBlob, imageFileName)) {
@@ -3428,11 +3650,60 @@ button.night-btn {
         function getRoleCategory(roleStr) {
             if(roleStr.startsWith('镇民')) return 'Townsfolk';
             if(roleStr.startsWith('外来者')) return 'Outsider';
+            if(roleStr.startsWith('旅行者')) return 'Traveler';
             if(roleStr.startsWith('爪牙')) return 'Minion';
             if(roleStr.startsWith('恶魔')) return 'Demon';
             return 'Unknown';
         }
         function isEvil(roleStr) { return roleStr.startsWith('爪牙') || roleStr.startsWith('恶魔'); }
+        function isTravelerRole(roleStr) {
+            return normalizeRoleName(roleStr) === TRAVELER_ROLE || `${roleStr || ''}`.startsWith('旅行者：');
+        }
+        function isTravelerPlayer(player) {
+            return !!player && isTravelerRole(player.role);
+        }
+        function getTravelerCampValue(player) {
+            return travelerCampLabels[player?.travelerCamp] ? player.travelerCamp : 'undecided';
+        }
+        function getTravelerCampLabel(playerOrValue) {
+            const campValue = typeof playerOrValue === 'string' ? playerOrValue : getTravelerCampValue(playerOrValue);
+            return travelerCampLabels[campValue] || travelerCampLabels.undecided;
+        }
+        function getTravelerName(player) {
+            return `${player?.travelerName || ''}`.trim() || '旅行者';
+        }
+        function getTravelerAbilityText(player) {
+            return `${player?.travelerAbility || ''}`.trim() || travelerRoleTexts.ability;
+        }
+        function getPlayerRoleLabel(player) {
+            if (isTravelerPlayer(player)) return `旅行者：${getTravelerName(player)}`;
+            return normalizeRoleName(player?.role);
+        }
+        function getPlayerRoleShortName(player) {
+            if (isTravelerPlayer(player)) return getTravelerName(player);
+            const roleName = normalizeRoleName(player?.role);
+            return roleName === '❓ 未分配' ? '待分配' : (roleName.split('：')[1] || roleName);
+        }
+        function getPlayerAbilityText(player) {
+            if (isTravelerPlayer(player)) return getTravelerAbilityText(player);
+            const roleName = normalizeRoleName(player?.role);
+            return getCurrentRoleAbilities()[roleName] || '无技能描述';
+        }
+        function getTravelerSeatStatus(player) {
+            if (!player) return '未分配';
+            if (isTravelerPlayer(player)) {
+                const campText = getTravelerCampValue(player) === 'undecided' ? '' : ` / ${getTravelerCampLabel(player)}`;
+                return `旅行者 / ${getTravelerName(player)}${campText}`;
+            }
+            const roleName = normalizeRoleName(player.role);
+            return roleName === '❓ 未分配' ? '未分配' : (roleName.split('：')[1] || roleName);
+        }
+        function isPlayerOnCamp(player, camp) {
+            if (isTravelerPlayer(player)) return getTravelerCampValue(player) === camp;
+            const roleName = normalizeRoleName(player.role);
+            if (roleName === '❓ 未分配') return false;
+            return camp === 'evil' ? isEvil(roleName) : !isEvil(roleName);
+        }
         function getDefaultSeatName(id) { return `座位 ${id + 1}`; }
         function isDefaultSeatName(name, id) { return `${name || ''}`.trim() === getDefaultSeatName(id); }
         function normalizeRosterList(list) {
@@ -3479,6 +3750,8 @@ button.night-btn {
             const aliasMap = {
                 '镇民：处女': '镇民：贞洁者',
                 '镇民：杀手': '镇民：猎人',
+                '爪牙：毒药师': '爪牙：投毒者',
+                '旅行者': TRAVELER_ROLE,
                 '镇民：驱魔师': '镇民：驱魔人',
                 '镇民：茶女郎': '镇民：茶艺师',
                 '外来者：打手': '外来者：莽夫',
@@ -3493,16 +3766,21 @@ button.night-btn {
             return aliasMap[roleStr] || roleStr || '❓ 未分配';
         }
         function normalizePlayerData(player, index) {
+            const roleName = normalizeRoleName(player.role);
+            const isTraveler = isTravelerRole(roleName);
             return {
                 id: typeof player.id === 'number' ? player.id : index,
                 name: player.name || getDefaultSeatName(index),
-                role: normalizeRoleName(player.role),
+                role: roleName,
                 isAlive: player.isAlive !== false,
                 hasGhostVote: !!player.hasGhostVote,
                 hasNominated: !!player.hasNominated,
                 hasBeenNominated: !!player.hasBeenNominated,
                 tokens: Array.isArray(player.tokens) ? player.tokens : [],
-                deathType: player.deathType || (player.isAlive === false ? 'execution' : '')
+                deathType: player.deathType || (player.isAlive === false ? 'execution' : ''),
+                travelerName: isTraveler ? `${player.travelerName || ''}`.trim() : '',
+                travelerAbility: isTraveler ? `${player.travelerAbility || ''}`.trim() : '',
+                travelerCamp: isTraveler && travelerCampLabels[player.travelerCamp] ? player.travelerCamp : 'undecided'
             };
         }
         function createPlayer(id, preservedName = '') {
@@ -3515,8 +3793,118 @@ button.night-btn {
                 hasNominated: false,
                 hasBeenNominated: false,
                 tokens: [],
-                deathType: ''
+                deathType: '',
+                travelerName: '',
+                travelerAbility: '',
+                travelerCamp: 'undecided'
             };
+        }
+        function getTravelerEditorPlayer() {
+            const seatSelect = document.getElementById('travelerSeatSelect');
+            if (!seatSelect || !players.length) return null;
+            const travelerId = Number(seatSelect.value);
+            return players.find(player => player.id === travelerId) || null;
+        }
+        function syncTravelerEditorFromSeat() {
+            const seatSelect = document.getElementById('travelerSeatSelect');
+            const nameInput = document.getElementById('travelerNameInput');
+            const campSelect = document.getElementById('travelerCampSelect');
+            const abilityInput = document.getElementById('travelerAbilityInput');
+            const hint = document.getElementById('travelerHint');
+            const player = getTravelerEditorPlayer();
+            if (!seatSelect || !nameInput || !campSelect || !abilityInput || !hint) return;
+            if (!player) {
+                nameInput.value = '';
+                campSelect.value = 'undecided';
+                abilityInput.value = '';
+                hint.innerText = '旅行者不参与随机发牌，请先布置座位后再指定。';
+                return;
+            }
+            if (isTravelerPlayer(player)) {
+                nameInput.value = player.travelerName || '';
+                campSelect.value = getTravelerCampValue(player);
+                abilityInput.value = player.travelerAbility || '';
+                hint.innerText = `${player.name} 当前已设为旅行者，可继续修改其名称、阵营与能力。`;
+            } else {
+                nameInput.value = '';
+                campSelect.value = 'undecided';
+                abilityInput.value = '';
+                hint.innerText = `当前选中 ${player.name}，填写信息后可将其设为旅行者。`;
+            }
+        }
+        function initTravelerControls() {
+            const seatSelect = document.getElementById('travelerSeatSelect');
+            const nameInput = document.getElementById('travelerNameInput');
+            const campSelect = document.getElementById('travelerCampSelect');
+            const abilityInput = document.getElementById('travelerAbilityInput');
+            const applyBtn = document.getElementById('travelerApplyBtn');
+            const clearBtn = document.getElementById('travelerClearBtn');
+            const hint = document.getElementById('travelerHint');
+            if (!seatSelect || !nameInput || !campSelect || !abilityInput || !applyBtn || !clearBtn || !hint) return;
+
+            if (!players.length) {
+                seatSelect.innerHTML = '<option value="">请先布置座位后再添加旅行者</option>';
+                seatSelect.disabled = true;
+                nameInput.disabled = true;
+                campSelect.disabled = true;
+                abilityInput.disabled = true;
+                applyBtn.disabled = true;
+                clearBtn.disabled = true;
+                nameInput.value = '';
+                campSelect.value = 'undecided';
+                abilityInput.value = '';
+                hint.innerText = '旅行者不参与随机发牌，请先一键布置并随机发牌。';
+                return;
+            }
+
+            const previousValue = players.some(player => `${player.id}` === `${seatSelect.value}`) ? seatSelect.value : `${players[0].id}`;
+            seatSelect.innerHTML = players.map(player => `<option value="${player.id}">${escapeHtml(player.name)} · ${escapeHtml(getTravelerSeatStatus(player))}</option>`).join('');
+            seatSelect.value = previousValue;
+            seatSelect.disabled = false;
+            nameInput.disabled = false;
+            campSelect.disabled = false;
+            abilityInput.disabled = false;
+            applyBtn.disabled = false;
+            clearBtn.disabled = false;
+            syncTravelerEditorFromSeat();
+        }
+        function applyTravelerToSelectedSeat() {
+            const player = getTravelerEditorPlayer();
+            const nameInput = document.getElementById('travelerNameInput');
+            const campSelect = document.getElementById('travelerCampSelect');
+            const abilityInput = document.getElementById('travelerAbilityInput');
+            if (!player || !nameInput || !campSelect || !abilityInput) return alert('请先布置座位后再添加旅行者。');
+            const travelerName = nameInput.value.trim();
+            if (!travelerName) return alert('请输入旅行者名称。');
+            player.role = TRAVELER_ROLE;
+            player.travelerName = travelerName;
+            player.travelerCamp = travelerCampLabels[campSelect.value] ? campSelect.value : 'undecided';
+            player.travelerAbility = abilityInput.value.trim() || travelerRoleTexts.ability;
+            saveData();
+            renderAll();
+        }
+        function clearTravelerFromSelectedSeat() {
+            const player = getTravelerEditorPlayer();
+            if (!player) return;
+            if (!isTravelerPlayer(player)) {
+                syncTravelerEditorFromSeat();
+                return;
+            }
+            player.role = '❓ 未分配';
+            player.travelerName = '';
+            player.travelerAbility = '';
+            player.travelerCamp = 'undecided';
+            saveData();
+            renderAll();
+        }
+        function updateTravelerField(id, field, value) {
+            const player = players.find(item => item.id === id);
+            if (!player || !isTravelerPlayer(player)) return;
+            if (field === 'travelerName') player.travelerName = `${value || ''}`.trim();
+            if (field === 'travelerAbility') player.travelerAbility = `${value || ''}`.trim();
+            if (field === 'travelerCamp') player.travelerCamp = travelerCampLabels[value] ? value : 'undecided';
+            saveData();
+            renderAll();
         }
         function hasRole(roleStr) {
             return players.some(player => normalizeRoleName(player.role) === roleStr);
@@ -3815,7 +4203,9 @@ button.night-btn {
             if(isNaN(count) || count < min) count = min; if(count > max) count = max;
             document.getElementById('playerCountInput').value = count;
             const dist = roleDistribution[count];
-            if(dist) document.getElementById('roleInfo').innerHTML = `支持 ${min}-${max} 人 | 基础配置: ${dist[0]}镇民 | ${dist[1]}外来者 | ${dist[2]}爪牙 | ${dist[3]}恶魔`;
+            const travelerCount = players.filter(player => isTravelerPlayer(player)).length;
+            const travelerText = travelerCount ? ` | 旅行者: ${travelerCount}` : '';
+            if(dist) document.getElementById('roleInfo').innerHTML = `支持 ${min}-${max} 人 | 基础配置: ${dist[0]}镇民 | ${dist[1]}外来者 | ${dist[2]}爪牙 | ${dist[3]}恶魔${travelerText}`;
         }
 
         function updateTimerDisplay() {
@@ -3899,7 +4289,23 @@ button.night-btn {
         function markDeath(id, deathType) { const player = players.find(p => p.id === id); if (!player || !player.isAlive) return; if (deathType === 'demon' && isProtectedFromDemon(player)) return; player.isAlive = false; player.hasGhostVote = true; player.deathType = deathType; saveData(); renderAll(); }
         function revivePlayer(id) { const player = players.find(p => p.id === id); if (!player || player.isAlive) return; player.isAlive = true; player.hasGhostVote = false; player.deathType = ''; saveData(); renderAll(); }
         function toggleGhostVote(id) { const player = players.find(p => p.id === id); if (!player.isAlive) { player.hasGhostVote = !player.hasGhostVote; saveData(); renderAll(); } }
-        function updateRole(id, newRole) { players.find(p => p.id === id).role = normalizeRoleName(newRole); saveData(); renderAll(); }
+        function updateRole(id, newRole) {
+            const player = players.find(p => p.id === id);
+            if (!player) return;
+            const normalizedRole = normalizeRoleName(newRole);
+            player.role = normalizedRole;
+            if (isTravelerRole(normalizedRole)) {
+                if (!player.travelerName) player.travelerName = '旅行者';
+                if (!player.travelerAbility) player.travelerAbility = travelerRoleTexts.ability;
+                player.travelerCamp = travelerCampLabels[player.travelerCamp] ? player.travelerCamp : 'undecided';
+            } else {
+                player.travelerName = '';
+                player.travelerAbility = '';
+                player.travelerCamp = 'undecided';
+            }
+            saveData();
+            renderAll();
+        }
         function addToken(id, event) { if (event.key === 'Enter' && event.target.value.trim()) { const player = players.find(p => p.id === id); if (!player.tokens.includes(event.target.value.trim())) { player.tokens.push(event.target.value.trim()); saveData(); renderAll(); } } }
         function addSpecificToken(id, tokenStr) {
             if (tokenStr === '👑 主人') {
@@ -3925,6 +4331,7 @@ button.night-btn {
             if (hasRole('镇民：占卜师')) hints.push({ type: 'warning', text: '本局有占卜师：开始夜晚前先设定一名死敌，并提前记好“🔮 死敌”标记。' });
             if (hasRole('爪牙：男爵')) hints.push({ type: 'warning', text: '本局有男爵：外来者数量 +2，请以两名外来者替换两名镇民。' });
             if (hasSpyInPlay() && (hasRole('镇民：厨师') || hasRole('镇民：共情者'))) hints.push({ type: 'system', text: '本局有间谍：夜晚顺序中的厨师/共情者会给出真实值与注册值两种结果，按说书人裁定任选其一。' });
+            if (players.some(player => isTravelerPlayer(player))) hints.push({ type: 'system', text: '本局有旅行者：旅行者不参与随机发牌，建议公开其阵营与技能边界后再进入白天讨论。' });
             if (hints.length === 0) hints.push({ type: 'normal', text: '当前无特殊开局提醒，可直接进入夜晚流程。' });
 
             panel.innerHTML = `
@@ -4033,7 +4440,19 @@ button.night-btn {
             generateNightOrder(currentNightOrderType, { scroll: false });
         }
 
-        function renderAll() { renderRosterList(); renderCircle(); renderHints(); renderList(); updateRenameModeUi(); updatePlayerListLayoutUi(); renderScoreBoard(); refreshNightOrderIfOpen(); }
+        function renderAll() {
+            renderRosterList();
+            initTravelerControls();
+            initRoleRevealSelect();
+            updateRoleInfo();
+            renderCircle();
+            renderHints();
+            renderList();
+            updateRenameModeUi();
+            updatePlayerListLayoutUi();
+            renderScoreBoard();
+            refreshNightOrderIfOpen();
+        }
 
         function renderCircle() {
             const stage = document.getElementById('circleStage');
@@ -4066,17 +4485,17 @@ button.night-btn {
                 const noteY = center + noteRadius * Math.sin(angle);
                 const seat = document.createElement('div');
                 const roleCategory = getRoleCategory(normalizeRoleName(p.role)).toLowerCase();
-                const seatRoleClass = roleCategory === 'minion' ? 'seat-minion' : roleCategory === 'demon' ? 'seat-demon' : '';
+                const seatRoleClass = roleCategory === 'minion' ? 'seat-minion' : roleCategory === 'demon' ? 'seat-demon' : roleCategory === 'traveler' ? 'seat-traveler' : '';
                 seat.className = `seat ${seatRoleClass} ${p.isAlive ? '' : 'dead-seat'}`.trim();
                 seat.style.cssText = `left: ${x}px; top: ${y}px;`;
                 seat.onclick = () => handleSeatClick(p.id);
                 const roleName = normalizeRoleName(p.role);
-                const shortRole = roleName === '❓ 未分配' ? '待分配' : roleName.split('：')[1] || roleName;
+                const shortRole = getPlayerRoleShortName(p);
                 const badgeHtml = getSeatBadgesHtml(p);
                 const abilityNote = document.createElement('div');
-                abilityNote.className = `seat-ability ${roleCategory === 'demon' ? 'demon' : roleCategory === 'minion' ? 'evil' : ''}`.trim();
+                abilityNote.className = `seat-ability ${roleCategory === 'demon' ? 'demon' : roleCategory === 'minion' ? 'evil' : roleCategory === 'traveler' ? 'traveler' : ''}`.trim();
                 abilityNote.style.cssText = `left: ${noteX}px; top: ${noteY}px;`;
-                abilityNote.innerText = getWheelAbilityText(roleName);
+                abilityNote.innerText = getWheelAbilityText(roleName, p);
 
                 seat.innerHTML = `
                     ${badgeHtml}
@@ -4093,19 +4512,44 @@ button.night-btn {
             players.forEach(p => {
                 const card = document.createElement('div'); card.className = `player-card ${p.isAlive ? '' : 'dead'}`;
                 const roleName = normalizeRoleName(p.role);
-                let roleOptions = getCurrentAllRoles().map(r => `<option value="${r}" ${roleName === r ? 'selected' : ''}>${r}</option>`).join('');
+                let roleOptions = getCurrentAllRoles().map(r => `<option value="${r}" ${roleName === r ? 'selected' : ''}>${r === TRAVELER_ROLE ? '旅行者：自定义' : r}</option>`).join('');
                 let ghostBtnHtml = p.isAlive ? '' : `<button class="${p.hasGhostVote ? 'ghost-btn' : 'no-ghost'}" onclick="toggleGhostVote(${p.id})">${p.hasGhostVote ? '👻 有票' : '❌ 无票'}</button>`;
-                let abilityDesc = getCurrentRoleAbilities()[roleName] || '无技能描述';
+                let abilityDesc = getPlayerAbilityText(p);
                 const deathLabel = p.deathType === 'demon' ? '🗡️ 恶魔刀' : '☠️ 已处决';
                 const deathClass = p.deathType === 'demon' ? 'demon-mark' : 'execution-mark';
                 const actionHtml = p.isAlive
                     ? ''
                     : `<div class="actions">${ghostBtnHtml}<button class="revive-btn" onclick="revivePlayer(${p.id})">✨ 复活</button><button class="death-mark ${deathClass}" disabled>${deathLabel}</button></div>`;
+                const travelerEditorHtml = isTravelerPlayer(p)
+                    ? `
+                        <div class="traveler-editor">
+                            <div class="traveler-editor-row">
+                                <div>
+                                    <div class="traveler-editor-label">旅行者名称</div>
+                                    <input type="text" class="traveler-meta-input" value="${escapeHtml(p.travelerName || '')}" placeholder="旅行者名称" onchange="updateTravelerField(${p.id}, 'travelerName', this.value)">
+                                </div>
+                                <div>
+                                    <div class="traveler-editor-label">公开阵营</div>
+                                    <select class="traveler-meta-input" onchange="updateTravelerField(${p.id}, 'travelerCamp', this.value)">
+                                        <option value="undecided" ${getTravelerCampValue(p) === 'undecided' ? 'selected' : ''}>未定</option>
+                                        <option value="good" ${getTravelerCampValue(p) === 'good' ? 'selected' : ''}>善良</option>
+                                        <option value="evil" ${getTravelerCampValue(p) === 'evil' ? 'selected' : ''}>邪恶</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="traveler-editor-label">旅行者能力</div>
+                                <textarea class="traveler-ability-input" placeholder="输入旅行者能力说明" onchange="updateTravelerField(${p.id}, 'travelerAbility', this.value)">${escapeHtml(p.travelerAbility || '')}</textarea>
+                            </div>
+                        </div>
+                    `
+                    : '';
 
                 card.innerHTML = `
                     <div class="row"><span class="player-name">${p.name}</span>${actionHtml}</div>
                     <div class="row" style="margin-bottom: 4px;"><select onchange="updateRole(${p.id}, this.value)">${roleOptions}</select></div>
                     <div class="role-desc">ℹ️ ${abilityDesc}</div>
+                    ${travelerEditorHtml}
                     <button class="copy-role-btn" onclick="copyRoleProfile(${p.id})">🖼️ 保存/分享角色卡</button>
                 `;
                 list.appendChild(card);
