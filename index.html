@@ -2593,6 +2593,426 @@ button.night-btn {
             ctx.quadraticCurveTo(x, y, x + r, y);
             ctx.closePath();
         }
+        function wrapRoleCardText(ctx, text, maxWidth) {
+            const lines = [];
+            const stickyPunctuation = new Set(Array.from('，。！？；：、）》」』】）,.!?;:'));
+            `${text || ''}`.split('\n').forEach((paragraph, paragraphIndex, paragraphs) => {
+                const source = Array.from(`${paragraph || ''}`.trim() || ' ');
+                let currentLine = '';
+                source.forEach(char => {
+                    const testLine = currentLine + char;
+                    if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+                        if (stickyPunctuation.has(char)) {
+                            lines.push(testLine);
+                            currentLine = '';
+                        } else {
+                            lines.push(currentLine);
+                            currentLine = char;
+                        }
+                    } else {
+                        currentLine = testLine;
+                    }
+                });
+                lines.push(currentLine || ' ');
+                if (paragraphIndex < paragraphs.length - 1) lines.push('');
+            });
+            return lines;
+        }
+        function isMobileLikeDevice() {
+            return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')
+                || !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+        }
+        function getRoleCardPalette(roleName) {
+            switch (getRoleCategory(roleName)) {
+                case 'Townsfolk':
+                    return {
+                        accent: '#c8a86a',
+                        accentSoft: '#8e7446',
+                        bgTop: '#251a1f',
+                        bgMid: '#151014',
+                        bgBottom: '#0c0a0c',
+                        glowA: 'rgba(197, 165, 106, 0.16)',
+                        glowB: 'rgba(131, 83, 34, 0.10)',
+                        sectionFill: 'rgba(80, 58, 32, 0.18)',
+                        sectionEdge: 'rgba(197, 165, 106, 0.22)',
+                        hookFill: 'rgba(92, 70, 36, 0.18)',
+                        hookEdge: 'rgba(197, 165, 106, 0.22)',
+                        badgeFill: 'rgba(197, 165, 106, 0.14)',
+                        badgeText: '#e0c58f',
+                        body: '#eadfce',
+                        bodyDim: '#cdbda7',
+                        rune: 'rgba(222, 190, 124, 0.88)',
+                        runeGlow: 'rgba(197, 165, 106, 0.18)'
+                    };
+                case 'Outsider':
+                    return {
+                        accent: '#96a8bc',
+                        accentSoft: '#64778b',
+                        bgTop: '#1d1c22',
+                        bgMid: '#121116',
+                        bgBottom: '#0b0a0d',
+                        glowA: 'rgba(124, 148, 176, 0.16)',
+                        glowB: 'rgba(83, 102, 126, 0.10)',
+                        sectionFill: 'rgba(70, 84, 103, 0.17)',
+                        sectionEdge: 'rgba(129, 150, 176, 0.22)',
+                        hookFill: 'rgba(73, 89, 108, 0.18)',
+                        hookEdge: 'rgba(129, 150, 176, 0.22)',
+                        badgeFill: 'rgba(124, 148, 176, 0.16)',
+                        badgeText: '#d5dfeb',
+                        body: '#e5edf3',
+                        bodyDim: '#bdcad7',
+                        rune: 'rgba(177, 197, 219, 0.9)',
+                        runeGlow: 'rgba(124, 148, 176, 0.18)'
+                    };
+                case 'Minion':
+                    return {
+                        accent: '#c45d70',
+                        accentSoft: '#7d3140',
+                        bgTop: '#27151a',
+                        bgMid: '#170e12',
+                        bgBottom: '#0c090c',
+                        glowA: 'rgba(173, 67, 90, 0.18)',
+                        glowB: 'rgba(107, 26, 41, 0.12)',
+                        sectionFill: 'rgba(101, 28, 41, 0.18)',
+                        sectionEdge: 'rgba(181, 79, 101, 0.22)',
+                        hookFill: 'rgba(116, 30, 48, 0.20)',
+                        hookEdge: 'rgba(181, 79, 101, 0.24)',
+                        badgeFill: 'rgba(173, 67, 90, 0.17)',
+                        badgeText: '#f1c9d0',
+                        body: '#f0ddd8',
+                        bodyDim: '#d9beb8',
+                        rune: 'rgba(220, 127, 146, 0.9)',
+                        runeGlow: 'rgba(173, 67, 90, 0.22)'
+                    };
+                case 'Demon':
+                    return {
+                        accent: '#ddb16e',
+                        accentSoft: '#8b392d',
+                        bgTop: '#2a1717',
+                        bgMid: '#170d10',
+                        bgBottom: '#0c090b',
+                        glowA: 'rgba(221, 177, 110, 0.18)',
+                        glowB: 'rgba(139, 57, 45, 0.14)',
+                        sectionFill: 'rgba(113, 54, 32, 0.20)',
+                        sectionEdge: 'rgba(221, 177, 110, 0.24)',
+                        hookFill: 'rgba(133, 56, 37, 0.22)',
+                        hookEdge: 'rgba(221, 177, 110, 0.26)',
+                        badgeFill: 'rgba(221, 177, 110, 0.16)',
+                        badgeText: '#f3ddae',
+                        body: '#f3e4d4',
+                        bodyDim: '#dcc5af',
+                        rune: 'rgba(240, 200, 125, 0.92)',
+                        runeGlow: 'rgba(221, 177, 110, 0.24)'
+                    };
+                default:
+                    return {
+                        accent: '#c8a86a',
+                        accentSoft: '#8e7446',
+                        bgTop: '#24181d',
+                        bgMid: '#151014',
+                        bgBottom: '#0b090b',
+                        glowA: 'rgba(197, 165, 106, 0.14)',
+                        glowB: 'rgba(123, 43, 56, 0.08)',
+                        sectionFill: 'rgba(78, 55, 31, 0.16)',
+                        sectionEdge: 'rgba(197, 165, 106, 0.18)',
+                        hookFill: 'rgba(92, 70, 36, 0.16)',
+                        hookEdge: 'rgba(197, 165, 106, 0.20)',
+                        badgeFill: 'rgba(197, 165, 106, 0.14)',
+                        badgeText: '#e0c58f',
+                        body: '#eadfce',
+                        bodyDim: '#cdbda7',
+                        rune: 'rgba(222, 190, 124, 0.84)',
+                        runeGlow: 'rgba(197, 165, 106, 0.18)'
+                    };
+            }
+        }
+        function getRoleCardHook(roleName) {
+            const source = `${getRoleBasicPlay(roleName) || getCurrentRoleAbilities()[roleName] || ''}`
+                .replace(/\s+/g, '')
+                .trim();
+            if (!source) return '核心价值仍待本局命运揭示。';
+            const sentence = source.split(/[。！？；]/)[0] || source;
+            let brief = sentence.split(/[，、]/)[0] || sentence;
+            if (brief.length < 12 && sentence.length > brief.length) brief = sentence;
+            if (brief.length > 26) brief = `${brief.slice(0, 24)}…`;
+            return /[。！？…]$/.test(brief) ? brief : `${brief}。`;
+        }
+        function drawRoleCardEmblem(ctx, category, centerX, centerY, radius, palette) {
+            ctx.save();
+            ctx.translate(centerX, centerY);
+
+            const outerGlow = ctx.createRadialGradient(0, 0, radius * 0.1, 0, 0, radius * 1.2);
+            outerGlow.addColorStop(0, palette.runeGlow);
+            outerGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = outerGlow;
+            ctx.beginPath();
+            ctx.arc(0, 0, radius * 1.15, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(0, 0, radius, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.strokeStyle = palette.rune;
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.globalAlpha = 0.82;
+
+            if (category === 'Townsfolk') {
+                for (let i = 0; i < 8; i++) {
+                    const angle = (Math.PI / 4) * i;
+                    ctx.beginPath();
+                    ctx.moveTo(Math.cos(angle) * radius * 0.18, Math.sin(angle) * radius * 0.18);
+                    ctx.lineTo(Math.cos(angle) * radius * 0.78, Math.sin(angle) * radius * 0.78);
+                    ctx.stroke();
+                }
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.2, 0, Math.PI * 2);
+                ctx.stroke();
+            } else if (category === 'Outsider') {
+                ctx.beginPath();
+                ctx.arc(-radius * 0.08, 0, radius * 0.42, Math.PI * 0.3, Math.PI * 1.7);
+                ctx.stroke();
+                ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+                ctx.beginPath();
+                ctx.arc(radius * 0.10, 0, radius * 0.34, Math.PI * 0.32, Math.PI * 1.68);
+                ctx.stroke();
+                ctx.strokeStyle = palette.rune;
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.68, Math.PI * 0.18, Math.PI * 0.82);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(radius * 0.56, -radius * 0.18, radius * 0.06, 0, Math.PI * 2);
+                ctx.fillStyle = palette.rune;
+                ctx.fill();
+            } else if (category === 'Minion') {
+                ctx.beginPath();
+                ctx.moveTo(0, -radius * 0.62);
+                ctx.lineTo(radius * 0.46, 0);
+                ctx.lineTo(0, radius * 0.62);
+                ctx.lineTo(-radius * 0.46, 0);
+                ctx.closePath();
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.ellipse(0, 0, radius * 0.34, radius * 0.2, 0, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, -radius * 0.12);
+                ctx.lineTo(0, radius * 0.12);
+                ctx.stroke();
+            } else if (category === 'Demon') {
+                ctx.beginPath();
+                ctx.moveTo(-radius * 0.42, -radius * 0.02);
+                ctx.quadraticCurveTo(-radius * 0.68, -radius * 0.58, -radius * 0.2, -radius * 0.78);
+                ctx.moveTo(radius * 0.42, -radius * 0.02);
+                ctx.quadraticCurveTo(radius * 0.68, -radius * 0.58, radius * 0.2, -radius * 0.78);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, radius * 0.08, radius * 0.34, Math.PI * 0.05, Math.PI * 0.95);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(-radius * 0.22, radius * 0.1);
+                ctx.lineTo(0, radius * 0.48);
+                ctx.lineTo(radius * 0.22, radius * 0.1);
+                ctx.stroke();
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(-radius * 0.48, -radius * 0.48);
+                ctx.lineTo(radius * 0.48, radius * 0.48);
+                ctx.moveTo(radius * 0.48, -radius * 0.48);
+                ctx.lineTo(-radius * 0.48, radius * 0.48);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(0, 0, radius * 0.24, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+        function createRoleProfileCanvasV2(player) {
+            if (!player) return null;
+            const roleName = normalizeRoleName(player.role);
+            const parts = `${roleName}`.split('：');
+            const categoryLabel = parts.length > 1 ? parts[0] : '身份';
+            const shortRoleName = parts.length > 1 ? parts[1] : roleName;
+            const scriptName = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
+            const palette = getRoleCardPalette(roleName);
+            const portrait = isMobileLikeDevice();
+            const width = portrait ? 860 : 1120;
+            const paddingX = portrait ? 60 : 74;
+            const topPad = portrait ? 62 : 56;
+            const contentWidth = width - paddingX * 2;
+            const bodyFontSize = portrait ? 28 : 24;
+            const bodyLineHeight = portrait ? 40 : 34;
+            const hookFontSize = portrait ? 30 : 26;
+            const hookLineHeight = portrait ? 42 : 36;
+            const sectionLabelSize = portrait ? 24 : 22;
+            const sectionPadX = portrait ? 26 : 28;
+            const sectionPadY = portrait ? 22 : 20;
+            const emblemRadius = portrait ? 88 : 98;
+            const hookText = getRoleCardHook(roleName);
+            const sections = [
+                { label: '技能', text: getCurrentRoleAbilities()[roleName] || '无技能描述。' },
+                { label: '初级玩法', text: getRoleBasicPlay(roleName) },
+                { label: '进阶玩法', text: getRoleAdvancedPlay(roleName) }
+            ];
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return null;
+
+            ctx.font = `${hookFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            const hookLines = wrapRoleCardText(ctx, hookText, contentWidth - 36);
+            ctx.font = `${bodyFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            const sectionData = sections.map(section => ({
+                ...section,
+                lines: wrapRoleCardText(ctx, section.text, contentWidth - sectionPadX * 2)
+            }));
+
+            const headerHeight = portrait ? 248 : 214;
+            const hookHeight = 42 + hookLines.reduce((sum, line) => sum + (line === '' ? 18 : hookLineHeight), 0) + 28;
+            let height = topPad + headerHeight + hookHeight + 24;
+            sectionData.forEach(section => {
+                height += 36 + sectionPadY * 2;
+                height += section.lines.reduce((sum, line) => sum + (line === '' ? 16 : bodyLineHeight), 0);
+                height += 22;
+            });
+            height += 38;
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, width, height);
+
+            const background = ctx.createLinearGradient(0, 0, 0, height);
+            background.addColorStop(0, palette.bgTop);
+            background.addColorStop(0.56, palette.bgMid);
+            background.addColorStop(1, palette.bgBottom);
+            ctx.fillStyle = background;
+            ctx.fillRect(0, 0, width, height);
+
+            const topGlow = ctx.createRadialGradient(width * 0.52, topPad * 0.2, 30, width * 0.54, topPad + 30, width * 0.68);
+            topGlow.addColorStop(0, palette.glowA);
+            topGlow.addColorStop(0.45, palette.glowB);
+            topGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = topGlow;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = 'rgba(197, 165, 106, 0.34)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(18, 18, width - 36, height - 36);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(30, 30, width - 60, height - 60);
+
+            for (let i = 0; i < width; i += 32) {
+                ctx.strokeStyle = i % 64 === 0 ? 'rgba(255,255,255,0.012)' : 'rgba(255,255,255,0.006)';
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(0, i);
+                ctx.stroke();
+            }
+
+            const emblemX = width - paddingX - emblemRadius * 0.86;
+            const emblemY = topPad + (portrait ? 88 : 80);
+            drawRoleCardEmblem(ctx, getRoleCategory(roleName), emblemX, emblemY, emblemRadius, palette);
+
+            ctx.fillStyle = '#a99c90';
+            ctx.font = '18px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            ctx.fillText(`剧本  ${scriptName}`, paddingX, topPad);
+
+            ctx.fillStyle = palette.bodyDim;
+            ctx.textAlign = 'right';
+            ctx.fillText('公开展示版', width - paddingX, topPad);
+            ctx.textAlign = 'left';
+
+            ctx.fillStyle = '#f4eadc';
+            ctx.font = `${portrait ? 64 : 58}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            ctx.fillText(shortRoleName, paddingX, topPad + 82);
+
+            ctx.font = '20px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            const badgeText = ` ${categoryLabel} `;
+            const badgeWidth = ctx.measureText(badgeText).width + 34;
+            ctx.fillStyle = palette.badgeFill;
+            drawRoundedRect(ctx, paddingX, topPad + 106, badgeWidth, 38, 19);
+            ctx.fill();
+            ctx.strokeStyle = palette.sectionEdge;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = palette.badgeText;
+            ctx.fillText(badgeText, paddingX + 16, topPad + 131);
+
+            const dividerY = topPad + headerHeight - 20;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.beginPath();
+            ctx.moveTo(paddingX, dividerY);
+            ctx.lineTo(width - paddingX, dividerY);
+            ctx.stroke();
+
+            let y = topPad + headerHeight;
+            ctx.fillStyle = palette.hookFill;
+            drawRoundedRect(ctx, paddingX, y, contentWidth, hookHeight, 24);
+            ctx.fill();
+            ctx.strokeStyle = palette.hookEdge;
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            ctx.fillStyle = palette.accent;
+            ctx.font = '600 20px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            ctx.fillText('核心卖点', paddingX + 20, y + 32);
+
+            ctx.fillStyle = palette.body;
+            ctx.font = `${hookFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            let innerY = y + 68;
+            hookLines.forEach(line => {
+                if (line === '') {
+                    innerY += 18;
+                    return;
+                }
+                ctx.fillText(line, paddingX + 20, innerY);
+                innerY += hookLineHeight;
+            });
+            y += hookHeight + 22;
+
+            sectionData.forEach(section => {
+                const sectionHeight = 34 + sectionPadY * 2 + section.lines.reduce((sum, line) => sum + (line === '' ? 16 : bodyLineHeight), 0);
+                ctx.fillStyle = palette.sectionFill;
+                drawRoundedRect(ctx, paddingX, y, contentWidth, sectionHeight, 24);
+                ctx.fill();
+                ctx.strokeStyle = palette.sectionEdge;
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+
+                ctx.fillStyle = palette.accent;
+                ctx.font = `600 ${sectionLabelSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+                ctx.fillText(section.label, paddingX + sectionPadX, y + 34);
+
+                ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(paddingX + sectionPadX, y + 50);
+                ctx.lineTo(width - paddingX - sectionPadX, y + 50);
+                ctx.stroke();
+
+                ctx.fillStyle = palette.body;
+                ctx.font = `${bodyFontSize}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+                let textY = y + 88;
+                section.lines.forEach(line => {
+                    if (line === '') {
+                        textY += 16;
+                        return;
+                    }
+                    ctx.fillText(line, paddingX + sectionPadX, textY);
+                    textY += bodyLineHeight;
+                });
+
+                y += sectionHeight + 22;
+            });
+
+            return canvas;
+        }
         function createRoleProfileCanvas(player) {
             if (!player) return null;
             const roleName = normalizeRoleName(player.role);
@@ -2735,11 +3155,11 @@ button.night-btn {
                 `初级玩法：${getRoleBasicPlay(roleName)}`,
                 `进阶玩法：${getRoleAdvancedPlay(roleName)}`
             ].join('\n');
-            const canvas = createRoleProfileCanvas(player);
+            const canvas = createRoleProfileCanvasV2(player);
             const imageBlob = await canvasToBlob(canvas);
-            const imageFileName = `${sanitizeFileName(player.name)}_${sanitizeFileName(roleName)}.png`;
-            const isMobileLike = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')
-                || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+            const scriptNameForFile = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
+            const imageFileName = `${sanitizeFileName(scriptNameForFile)}_${sanitizeFileName(roleName)}_角色卡.png`;
+            const isMobileLike = isMobileLikeDevice();
 
             if (imageBlob && (isMobileLike || !navigator.clipboard || !window.isSecureContext || typeof ClipboardItem === 'undefined') && openRoleCardPreviewModal(canvas, imageBlob, imageFileName)) {
                 return;
