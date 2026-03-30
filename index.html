@@ -1968,7 +1968,7 @@ button.night-btn {
 
         <section class="panel control-panel text-center">
             <label>设定玩家总数</label>
-            <input type="number" id="playerCountInput" min="5" max="15" value="8" oninput="updateRoleInfo()" onchange="updateRoleInfo()">
+            <input type="number" id="playerCountInput" min="5" max="15" value="8" oninput="updateRoleInfo(false)" onchange="updateRoleInfo(true)">
             <div id="roleInfo" class="role-info">标准配置: 读取中...</div>
 
             <div class="roster-panel">
@@ -4563,12 +4563,26 @@ button.night-btn {
             return recommendationData ? renderSuggestionBox(recommendationData.title, recommendationData.options) : '';
         }
 
-        function updateRoleInfo() {
+        function updateRoleInfo(commitValue = true) {
             const { min, max } = getCurrentPlayerRange();
-            let count = parseInt(document.getElementById('playerCountInput').value);
-            if(isNaN(count) || count < min) count = min; if(count > max) count = max;
-            document.getElementById('playerCountInput').value = count;
-            const dist = roleDistribution[count];
+            const playerCountInput = document.getElementById('playerCountInput');
+            const rawValue = `${playerCountInput.value || ''}`.trim();
+            let count = parseInt(rawValue, 10);
+            const hasValidNumber = !Number.isNaN(count);
+
+            if (!hasValidNumber) {
+                if (commitValue) {
+                    count = min;
+                    playerCountInput.value = count;
+                }
+            } else {
+                if (count < min) count = min;
+                if (count > max) count = max;
+                if (commitValue) playerCountInput.value = count;
+            }
+
+            const displayCount = hasValidNumber ? Math.min(max, Math.max(min, count)) : min;
+            const dist = roleDistribution[displayCount];
             const travelerCount = players.filter(player => isTravelerPlayer(player)).length;
             const travelerText = travelerCount ? ` | 旅行者: ${travelerCount}` : '';
             if(dist) document.getElementById('roleInfo').innerHTML = `支持 ${min}-${max} 人 | 基础配置: ${dist[0]}镇民 | ${dist[1]}外来者 | ${dist[2]}爪牙 | ${dist[3]}恶魔${travelerText}`;
