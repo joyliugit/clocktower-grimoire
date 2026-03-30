@@ -1,0 +1,2192 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1b1218" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="description"
+      content="血染钟楼暗流涌动说书人本地网页：圆桌建局、自动发牌、夜间提词器、玩家卡片、标记与自动存档。"
+    />
+    <title>暗流涌动说书人台</title>
+    <style>
+:root {
+  --bg: #110d12;
+  --bg-soft: #181218;
+  --panel: rgba(28, 18, 24, 0.86);
+  --panel-strong: rgba(39, 24, 29, 0.94);
+  --line: rgba(255, 228, 202, 0.12);
+  --line-strong: rgba(255, 228, 202, 0.24);
+  --text: #f5e8d4;
+  --muted: #cbb49c;
+  --accent: #c44937;
+  --accent-soft: rgba(196, 73, 55, 0.16);
+  --gold: #d5b06a;
+  --gold-soft: rgba(213, 176, 106, 0.2);
+  --cyan: #6ea6bf;
+  --rose: #b8647b;
+  --green: #719a69;
+  --danger: #a83f48;
+  --shadow: 0 22px 60px rgba(0, 0, 0, 0.32);
+  --radius-lg: 28px;
+  --radius-md: 20px;
+  --radius-sm: 14px;
+  --townsfolk: #d5b06a;
+  --outsider: #72a9bf;
+  --minion: #c16c87;
+  --demon: #d44e46;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text);
+  font-family: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(196, 73, 55, 0.2), transparent 28%),
+    radial-gradient(circle at top right, rgba(112, 82, 131, 0.18), transparent 24%),
+    radial-gradient(circle at bottom center, rgba(213, 176, 106, 0.08), transparent 32%),
+    linear-gradient(180deg, #171015 0%, #0d0a0e 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.012) 0,
+      rgba(255, 255, 255, 0.012) 1px,
+      transparent 1px,
+      transparent 18px
+    );
+  opacity: 0.3;
+  mix-blend-mode: soft-light;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.page-shell {
+  width: min(1500px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 24px 0 40px;
+}
+
+.panel {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent 28%),
+    var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  backdrop-filter: blur(18px);
+}
+
+.panel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top right, rgba(213, 176, 106, 0.08), transparent 28%),
+    radial-gradient(circle at bottom left, rgba(196, 73, 55, 0.08), transparent 38%);
+}
+
+.hero,
+.setup-panel,
+.table-panel,
+.night-panel,
+.players-panel,
+.notes-panel {
+  padding: 28px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.hero-copy,
+.save-panel,
+.section-heading,
+.table-core,
+.night-current,
+.player-card,
+.save-card,
+.bluff-item,
+.warning-item,
+.night-step-item {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow,
+.kicker,
+.save-kicker {
+  margin: 0 0 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--gold);
+}
+
+h1,
+h2,
+h3,
+.seat-number,
+.seat-role,
+.role-name,
+.type-badge {
+  font-family: "Georgia", "Songti SC", "STSong", serif;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2.6rem, 5vw, 4.9rem);
+  line-height: 0.95;
+  max-width: 9ch;
+}
+
+h2 {
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  line-height: 1;
+}
+
+h3 {
+  font-size: 1.4rem;
+  line-height: 1.05;
+}
+
+.hero-lead,
+.save-note,
+.label,
+.section-copy,
+.tiny-copy,
+.ability-copy,
+.role-ability,
+.role-note,
+.hint-copy,
+.warning-copy,
+.night-ability,
+.seat-name,
+.empty-state {
+  color: var(--muted);
+}
+
+.hero-lead {
+  max-width: 58ch;
+  margin-top: 18px;
+  line-height: 1.8;
+}
+
+.hero-tags,
+.save-panel,
+.button-row,
+.summary-grid,
+.status-row,
+.field-row,
+.token-list,
+.token-presets,
+.card-badges,
+.night-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.hero-tags {
+  margin-top: 22px;
+}
+
+.hero-tags span,
+.card-badge,
+.save-chip,
+.seat-token-count {
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 228, 202, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.save-panel {
+  display: grid;
+  align-content: start;
+}
+
+.save-card {
+  padding: 18px 20px;
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.save-card.compact {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.save-card strong {
+  display: block;
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+}
+
+.main-layout {
+  display: grid;
+  grid-template-columns: 1.02fr 1.2fr 0.96fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.section-heading {
+  margin-bottom: 18px;
+}
+
+.section-copy {
+  margin-top: 10px;
+  line-height: 1.75;
+}
+
+.control-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.count-field {
+  display: grid;
+  gap: 8px;
+}
+
+.count-field span {
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
+input[type="number"],
+input[type="text"],
+select,
+textarea {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 228, 202, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+}
+
+input[type="number"],
+input[type="text"],
+select {
+  padding: 12px 14px;
+}
+
+textarea {
+  padding: 14px 16px;
+  resize: vertical;
+  min-height: 200px;
+  line-height: 1.7;
+}
+
+button {
+  padding: 11px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 228, 202, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  transition:
+    transform 0.18s ease,
+    border-color 0.18s ease,
+    background 0.18s ease,
+    color 0.18s ease;
+}
+
+button:hover,
+.seat:hover,
+.token:hover,
+.night-step-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(213, 176, 106, 0.52);
+}
+
+.accent-button {
+  background: linear-gradient(135deg, rgba(196, 73, 55, 0.26), rgba(213, 176, 106, 0.16));
+  border-color: rgba(213, 176, 106, 0.52);
+}
+
+.danger-button {
+  background: rgba(168, 63, 72, 0.16);
+  border-color: rgba(168, 63, 72, 0.42);
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.summary-grid article,
+.bluff-card,
+.night-list-wrap,
+.player-card,
+.token,
+.warning-item,
+.night-step-item,
+.bluff-item {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.summary-grid article {
+  padding: 16px;
+  border-radius: var(--radius-md);
+}
+
+.summary-grid strong {
+  display: block;
+  margin: 10px 0 8px;
+  font-size: 1.4rem;
+}
+
+.bluff-card {
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+}
+
+.inline-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.bluff-list {
+  display: grid;
+  gap: 10px;
+}
+
+.bluff-item {
+  padding: 12px 14px;
+  border-radius: 16px;
+}
+
+.bluff-item strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.table-stage {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 720px);
+  aspect-ratio: 1;
+  margin: 0 auto;
+}
+
+.table-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.02) 0 42%, transparent 42%),
+    radial-gradient(circle at center, rgba(196, 73, 55, 0.08), transparent 65%),
+    radial-gradient(circle at center, rgba(213, 176, 106, 0.08), transparent 80%);
+  border: 1px solid rgba(255, 228, 202, 0.1);
+}
+
+.table-ring::before,
+.table-ring::after {
+  content: "";
+  position: absolute;
+  inset: 8% 8%;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 228, 202, 0.08);
+}
+
+.table-ring::after {
+  inset: 20% 20%;
+}
+
+.table-core {
+  width: min(36%, 220px);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  text-align: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at top, rgba(213, 176, 106, 0.16), transparent 50%),
+    var(--panel-strong);
+  border: 1px solid rgba(255, 228, 202, 0.12);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.26);
+}
+
+.core-script {
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--gold);
+}
+
+.table-core strong {
+  display: block;
+  margin: 8px 0 6px;
+  font-size: 1.2rem;
+}
+
+.table-core span {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 0.92rem;
+}
+
+.seat {
+  position: absolute;
+  left: var(--seat-x);
+  top: var(--seat-y);
+  width: clamp(78px, 10vw, 106px);
+  min-height: clamp(78px, 10vw, 106px);
+  transform: translate(-50%, -50%);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 5px;
+  padding: 10px 8px;
+  text-align: center;
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 60%),
+    rgba(24, 15, 20, 0.88);
+  border: 1px solid rgba(255, 228, 202, 0.12);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.24);
+}
+
+.seat.dead {
+  opacity: 0.46;
+  filter: grayscale(0.4);
+}
+
+.seat-number {
+  font-size: 1.05rem;
+  color: var(--gold);
+}
+
+.seat-name {
+  font-size: 0.88rem;
+  line-height: 1.25;
+  min-height: 2.4em;
+}
+
+.seat-role {
+  font-size: 0.9rem;
+  line-height: 1.1;
+}
+
+.seat-status {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.seat-token-count {
+  font-size: 0.76rem;
+  padding: 4px 8px;
+}
+
+.seat[data-type="townsfolk"] {
+  border-color: rgba(213, 176, 106, 0.38);
+}
+
+.seat[data-type="outsider"] {
+  border-color: rgba(110, 166, 191, 0.36);
+}
+
+.seat[data-type="minion"] {
+  border-color: rgba(184, 100, 123, 0.38);
+}
+
+.seat[data-type="demon"] {
+  border-color: rgba(212, 78, 70, 0.42);
+}
+
+.night-toolbar {
+  margin-bottom: 14px;
+}
+
+.night-current {
+  min-height: 320px;
+  padding: 20px;
+  border-radius: var(--radius-md);
+  background:
+    linear-gradient(180deg, rgba(213, 176, 106, 0.06), transparent 45%),
+    rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.night-current.empty {
+  display: grid;
+  place-items: center;
+  text-align: center;
+}
+
+.step-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--gold);
+  margin-bottom: 14px;
+}
+
+.step-title {
+  margin-bottom: 8px;
+  font-size: 1.65rem;
+}
+
+.step-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.type-badge,
+.warning-badge,
+.hint-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 228, 202, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 0.88rem;
+}
+
+.type-badge[data-type="townsfolk"] {
+  color: var(--townsfolk);
+}
+
+.type-badge[data-type="outsider"] {
+  color: var(--outsider);
+}
+
+.type-badge[data-type="minion"] {
+  color: var(--minion);
+}
+
+.type-badge[data-type="demon"] {
+  color: var(--demon);
+}
+
+.night-ability {
+  font-style: italic;
+  line-height: 1.75;
+  margin-bottom: 14px;
+}
+
+.guide-box {
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(213, 176, 106, 0.18), rgba(213, 176, 106, 0.08));
+  border: 1px solid rgba(213, 176, 106, 0.36);
+  color: #f9e7b5;
+  line-height: 1.7;
+  margin-bottom: 14px;
+}
+
+.warning-box {
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(168, 63, 72, 0.16);
+  border: 1px solid rgba(168, 63, 72, 0.34);
+  color: #ffd8d8;
+  line-height: 1.7;
+}
+
+.warning-stack {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.warning-item {
+  padding: 12px 14px;
+  border-radius: 16px;
+}
+
+.night-list-wrap {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+}
+
+.night-step-list {
+  display: grid;
+  gap: 10px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.night-step-item {
+  padding: 12px 14px;
+  border-radius: 16px;
+}
+
+.night-step-item.active {
+  border-color: rgba(213, 176, 106, 0.38);
+  background: linear-gradient(135deg, rgba(196, 73, 55, 0.14), rgba(213, 176, 106, 0.12));
+}
+
+.night-step-item strong {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.players-panel,
+.notes-panel {
+  margin-top: 24px;
+}
+
+.player-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.player-card {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: var(--radius-md);
+}
+
+.player-card.dead {
+  opacity: 0.8;
+}
+
+.card-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.card-head strong {
+  display: block;
+  font-size: 1.25rem;
+}
+
+.role-name {
+  font-size: 1.2rem;
+}
+
+.card-badges {
+  align-items: center;
+}
+
+.card-badge.dead {
+  color: #ffd3d3;
+  border-color: rgba(168, 63, 72, 0.4);
+}
+
+.card-badge.good {
+  color: #d6ebb7;
+  border-color: rgba(113, 154, 105, 0.4);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.role-ability,
+.role-note {
+  line-height: 1.7;
+}
+
+.card-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.card-controls button {
+  padding: 9px 12px;
+}
+
+.card-controls button.is-active,
+.token-preset.is-active {
+  background: linear-gradient(135deg, rgba(196, 73, 55, 0.24), rgba(213, 176, 106, 0.12));
+  border-color: rgba(213, 176, 106, 0.48);
+}
+
+.token-zone {
+  display: grid;
+  gap: 12px;
+}
+
+.token-presets {
+  gap: 8px;
+}
+
+.token-preset {
+  padding: 8px 11px;
+  font-size: 0.9rem;
+}
+
+.token-list {
+  gap: 8px;
+}
+
+.token {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: var(--text);
+}
+
+.token.removeable {
+  cursor: pointer;
+}
+
+.token-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.notes-panel textarea {
+  position: relative;
+  z-index: 1;
+}
+
+.hidden {
+  display: none !important;
+}
+
+@media (max-width: 1320px) {
+  .main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .table-stage {
+    width: min(100%, 680px);
+  }
+}
+
+@media (max-width: 1080px) {
+  .player-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .page-shell {
+    width: min(100% - 18px, 100%);
+    padding-top: 18px;
+  }
+
+  .hero,
+  .setup-panel,
+  .table-panel,
+  .night-panel,
+  .players-panel,
+  .notes-panel {
+    padding: 22px;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .inline-head,
+  .card-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .button-row,
+  .night-toolbar,
+  .field-row,
+  .token-input-row {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .player-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .seat {
+    width: 78px;
+    min-height: 78px;
+    padding: 8px 6px;
+    border-radius: 18px;
+  }
+
+  .seat-role {
+    font-size: 0.8rem;
+  }
+
+  .table-core {
+    width: 42%;
+  }
+}
+
+</style>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero panel">
+        <div class="hero-copy">
+          <p class="eyebrow">血染钟楼</p>
+          <h1>暗流涌动说书人台</h1>
+          <p class="hero-lead">
+            纯本地静态网页，围绕“圆桌建局 + 发牌 + 夜间提词 + 玩家控制卡”来做。
+            所有座位、身份、生死、鬼票和标记都会自动存到本地，浏览器误关后也能原样恢复。
+          </p>
+          <div class="hero-tags">
+            <span>纯本地运行</span>
+            <span>自动存档</span>
+            <span>暗流涌动基础板</span>
+            <span>支持手动改牌</span>
+          </div>
+        </div>
+
+        <div class="save-panel">
+          <div class="save-card">
+            <p class="save-kicker">自动存档</p>
+            <strong id="save-indicator">尚未保存</strong>
+            <p id="restore-indicator" class="save-note">所有改动会实时写入本地存储。</p>
+          </div>
+          <div class="save-card compact">
+            <p class="save-kicker">当前夜间模式</p>
+            <strong id="night-mode-indicator">未打开</strong>
+            <p class="save-note">点击“首夜提词”或“其他夜晚提词”进入说书流程。</p>
+          </div>
+        </div>
+      </header>
+
+      <main class="main-layout">
+        <section class="panel setup-panel">
+          <div class="section-heading">
+            <p class="kicker">建局</p>
+            <h2>建局与发牌</h2>
+          </div>
+
+          <div class="control-stack">
+            <label class="count-field">
+              <span>玩家人数</span>
+              <input id="player-count-input" type="number" min="5" max="15" step="1" />
+            </label>
+
+            <div class="button-row">
+              <button id="generate-seats" type="button">生成座位</button>
+              <button id="deal-roles" type="button" class="accent-button">随机发牌</button>
+              <button id="reroll-bluffs" type="button">重抽虚张声势</button>
+            </div>
+
+            <div class="button-row">
+              <button id="first-night-button" type="button">首夜提词</button>
+              <button id="other-night-button" type="button">其他夜晚提词</button>
+              <button id="clear-storage" type="button" class="danger-button">清空存档</button>
+            </div>
+          </div>
+
+          <div class="summary-grid">
+            <article>
+              <span class="label">预期构成</span>
+              <strong id="expected-composition">5 / 0 / 1 / 1</strong>
+              <p id="expected-note">会自动计入男爵之类的外来者修正。</p>
+            </article>
+            <article>
+              <span class="label">当前板面</span>
+              <strong id="actual-composition">0 / 0 / 0 / 0</strong>
+              <p id="actual-note">尚未发牌。</p>
+            </article>
+            <article>
+              <span class="label">存活人数</span>
+              <strong id="alive-count">0</strong>
+              <p id="ghost-note">死亡玩家会自动获得一张可用鬼票。</p>
+            </article>
+          </div>
+
+          <div class="bluff-card">
+            <div class="inline-head">
+              <div>
+                <p class="kicker">虚张声势</p>
+                <h3>小恶魔虚张声势</h3>
+              </div>
+              <span class="tiny-copy">默认从未在场的善方角色中抽三张</span>
+            </div>
+            <div id="bluff-list" class="bluff-list"></div>
+          </div>
+        </section>
+
+        <section class="panel table-panel">
+          <div class="section-heading">
+            <p class="kicker">白天圆桌</p>
+            <h2>圆桌视图</h2>
+          </div>
+
+          <div class="table-stage">
+            <div class="table-ring" id="table-ring"></div>
+            <div class="table-core">
+              <p class="core-script">暗流涌动</p>
+              <strong id="table-core-status">等待生成座位</strong>
+              <span id="table-core-substatus">点击圆桌座位可直接改名。</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel night-panel">
+          <div class="section-heading">
+            <p class="kicker">夜间提词</p>
+            <h2>夜间提词器</h2>
+          </div>
+
+          <div class="night-toolbar">
+            <button id="night-prev" type="button">上一步</button>
+            <button id="night-next" type="button" class="accent-button">下一步</button>
+          </div>
+
+          <div id="night-current" class="night-current empty">
+            <p>先完成建局或发牌，再选择“首夜提词”或“其他夜晚提词”。</p>
+          </div>
+
+          <div id="night-conditional-warnings" class="warning-stack"></div>
+
+          <div class="night-list-wrap">
+            <div class="inline-head">
+              <h3>今晚步骤</h3>
+              <span id="night-step-count" class="tiny-copy">0 步</span>
+            </div>
+            <div id="night-step-list" class="night-step-list"></div>
+          </div>
+        </section>
+      </main>
+
+      <section class="panel players-panel">
+        <div class="section-heading">
+          <p class="kicker">玩家控制卡</p>
+          <h2>玩家卡片</h2>
+          <p class="section-copy">
+            每张卡都能切换生死、处理鬼票、手动改牌、标记状态与输入自定义标记。
+            点击圆桌座位可改名，卡片上的更改会立即同步回圆桌与夜间提词器。
+          </p>
+        </div>
+        <div id="player-cards" class="player-cards"></div>
+      </section>
+
+      <section class="panel notes-panel">
+        <div class="section-heading">
+          <p class="kicker">说书笔记</p>
+          <h2>记录区</h2>
+        </div>
+        <textarea
+          id="storyteller-notes"
+          rows="8"
+          placeholder="记录厨师数字、共情者结果、占卜师红鲱鱼、毒药师目标、今天被处决的是谁……"
+        ></textarea>
+      </section>
+    </div>
+
+    <script>
+const STORAGE_KEY = "botc-trouble-brewing-local-v1";
+
+const SCRIPT_NAME = "暗流涌动";
+const SMALL_GAME_NO_BLUFFS_MAX = 6;
+
+const setupByPlayers = {
+  5: { townsfolk: 3, outsider: 0, minions: 1, demon: 1 },
+  6: { townsfolk: 3, outsider: 1, minions: 1, demon: 1 },
+  7: { townsfolk: 5, outsider: 0, minions: 1, demon: 1 },
+  8: { townsfolk: 5, outsider: 1, minions: 1, demon: 1 },
+  9: { townsfolk: 5, outsider: 2, minions: 1, demon: 1 },
+  10: { townsfolk: 7, outsider: 0, minions: 2, demon: 1 },
+  11: { townsfolk: 7, outsider: 1, minions: 2, demon: 1 },
+  12: { townsfolk: 7, outsider: 2, minions: 2, demon: 1 },
+  13: { townsfolk: 9, outsider: 0, minions: 3, demon: 1 },
+  14: { townsfolk: 9, outsider: 1, minions: 3, demon: 1 },
+  15: { townsfolk: 9, outsider: 2, minions: 3, demon: 1 },
+};
+
+const typeLabels = {
+  townsfolk: "镇民",
+  outsider: "外来者",
+  minion: "爪牙",
+  demon: "恶魔",
+  fixed: "固定流程",
+};
+
+const tokenPresets = ["🧪 中毒", "🍺 醉酒", "🛡️ 保护", "👑 主人", "💀 今夜死"];
+
+const roles = [
+  {
+    id: "washerwoman",
+    label: "洗衣妇",
+    type: "townsfolk",
+    dealable: true,
+    ability: "首夜得知两名玩家，其中一人是某个在场镇民。",
+    note: "向她展示两名玩家与一个镇民身份，其中只有一人真正是该镇民。",
+    firstOrder: 20,
+    guideFirst: "唤醒后展示两名玩家，再告知一个在场镇民身份；其中仅一人符合。",
+  },
+  {
+    id: "librarian",
+    label: "图书管理员",
+    type: "townsfolk",
+    dealable: true,
+    ability: "首夜得知两名玩家，其中一人是某个在场外来者；或者得知本局没有外来者。",
+    note: "若本局没有外来者，可以直接明确告知。",
+    firstOrder: 30,
+    guideFirst: "若有外来者，展示两名玩家与外来者身份；若没有外来者，直接告诉她本局没有外来者。",
+  },
+  {
+    id: "investigator",
+    label: "调查员",
+    type: "townsfolk",
+    dealable: true,
+    ability: "首夜得知两名玩家，其中一人是某个在场爪牙。",
+    note: "向他展示两名玩家与一个爪牙身份。",
+    firstOrder: 40,
+    guideFirst: "唤醒后展示两名玩家与一个在场爪牙身份，其中只有一人真正是该爪牙。",
+  },
+  {
+    id: "chef",
+    label: "厨师",
+    type: "townsfolk",
+    dealable: true,
+    ability: "首夜得知有多少对相邻玩家同时是邪恶。",
+    note: "只数相邻的邪恶对数。",
+    firstOrder: 50,
+    guideFirst: "比出一个数字，表示相邻邪恶对有多少组。",
+  },
+  {
+    id: "empath",
+    label: "共情者",
+    type: "townsfolk",
+    dealable: true,
+    ability: "每晚得知你两侧存活邻座中有多少人是邪恶。",
+    note: "只看存活邻座。",
+    firstOrder: 60,
+    otherOrder: 20,
+    guideFirst: "比出一个数字，表示你两侧存活邻座里有多少邪恶。",
+    guideOther: "继续比出两侧存活邻座中的邪恶人数。",
+  },
+  {
+    id: "fortune-teller",
+    label: "占卜师",
+    type: "townsfolk",
+    dealable: true,
+    ability: "每晚选择两名玩家：若其中至少一人是恶魔则得知“是”；但有一名好人可能被视为恶魔。",
+    note: "记得提前确定红鲱鱼目标。",
+    firstOrder: 70,
+    otherOrder: 30,
+    guideFirst: "让她指两名玩家，再点头或摇头。记得红鲱鱼在整局内固定。",
+    guideOther: "继续让她指两名玩家，并给出“是”或“否”。",
+  },
+  {
+    id: "undertaker",
+    label: "送葬者",
+    type: "townsfolk",
+    dealable: true,
+    requiresTrigger: true,
+    ability: "每晚得知今天被处决玩家的角色。",
+    note: "只有今天真的发生了处决时才应唤醒。",
+    otherOrder: 40,
+    guideOther: "若今天有人被处决，向他展示那名被处决玩家的真实角色。",
+    warning: "只有今天真的发生处决时才应唤醒送葬者。",
+  },
+  {
+    id: "monk",
+    label: "僧侣",
+    type: "townsfolk",
+    dealable: true,
+    ability: "每晚选择一名其他玩家：今夜其受到保护。",
+    note: "通常不能保护自己。",
+    otherOrder: 50,
+    guideOther: "让他指一名其他玩家，并给目标贴上“🛡️ 保护”标记。",
+  },
+  {
+    id: "ravenkeeper",
+    label: "守鸦人",
+    type: "townsfolk",
+    dealable: true,
+    requiresTrigger: true,
+    ability: "若你夜里死亡，你会得知一名玩家的真实角色。",
+    note: "只有今夜死亡时才唤醒。",
+    otherOrder: 60,
+    guideOther: "若他今夜死亡，让他指一名玩家，并向他展示那名玩家的真实角色。",
+    warning: "只有守鸦人今夜死亡时才应唤醒。",
+  },
+  {
+    id: "virgin",
+    label: "圣女",
+    type: "townsfolk",
+    dealable: true,
+    ability: "若你首次被镇民提名，提名者会立刻被处决。",
+    note: "白天角色，不会出现在夜间提词器中。",
+  },
+  {
+    id: "slayer",
+    label: "屠魔者",
+    type: "townsfolk",
+    dealable: true,
+    oneUse: true,
+    ability: "每局一次，白天公开指定一名玩家；若其是恶魔，该玩家立即死亡。",
+    note: "白天角色，不会出现在夜间提词器中。",
+  },
+  {
+    id: "soldier",
+    label: "士兵",
+    type: "townsfolk",
+    dealable: true,
+    ability: "恶魔无法在夜里杀死你。",
+    note: "被毒或醉后依然可能被恶魔杀死。",
+  },
+  {
+    id: "mayor",
+    label: "市长",
+    type: "townsfolk",
+    dealable: true,
+    ability: "若最后只剩三人存活且今天无人处决，善良获胜；恶魔夜里可能误杀旁人而非你。",
+    note: "残局角色，不会出现在夜间提词器中。",
+  },
+  {
+    id: "butler",
+    label: "管家",
+    type: "outsider",
+    dealable: true,
+    ability: "每晚选择一名玩家作为主人；明天只有主人投票时你才能投票。",
+    note: "记得给目标贴“👑 主人”标记。",
+    firstOrder: 80,
+    otherOrder: 70,
+    guideFirst: "让管家选择主人，并给目标贴上“👑 主人”。",
+    guideOther: "继续选择明天的主人，并更新“👑 主人”标记。",
+  },
+  {
+    id: "drunk",
+    label: "酒鬼",
+    type: "outsider",
+    dealable: true,
+    ability: "你不知道自己是外来者，而是以为自己是某个镇民，但始终醉酒。",
+    note: "适合配合手动改牌与“🍺 醉酒”标记使用。",
+  },
+  {
+    id: "recluse",
+    label: "隐士",
+    type: "outsider",
+    dealable: true,
+    ability: "你可能会被侦测成邪恶或恶魔，即使你不是。",
+    note: "这会影响厨师、共情者、占卜师、调查员等信息。",
+  },
+  {
+    id: "saint",
+    label: "圣徒",
+    type: "outsider",
+    dealable: true,
+    ability: "若你被处决，善良立刻失败。",
+    note: "白天持续生效。",
+  },
+  {
+    id: "poisoner",
+    label: "毒药师",
+    type: "minion",
+    dealable: true,
+    ability: "每晚选择一名玩家：其今夜与明天白天中毒。",
+    note: "常用“🧪 中毒”标记追踪。",
+    firstOrder: 90,
+    otherOrder: 80,
+    guideFirst: "让毒药师选择一名玩家，并给目标贴“🧪 中毒”。",
+    guideOther: "继续选择中毒目标，并更新中毒标记。",
+  },
+  {
+    id: "spy",
+    label: "间谍",
+    type: "minion",
+    dealable: true,
+    ability: "每晚查看魔典；你可能被侦测成善良与镇民或外来者。",
+    note: "只需展示当前完整局面，不需要额外给数字。",
+    firstOrder: 100,
+    otherOrder: 90,
+    guideFirst: "让间谍查看整本魔典，然后闭眼。",
+    guideOther: "继续让间谍查看整本魔典。",
+  },
+  {
+    id: "scarlet-woman",
+    label: "猩红女郎",
+    type: "minion",
+    dealable: true,
+    ability: "若仍有5名以上玩家存活时恶魔死亡，你会变成恶魔。",
+    note: "持续被动，不出现在夜间提词器中。",
+  },
+  {
+    id: "baron",
+    label: "男爵",
+    type: "minion",
+    dealable: true,
+    outsiderModifier: 2,
+    ability: "[+2 外来者] 没有夜间动作。",
+    note: "放入后要减少2名镇民并增加2名外来者。",
+  },
+  {
+    id: "imp",
+    label: "小恶魔",
+    type: "demon",
+    dealable: true,
+    ability: "每晚选择一名玩家：其死亡。若你自杀，则一名爪牙会成为新的小恶魔。",
+    note: "5至6人局时，小恶魔开局不看爪牙，也不拿三张虚张声势。",
+    otherOrder: 100,
+    guideOther: "让小恶魔选择一名玩家死亡。若他选择自杀，立刻让一名爪牙接替为新的小恶魔。",
+  },
+];
+
+const roleMap = new Map(roles.map((role) => [role.id, role]));
+
+const pools = {
+  townsfolk: roles.filter((role) => role.dealable && role.type === "townsfolk"),
+  outsider: roles.filter((role) => role.dealable && role.type === "outsider"),
+  minion: roles.filter((role) => role.dealable && role.type === "minion"),
+  demon: roles.filter((role) => role.dealable && role.type === "demon"),
+};
+
+const elements = {
+  playerCountInput: document.querySelector("#player-count-input"),
+  generateSeats: document.querySelector("#generate-seats"),
+  dealRoles: document.querySelector("#deal-roles"),
+  rerollBluffs: document.querySelector("#reroll-bluffs"),
+  firstNightButton: document.querySelector("#first-night-button"),
+  otherNightButton: document.querySelector("#other-night-button"),
+  clearStorage: document.querySelector("#clear-storage"),
+  saveIndicator: document.querySelector("#save-indicator"),
+  restoreIndicator: document.querySelector("#restore-indicator"),
+  nightModeIndicator: document.querySelector("#night-mode-indicator"),
+  expectedComposition: document.querySelector("#expected-composition"),
+  expectedNote: document.querySelector("#expected-note"),
+  actualComposition: document.querySelector("#actual-composition"),
+  actualNote: document.querySelector("#actual-note"),
+  aliveCount: document.querySelector("#alive-count"),
+  ghostNote: document.querySelector("#ghost-note"),
+  bluffList: document.querySelector("#bluff-list"),
+  tableRing: document.querySelector("#table-ring"),
+  tableCoreStatus: document.querySelector("#table-core-status"),
+  tableCoreSubstatus: document.querySelector("#table-core-substatus"),
+  nightCurrent: document.querySelector("#night-current"),
+  nightConditionalWarnings: document.querySelector("#night-conditional-warnings"),
+  nightStepCount: document.querySelector("#night-step-count"),
+  nightStepList: document.querySelector("#night-step-list"),
+  nightPrev: document.querySelector("#night-prev"),
+  nightNext: document.querySelector("#night-next"),
+  playerCards: document.querySelector("#player-cards"),
+  notes: document.querySelector("#storyteller-notes"),
+};
+
+function clampPlayerCount(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) {
+    return 8;
+  }
+  return Math.min(15, Math.max(5, Math.round(number)));
+}
+
+function makePlayer(seat, previous = {}) {
+  return {
+    id: previous.id || `seat-${seat}`,
+    seat,
+    name: previous.name || `${seat}号`,
+    roleId: previous.roleId || "",
+    drawnRoleId: previous.drawnRoleId || "",
+    alive: previous.alive !== false,
+    ghostVote: previous.ghostVote !== false,
+    abilityUsed: Boolean(previous.abilityUsed),
+    triggerTonight: Boolean(previous.triggerTonight),
+    keepsAbilityWhenDead: Boolean(previous.keepsAbilityWhenDead),
+    tokens: Array.isArray(previous.tokens) ? previous.tokens : [],
+  };
+}
+
+function buildPlayers(count, previousPlayers = []) {
+  return Array.from({ length: count }, (_, index) => makePlayer(index + 1, previousPlayers[index] || {}));
+}
+
+function getDefaultState() {
+  const playerCount = 8;
+  return {
+    playerCount,
+    players: buildPlayers(playerCount),
+    bluffs: [],
+    notes: "",
+    lastSavedAt: "",
+    restoreMessage: "所有改动会实时写入本地存储。",
+    sessionMessage: "已创建新的空白局。",
+    night: { mode: null, currentIndex: 0 },
+  };
+}
+
+function normalizeState(raw) {
+  const playerCount = clampPlayerCount(raw.playerCount);
+  return {
+    playerCount,
+    players: buildPlayers(playerCount, Array.isArray(raw.players) ? raw.players : []),
+    bluffs: Array.isArray(raw.bluffs) ? raw.bluffs.filter((id) => roleMap.has(id)) : [],
+    notes: typeof raw.notes === "string" ? raw.notes : "",
+    lastSavedAt: typeof raw.lastSavedAt === "string" ? raw.lastSavedAt : "",
+    restoreMessage:
+      typeof raw.restoreMessage === "string" ? raw.restoreMessage : "已从本地恢复上次局面。",
+    sessionMessage:
+      typeof raw.sessionMessage === "string" ? raw.sessionMessage : "已从本地恢复上次局面。",
+    night: {
+      mode: raw.night && (raw.night.mode === "first" || raw.night.mode === "other") ? raw.night.mode : null,
+      currentIndex:
+        raw.night && Number.isFinite(raw.night.currentIndex) ? Math.max(0, raw.night.currentIndex) : 0,
+    },
+  };
+}
+
+function formatTime(isoString) {
+  if (!isoString) {
+    return "尚未保存";
+  }
+  return new Intl.DateTimeFormat("zh-CN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).format(new Date(isoString));
+}
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) {
+      return getDefaultState();
+    }
+    const nextState = normalizeState(JSON.parse(saved));
+    nextState.restoreMessage = nextState.lastSavedAt
+      ? `已恢复 ${formatTime(nextState.lastSavedAt)} 的本地局面。`
+      : "已从本地恢复上次局面。";
+    return nextState;
+  } catch (_error) {
+    return getDefaultState();
+  }
+}
+
+let state = loadState();
+
+function persistState() {
+  state.lastSavedAt = new Date().toISOString();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+function commit(mutator, message) {
+  mutator();
+  if (message) {
+    state.sessionMessage = message;
+    state.restoreMessage = message;
+  }
+  persistState();
+  render();
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
+
+function shuffle(list) {
+  const copy = [...list];
+  for (let index = copy.length - 1; index > 0; index -= 1) {
+    const target = Math.floor(Math.random() * (index + 1));
+    [copy[index], copy[target]] = [copy[target], copy[index]];
+  }
+  return copy;
+}
+
+function sampleMany(list, count) {
+  return shuffle(list).slice(0, count);
+}
+
+function getRole(player) {
+  return player.roleId ? roleMap.get(player.roleId) || null : null;
+}
+
+function getDrawnRole(player) {
+  return player.drawnRoleId ? roleMap.get(player.drawnRoleId) || null : null;
+}
+
+function getCounts(players = state.players) {
+  return players.reduce(
+    (result, player) => {
+      const role = getRole(player);
+      if (!role) {
+        return result;
+      }
+      result[role.type] += 1;
+      return result;
+    },
+    { townsfolk: 0, outsider: 0, minion: 0, demon: 0 },
+  );
+}
+
+function getExpectedComposition() {
+  const base = setupByPlayers[state.playerCount];
+  const modifier = state.players
+    .map((player) => getRole(player))
+    .filter((role) => role && role.outsiderModifier)
+    .reduce((sum, role) => sum + role.outsiderModifier, 0);
+
+  const outsider = Math.max(0, base.outsider + modifier);
+  const townsfolk = base.townsfolk - (outsider - base.outsider);
+  return {
+    townsfolk,
+    outsider,
+    minion: base.minions,
+    demon: base.demon,
+    modifier,
+  };
+}
+
+function formatComposition(counts) {
+  return `${counts.townsfolk} / ${counts.outsider} / ${counts.minion} / ${counts.demon}`;
+}
+
+function getAliveCount() {
+  return state.players.filter((player) => player.alive).length;
+}
+
+function getGhostSummary() {
+  const dead = state.players.filter((player) => !player.alive);
+  return {
+    total: dead.length,
+    active: dead.filter((player) => player.ghostVote).length,
+  };
+}
+
+function getRoleOptionsHtml() {
+  const groups = [
+    { label: "镇民", roles: roles.filter((role) => role.type === "townsfolk") },
+    { label: "外来者", roles: roles.filter((role) => role.type === "outsider") },
+    { label: "爪牙", roles: roles.filter((role) => role.type === "minion") },
+    { label: "恶魔", roles: roles.filter((role) => role.type === "demon") },
+  ];
+
+  return groups
+    .map(
+      (group) => `
+        <optgroup label="${group.label}">
+          ${group.roles
+            .map((role) => `<option value="${role.id}">${escapeHtml(role.label)}</option>`)
+            .join("")}
+        </optgroup>
+      `,
+    )
+    .join("");
+}
+
+const roleOptionsHtml = getRoleOptionsHtml();
+
+function getModifierNote() {
+  const modifiedRoles = state.players
+    .map((player) => getRole(player))
+    .filter((role) => role && role.outsiderModifier);
+
+  if (!modifiedRoles.length) {
+    return "当前没有外来者修正。";
+  }
+
+  return modifiedRoles
+    .map((role) => `${role.label} ${role.outsiderModifier > 0 ? "+" : ""}${role.outsiderModifier}`)
+    .join("，");
+}
+
+function getBluffCandidates() {
+  const inPlay = new Set(state.players.map((player) => player.roleId).filter(Boolean));
+  return roles.filter(
+    (role) =>
+      (role.type === "townsfolk" || role.type === "outsider") &&
+      role.dealable &&
+      !inPlay.has(role.id),
+  );
+}
+
+function rerollBluffs() {
+  if (state.playerCount <= SMALL_GAME_NO_BLUFFS_MAX) {
+    state.bluffs = [];
+    return;
+  }
+  state.bluffs = sampleMany(getBluffCandidates(), 3).map((role) => role.id);
+}
+
+function dealRandomRoles() {
+  const setup = setupByPlayers[state.playerCount];
+  const demon = sampleMany(pools.demon, 1)[0];
+  const minions = sampleMany(pools.minion, setup.minions);
+  const outsiderModifier =
+    (demon.outsiderModifier || 0) + minions.reduce((sum, role) => sum + (role.outsiderModifier || 0), 0);
+  const outsiderCount = Math.max(0, setup.outsider + outsiderModifier);
+  const townsfolkCount = setup.townsfolk - (outsiderCount - setup.outsider);
+
+  const deck = shuffle([
+    ...sampleMany(pools.townsfolk, townsfolkCount),
+    ...sampleMany(pools.outsider, outsiderCount),
+    ...minions,
+    demon,
+  ]);
+
+  state.players = buildPlayers(state.playerCount, state.players).map((player, index) => ({
+    ...player,
+    roleId: deck[index].id,
+    drawnRoleId: deck[index].id,
+    alive: true,
+    ghostVote: true,
+    abilityUsed: false,
+    triggerTonight: false,
+    keepsAbilityWhenDead: false,
+    tokens: [],
+  }));
+
+  rerollBluffs();
+  state.night = { mode: null, currentIndex: 0 };
+}
+
+function buildNightSequence(mode) {
+  const steps = [];
+  const warnings = [];
+
+  if (mode === "first") {
+    const bluffNames = state.bluffs.map((id) => roleMap.get(id)?.label).filter(Boolean).join(" / ");
+    const smallGame = state.playerCount <= SMALL_GAME_NO_BLUFFS_MAX;
+    steps.push({
+      id: "evil-info",
+      type: "fixed",
+      title: "邪恶阵营信息",
+      ability: "按首夜流程处理爪牙互认、小恶魔信息与虚张声势。",
+      guide: smallGame
+        ? "这是5至6人局。按小人数规则处理：小恶魔不看爪牙，也不拿三张虚张声势。"
+        : `先完成邪恶阵营互认，再向小恶魔展示三张虚张声势：${bluffNames || "尚未生成"}`,
+      order: 1,
+    });
+  }
+
+  state.players.forEach((player) => {
+    const role = getRole(player);
+    if (!role) {
+      return;
+    }
+
+    const order = mode === "first" ? role.firstOrder : role.otherOrder;
+    if (typeof order !== "number") {
+      return;
+    }
+
+    if (role.oneUse && player.abilityUsed) {
+      return;
+    }
+
+    if (role.requiresTrigger && !player.triggerTonight) {
+      warnings.push({
+        title: `${player.seat}号 ${player.name} · ${role.label}`,
+        text: `这个角色只在满足条件时才该唤醒。当前“今夜触发”没有打开，所以提词器已自动跳过。${role.warning ? ` ${role.warning}` : ""}`,
+      });
+      return;
+    }
+
+    if (!player.alive && !player.keepsAbilityWhenDead && !role.requiresTrigger) {
+      return;
+    }
+
+    steps.push({
+      id: `${mode}-${player.id}-${role.id}`,
+      playerSeat: player.seat,
+      playerName: player.name,
+      type: role.type,
+      title: `${player.seat}号 · ${player.name} · ${role.label}`,
+      ability: role.ability,
+      guide: mode === "first" ? role.guideFirst || role.note : role.guideOther || role.note,
+      warning: role.warning || "",
+      order,
+    });
+  });
+
+  steps.sort((a, b) => a.order - b.order || (a.playerSeat || 0) - (b.playerSeat || 0));
+  return { steps, warnings };
+}
+
+function renderSaveStatus() {
+  elements.saveIndicator.textContent = `最近保存：${formatTime(state.lastSavedAt)}`;
+  elements.restoreIndicator.textContent = state.restoreMessage || state.sessionMessage;
+}
+
+function renderSummary() {
+  const expected = getExpectedComposition();
+  const actual = getCounts();
+  const ghost = getGhostSummary();
+  const assigned = state.players.filter((player) => player.roleId).length;
+
+  elements.playerCountInput.value = String(state.playerCount);
+  elements.expectedComposition.textContent = formatComposition(expected);
+  elements.expectedNote.textContent = getModifierNote();
+  elements.actualComposition.textContent = formatComposition(actual);
+  elements.actualNote.textContent =
+    assigned === 0
+      ? "尚未发牌。"
+      : assigned === state.playerCount
+        ? "已为所有座位分配角色。"
+        : `已分配 ${assigned} / ${state.playerCount} 个座位。`;
+  elements.aliveCount.textContent = `${getAliveCount()}`;
+  elements.ghostNote.textContent =
+    ghost.total === 0 ? "当前无人死亡。" : `${ghost.active} 名死者仍有鬼票，${ghost.total - ghost.active} 名死者已用票。`;
+}
+
+function renderBluffs() {
+  if (state.playerCount <= SMALL_GAME_NO_BLUFFS_MAX) {
+    elements.bluffList.innerHTML = `
+      <div class="bluff-item">
+        <p class="empty-state">5至6人局按小人数规则处理，小恶魔开局不拿三张虚张声势。</p>
+      </div>
+    `;
+    return;
+  }
+
+  if (!state.bluffs.length) {
+    elements.bluffList.innerHTML = `
+      <div class="bluff-item">
+        <p class="empty-state">随机发牌后会自动抽出三张不在场的善方角色。</p>
+      </div>
+    `;
+    return;
+  }
+
+  elements.bluffList.innerHTML = state.bluffs
+    .map((id) => roleMap.get(id))
+    .filter(Boolean)
+    .map(
+      (role) => `
+        <article class="bluff-item">
+          <strong>${escapeHtml(role.label)}</strong>
+          <p class="ability-copy">${escapeHtml(role.ability)}</p>
+        </article>
+      `,
+    )
+    .join("");
+}
+
+function renderTable() {
+  const players = buildPlayers(state.playerCount, state.players);
+  state.players = players;
+
+  elements.tableCoreStatus.textContent = `${SCRIPT_NAME} · ${state.playerCount} 人局`;
+  elements.tableCoreSubstatus.textContent = `${getAliveCount()} 人存活，点击座位可改名。`;
+
+  elements.tableRing.innerHTML = players
+    .map((player, index) => {
+      const angle = (Math.PI * 2 * index) / players.length - Math.PI / 2;
+      const radius = players.length <= 8 ? 42 : players.length <= 12 ? 44 : 46;
+      const x = 50 + Math.cos(angle) * radius;
+      const y = 50 + Math.sin(angle) * radius;
+      const role = getRole(player);
+      const roleLabel = role ? role.label : "未发牌";
+      const type = role ? role.type : "fixed";
+      const tokenCount = player.tokens.length ? `<span class="seat-token-count">${player.tokens.length} 标记</span>` : "";
+      const status = player.alive
+        ? `<span class="seat-token-count">存活</span>`
+        : `<span class="seat-token-count">${player.ghostVote ? "👻 有票" : "❌ 无票"}</span>`;
+
+      return `
+        <button
+          class="seat ${player.alive ? "" : "dead"}"
+          data-seat-index="${index}"
+          data-type="${type}"
+          type="button"
+          style="--seat-x:${x}%; --seat-y:${y}%"
+          title="点击改名"
+        >
+          <span class="seat-number">${player.seat}</span>
+          <span class="seat-name">${escapeHtml(player.name)}</span>
+          <span class="seat-role">${escapeHtml(roleLabel)}</span>
+          <span class="seat-status">${status}${tokenCount}</span>
+        </button>
+      `;
+    })
+    .join("");
+}
+
+function renderNightPanel() {
+  if (!state.night.mode) {
+    elements.nightModeIndicator.textContent = "未打开";
+    elements.nightCurrent.className = "night-current empty";
+    elements.nightCurrent.innerHTML = "<p>先完成建局或发牌，再选择“首夜提词”或“其他夜晚提词”。</p>";
+    elements.nightStepCount.textContent = "0 步";
+    elements.nightConditionalWarnings.innerHTML = "";
+    elements.nightStepList.innerHTML = "";
+    return;
+  }
+
+  const { steps, warnings } = buildNightSequence(state.night.mode);
+  const total = steps.length;
+  const currentIndex = total ? Math.min(state.night.currentIndex, total - 1) : 0;
+  state.night.currentIndex = currentIndex;
+
+  elements.nightModeIndicator.textContent =
+    total === 0
+      ? `${state.night.mode === "first" ? "首夜" : "其他夜晚"} · 无步骤`
+      : `${state.night.mode === "first" ? "首夜" : "其他夜晚"} · ${currentIndex + 1}/${total}`;
+
+  elements.nightStepCount.textContent = `${total} 步`;
+
+  if (!total) {
+    elements.nightCurrent.className = "night-current empty";
+    elements.nightCurrent.innerHTML = "<p>当前没有符合这个阶段的夜间角色，或条件角色尚未标记触发。</p>";
+  } else {
+    const step = steps[currentIndex];
+    elements.nightCurrent.className = "night-current";
+    elements.nightCurrent.innerHTML = `
+      <div class="step-counter">步骤 ${currentIndex + 1} / ${total}</div>
+      <h3 class="step-title">${escapeHtml(step.title)}</h3>
+      <div class="step-meta">
+        <span class="type-badge" data-type="${step.type}">${typeLabels[step.type]}</span>
+        ${
+          step.playerSeat
+            ? `<span class="hint-badge">座位 ${step.playerSeat}</span><span class="hint-badge">${escapeHtml(step.playerName)}</span>`
+            : `<span class="hint-badge">固定流程</span>`
+        }
+      </div>
+      <p class="night-ability">${escapeHtml(step.ability)}</p>
+      <div class="guide-box">${escapeHtml(step.guide)}</div>
+      ${step.warning ? `<div class="warning-box">${escapeHtml(step.warning)}</div>` : ""}
+    `;
+  }
+
+  elements.nightConditionalWarnings.innerHTML = warnings
+    .map(
+      (warning) => `
+        <div class="warning-item">
+          <strong>${escapeHtml(warning.title)}</strong>
+          <p class="warning-copy">${escapeHtml(warning.text)}</p>
+        </div>
+      `,
+    )
+    .join("");
+
+  elements.nightStepList.innerHTML = steps
+    .map(
+      (step, index) => `
+        <button class="night-step-item ${index === currentIndex ? "active" : ""}" type="button" data-night-index="${index}">
+          <strong>${index + 1}. ${escapeHtml(step.title)}</strong>
+          <p class="hint-copy">${escapeHtml(step.ability)}</p>
+        </button>
+      `,
+    )
+    .join("");
+}
+
+function renderCards() {
+  elements.playerCards.innerHTML = state.players
+    .map((player, index) => {
+      const role = getRole(player);
+      const drawnRole = getDrawnRole(player);
+      const roleLabel = role ? role.label : "未发牌";
+      const roleAbility = role ? role.ability : "尚未分配角色。";
+      const roleNote = role ? role.note || "无额外提醒。" : "可以先随机发牌，或手动指定角色。";
+      const canRestore = drawnRole && player.roleId && player.drawnRoleId !== player.roleId;
+      const showUsed = role && role.oneUse;
+      const showTrigger = role && role.requiresTrigger;
+
+      return `
+        <article class="player-card ${player.alive ? "" : "dead"}">
+          <div class="card-head">
+            <div>
+              <p class="kicker">${player.seat}号座位</p>
+              <strong>${escapeHtml(player.name)}</strong>
+              <p class="role-name">${escapeHtml(roleLabel)}</p>
+            </div>
+            <div class="card-badges">
+              <span class="card-badge ${player.alive ? "good" : "dead"}">${player.alive ? "存活" : "死亡"}</span>
+              <span class="card-badge ${!player.alive && player.ghostVote ? "good" : ""}">
+                ${player.alive ? "生者票正常" : player.ghostVote ? "👻 有鬼票" : "❌ 鬼票已用"}
+              </span>
+            </div>
+          </div>
+
+          <div class="field-row">
+            <label>
+              <span class="label">玩家姓名</span>
+              <input type="text" data-name-input="${index}" value="${escapeHtml(player.name)}" />
+            </label>
+            <label>
+              <span class="label">当前角色</span>
+              <select data-role-select="${index}">
+                <option value="">未发牌</option>
+                ${roleOptionsHtml}
+              </select>
+            </label>
+          </div>
+
+          <p class="hint-copy">原始牌：${drawnRole ? escapeHtml(drawnRole.label) : "尚未记录"}</p>
+          <p class="role-ability">${escapeHtml(roleAbility)}</p>
+          <p class="role-note">说书人提醒：${escapeHtml(roleNote)}</p>
+
+          <div class="card-controls">
+            <button type="button" data-action="toggle-life" data-index="${index}" class="${player.alive ? "" : "is-active"}">
+              ${player.alive ? "标记死亡" : "复活"}
+            </button>
+            <button type="button" data-action="toggle-ghost" data-index="${index}" class="${!player.alive && player.ghostVote ? "is-active" : ""}" ${player.alive ? "disabled" : ""}>
+              ${player.alive ? "存活中" : player.ghostVote ? "消耗鬼票" : "恢复鬼票"}
+            </button>
+            <button type="button" data-action="toggle-keep-dead" data-index="${index}" class="${player.keepsAbilityWhenDead ? "is-active" : ""}">
+              ${player.keepsAbilityWhenDead ? "死后仍行动" : "标记死后仍行动"}
+            </button>
+            ${showUsed ? `<button type="button" data-action="toggle-used" data-index="${index}" class="${player.abilityUsed ? "is-active" : ""}">${player.abilityUsed ? "能力已用" : "标记已用能力"}</button>` : ""}
+            ${showTrigger ? `<button type="button" data-action="toggle-trigger" data-index="${index}" class="${player.triggerTonight ? "is-active" : ""}">${player.triggerTonight ? "今夜已触发" : "标记今夜触发"}</button>` : ""}
+            ${canRestore ? `<button type="button" data-action="restore-role" data-index="${index}">还原原始牌</button>` : ""}
+          </div>
+
+          <div class="token-zone">
+            <div class="token-presets">
+              ${tokenPresets
+                .map((token) => `<button type="button" class="token-preset" data-action="add-preset-token" data-index="${index}" data-token="${escapeHtml(token)}">+${escapeHtml(token)}</button>`)
+                .join("")}
+            </div>
+
+            <form class="token-input-row" data-token-form="${index}">
+              <input type="text" name="token" placeholder="输入自定义标记，回车添加" />
+              <button type="submit">添加</button>
+            </form>
+
+            <div class="token-list">
+              ${
+                player.tokens.length
+                  ? player.tokens
+                      .map(
+                        (token) => `<button type="button" class="token removeable" data-action="remove-token" data-index="${index}" data-token-id="${escapeHtml(token.id)}" title="点击移除">${escapeHtml(token.label)}</button>`,
+                      )
+                      .join("")
+                  : `<span class="hint-copy">暂无标记。</span>`
+              }
+            </div>
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+
+  state.players.forEach((player, index) => {
+    const select = elements.playerCards.querySelector(`[data-role-select="${index}"]`);
+    if (select) {
+      select.value = player.roleId || "";
+    }
+  });
+}
+
+function renderNotes() {
+  if (elements.notes.value !== state.notes) {
+    elements.notes.value = state.notes;
+  }
+}
+
+function render() {
+  renderSaveStatus();
+  renderSummary();
+  renderBluffs();
+  renderTable();
+  renderNightPanel();
+  renderCards();
+  renderNotes();
+}
+
+function renameSeat(index) {
+  const player = state.players[index];
+  if (!player) {
+    return;
+  }
+
+  const nextName = window.prompt(`修改 ${player.seat} 号玩家姓名`, player.name);
+  if (nextName === null) {
+    return;
+  }
+
+  commit(() => {
+    state.players[index].name = nextName.trim() || `${player.seat}号`;
+  }, `已更新 ${player.seat} 号玩家姓名。`);
+}
+
+function openNight(mode) {
+  commit(() => {
+    state.night.mode = mode;
+    state.night.currentIndex = 0;
+  }, `已打开${mode === "first" ? "首夜" : "其他夜晚"}提词器。`);
+}
+
+function moveNight(delta) {
+  if (!state.night.mode) {
+    return;
+  }
+  const { steps } = buildNightSequence(state.night.mode);
+  if (!steps.length) {
+    return;
+  }
+  commit(() => {
+    state.night.currentIndex = Math.min(steps.length - 1, Math.max(0, state.night.currentIndex + delta));
+  });
+}
+
+function attachEvents() {
+  elements.generateSeats.addEventListener("click", () => {
+    commit(() => {
+      const count = clampPlayerCount(elements.playerCountInput.value);
+      state.playerCount = count;
+      state.players = buildPlayers(count, state.players);
+      rerollBluffs();
+    }, `已生成 ${clampPlayerCount(elements.playerCountInput.value)} 人圆桌座位。`);
+  });
+
+  elements.dealRoles.addEventListener("click", () => {
+    commit(() => {
+      state.playerCount = clampPlayerCount(elements.playerCountInput.value);
+      state.players = buildPlayers(state.playerCount, state.players);
+      dealRandomRoles();
+    }, `已为 ${clampPlayerCount(elements.playerCountInput.value)} 人局随机发牌。`);
+  });
+
+  elements.rerollBluffs.addEventListener("click", () => {
+    commit(() => {
+      rerollBluffs();
+    }, "已重抽小恶魔虚张声势。");
+  });
+
+  elements.firstNightButton.addEventListener("click", () => openNight("first"));
+  elements.otherNightButton.addEventListener("click", () => openNight("other"));
+  elements.nightPrev.addEventListener("click", () => moveNight(-1));
+  elements.nightNext.addEventListener("click", () => moveNight(1));
+
+  elements.clearStorage.addEventListener("click", () => {
+    const confirmed = window.confirm("确认清空当前本地存档？这会删除所有座位、角色、标记与笔记。");
+    if (!confirmed) {
+      return;
+    }
+    localStorage.removeItem(STORAGE_KEY);
+    state = getDefaultState();
+    state.restoreMessage = "本地存档已清空，已回到空白局。";
+    persistState();
+    render();
+  });
+
+  elements.playerCountInput.addEventListener("change", () => {
+    commit(() => {
+      state.playerCount = clampPlayerCount(elements.playerCountInput.value);
+      state.players = buildPlayers(state.playerCount, state.players);
+      rerollBluffs();
+    });
+  });
+
+  elements.notes.addEventListener("input", (event) => {
+    commit(() => {
+      state.notes = event.target.value;
+    });
+  });
+
+  elements.tableRing.addEventListener("click", (event) => {
+    const seatButton = event.target.closest("[data-seat-index]");
+    if (!seatButton) {
+      return;
+    }
+    renameSeat(Number(seatButton.dataset.seatIndex));
+  });
+
+  elements.nightStepList.addEventListener("click", (event) => {
+    const target = event.target.closest("[data-night-index]");
+    if (!target) {
+      return;
+    }
+    commit(() => {
+      state.night.currentIndex = Number(target.dataset.nightIndex);
+    });
+  });
+
+  elements.playerCards.addEventListener("change", (event) => {
+    const nameIndex = event.target.dataset.nameInput;
+    const roleIndex = event.target.dataset.roleSelect;
+
+    if (typeof nameIndex !== "undefined") {
+      const index = Number(nameIndex);
+      commit(() => {
+        state.players[index].name = event.target.value.trim() || `${state.players[index].seat}号`;
+      });
+      return;
+    }
+
+    if (typeof roleIndex !== "undefined") {
+      const index = Number(roleIndex);
+      const nextRoleId = event.target.value;
+      commit(() => {
+        const player = state.players[index];
+        player.roleId = nextRoleId;
+        if (!player.drawnRoleId && nextRoleId) {
+          player.drawnRoleId = nextRoleId;
+        }
+        player.abilityUsed = false;
+        player.triggerTonight = false;
+        player.keepsAbilityWhenDead = false;
+        if (!nextRoleId) {
+          player.tokens = [];
+        }
+        rerollBluffs();
+      }, `已调整 ${state.players[index].seat} 号玩家的当前角色。`);
+    }
+  });
+
+  elements.playerCards.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-action]");
+    if (!button) {
+      return;
+    }
+
+    const index = Number(button.dataset.index);
+    const player = state.players[index];
+    if (!player) {
+      return;
+    }
+
+    switch (button.dataset.action) {
+      case "toggle-life":
+        commit(() => {
+          player.alive = !player.alive;
+          if (!player.alive) {
+            player.ghostVote = true;
+          } else {
+            player.triggerTonight = false;
+            player.keepsAbilityWhenDead = false;
+          }
+        }, `${player.seat} 号玩家已${player.alive ? "复活" : "死亡"}。`);
+        break;
+      case "toggle-ghost":
+        if (player.alive) {
+          return;
+        }
+        commit(() => {
+          player.ghostVote = !player.ghostVote;
+        }, `${player.seat} 号玩家鬼票状态已更新。`);
+        break;
+      case "toggle-keep-dead":
+        commit(() => {
+          player.keepsAbilityWhenDead = !player.keepsAbilityWhenDead;
+        }, `${player.seat} 号玩家“死后仍行动”已切换。`);
+        break;
+      case "toggle-used":
+        commit(() => {
+          player.abilityUsed = !player.abilityUsed;
+        }, `${player.seat} 号玩家能力使用状态已更新。`);
+        break;
+      case "toggle-trigger":
+        commit(() => {
+          player.triggerTonight = !player.triggerTonight;
+        }, `${player.seat} 号玩家“今夜触发”已更新。`);
+        break;
+      case "restore-role":
+        commit(() => {
+          player.roleId = player.drawnRoleId;
+          player.abilityUsed = false;
+          player.triggerTonight = false;
+          player.keepsAbilityWhenDead = false;
+          rerollBluffs();
+        }, `${player.seat} 号玩家已还原到原始牌。`);
+        break;
+      case "add-preset-token":
+        commit(() => {
+          player.tokens.push({
+            id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+            label: button.dataset.token,
+          });
+        }, `${player.seat} 号玩家已添加标记。`);
+        break;
+      case "remove-token":
+        commit(() => {
+          player.tokens = player.tokens.filter((token) => token.id !== button.dataset.tokenId);
+        }, `${player.seat} 号玩家已移除标记。`);
+        break;
+      default:
+        break;
+    }
+  });
+
+  elements.playerCards.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-token-form]");
+    if (!form) {
+      return;
+    }
+    event.preventDefault();
+    const index = Number(form.dataset.tokenForm);
+    const input = form.querySelector('input[name="token"]');
+    const label = input.value.trim();
+    if (!label) {
+      return;
+    }
+    commit(() => {
+      state.players[index].tokens.push({
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        label,
+      });
+    }, `${state.players[index].seat} 号玩家已添加自定义标记。`);
+    input.value = "";
+  });
+}
+
+function init() {
+  render();
+  attachEvents();
+}
+
+init();
+
+</script>
+  </body>
+</html>
+
