@@ -1486,6 +1486,13 @@ button.night-btn {
     color: #f6dde0;
 }
 
+.score-btn-clear {
+    grid-column: 1 / -1;
+    background: linear-gradient(180deg, rgba(62, 58, 54, 0.96), rgba(34, 31, 29, 0.99));
+    border-color: rgba(129, 117, 103, 0.28);
+    color: #e7ddd2;
+}
+
 .score-summary {
     margin-top: 12px;
     color: var(--text-dim);
@@ -1852,6 +1859,7 @@ button.night-btn {
             <div class="score-buttons">
                 <button class="action-btn score-btn-good" onclick="recordCampWin('good')">🕯️ 善良胜利</button>
                 <button class="action-btn score-btn-evil" onclick="recordCampWin('evil')">😈 邪恶胜利</button>
+                <button class="action-btn score-btn-clear" onclick="clearScoreBoard()">🗑️ 清空积分栏</button>
             </div>
             <div id="seriesSummary" class="score-summary">已记录 0 局，当前未结算 MVP。</div>
             <div id="scoreBoardList" class="scoreboard-list"><div class="score-empty">暂无记分记录。</div></div>
@@ -2400,6 +2408,14 @@ button.night-btn {
             renderScoreBoard();
             alert(`${camp === 'evil' ? '邪恶阵营' : '善良阵营'}已加分。`);
         }
+        function clearScoreBoard() {
+            if (!confirm('确定要清空积分栏吗？这会重置所有玩家积分、已记录局数和当前赛季 MVP。')) return;
+            scoreBoard = {};
+            seriesGames = 0;
+            finalMvp = '';
+            saveData();
+            renderScoreBoard();
+        }
         function finalizeSeriesMvp() {
             const currentMvpNames = getCurrentMvpNames();
             if (!currentMvpNames.length) return alert('当前还没有可结算的 MVP 分数。');
@@ -2412,6 +2428,183 @@ button.night-btn {
             if (!oldName || !newName || oldName === newName || !(oldName in scoreBoard)) return;
             scoreBoard[newName] = (scoreBoard[newName] || 0) + scoreBoard[oldName];
             delete scoreBoard[oldName];
+        }
+        function wrapProfileText(ctx, text, maxWidth) {
+            const lines = [];
+            `${text || ''}`.split('\n').forEach((paragraph, paragraphIndex, paragraphs) => {
+                let currentLine = '';
+                Array.from(paragraph || ' ').forEach(char => {
+                    const testLine = currentLine + char;
+                    if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+                        lines.push(currentLine);
+                        currentLine = char;
+                    } else {
+                        currentLine = testLine;
+                    }
+                });
+                lines.push(currentLine || ' ');
+                if (paragraphIndex < paragraphs.length - 1) lines.push('');
+            });
+            return lines;
+        }
+        function canvasToBlob(canvas) {
+            return new Promise(resolve => {
+                if (!canvas) {
+                    resolve(null);
+                    return;
+                }
+                canvas.toBlob(blob => resolve(blob), 'image/png');
+            });
+        }
+        function sanitizeFileName(name) {
+            return `${name || 'role-profile'}`
+                .replace(/[\\/:*?"<>|]/g, '_')
+                .replace(/\s+/g, '_');
+        }
+        function downloadRoleProfileImage(blob, fileName) {
+            if (!blob) return false;
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+            return true;
+        }
+        function drawRoundedRect(ctx, x, y, width, height, radius) {
+            const r = Math.min(radius, width / 2, height / 2);
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + width - r, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+            ctx.lineTo(x + width, y + height - r);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+            ctx.lineTo(x + r, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+        function createRoleProfileCanvas(player) {
+            if (!player) return null;
+            const roleName = normalizeRoleName(player.role);
+            const roleParts = `${roleName}`.split('：');
+            const category = roleParts.length > 1 ? roleParts[0] : '身份';
+            const shortRoleName = roleParts.length > 1 ? roleParts[1] : roleName;
+            const scriptName = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
+            const sections = [
+                { label: '技能', text: getCurrentRoleAbilities()[roleName] || '无技能描述' },
+                { label: '初级玩法', text: getRoleBasicPlay(roleName) },
+                { label: '进阶玩法', text: getRoleAdvancedPlay(roleName) }
+            ];
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return null;
+
+            const width = 920;
+            const paddingX = 68;
+            const contentWidth = width - paddingX * 2;
+            ctx.font = '28px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            const sectionData = sections.map(section => ({
+                ...section,
+                lines: wrapProfileText(ctx, section.text, contentWidth - 16)
+            }));
+
+            let height = 170;
+            sectionData.forEach(section => {
+                height += 42;
+                height += section.lines.reduce((sum, line) => sum + (line === '' ? 16 : 36), 0);
+                height += 20;
+            });
+            height += 56;
+
+            canvas.width = width;
+            canvas.height = height;
+            ctx.clearRect(0, 0, width, height);
+
+            const background = ctx.createLinearGradient(0, 0, 0, height);
+            background.addColorStop(0, '#1d1418');
+            background.addColorStop(0.55, '#120e11');
+            background.addColorStop(1, '#0b090b');
+            ctx.fillStyle = background;
+            ctx.fillRect(0, 0, width, height);
+
+            const glow = ctx.createRadialGradient(width * 0.5, 0, 40, width * 0.5, height * 0.2, width * 0.75);
+            glow.addColorStop(0, 'rgba(197, 165, 106, 0.16)');
+            glow.addColorStop(0.45, 'rgba(123, 43, 56, 0.08)');
+            glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+            ctx.fillStyle = glow;
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.strokeStyle = 'rgba(197, 165, 106, 0.42)';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(18, 18, width - 36, height - 36);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(28, 28, width - 56, height - 56);
+
+            ctx.fillStyle = '#a99c90';
+            ctx.font = '18px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            ctx.fillText(`剧本  ${scriptName}`, paddingX, 64);
+
+            ctx.fillStyle = '#7c8996';
+            ctx.textAlign = 'right';
+            ctx.fillText(`座位  ${player.name}`, width - paddingX, 64);
+            ctx.textAlign = 'left';
+
+            ctx.fillStyle = '#f2eadc';
+            ctx.font = '600 52px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            ctx.fillText(shortRoleName, paddingX, 128);
+
+            const badgeText = ` ${category} `;
+            ctx.font = '20px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            const badgeWidth = ctx.measureText(badgeText).width + 28;
+            ctx.fillStyle = 'rgba(197, 165, 106, 0.14)';
+            drawRoundedRect(ctx, paddingX, 146, badgeWidth, 34, 17);
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(197, 165, 106, 0.28)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+            ctx.fillStyle = '#d7c097';
+            ctx.fillText(badgeText, paddingX + 14, 169);
+
+            let y = 224;
+            sectionData.forEach(section => {
+                ctx.fillStyle = '#c5a56a';
+                ctx.font = '600 24px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+                ctx.fillText(section.label, paddingX, y);
+                y += 18;
+
+                ctx.strokeStyle = 'rgba(197, 165, 106, 0.14)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(paddingX, y + 10);
+                ctx.lineTo(width - paddingX, y + 10);
+                ctx.stroke();
+                y += 32;
+
+                ctx.fillStyle = '#e7ded1';
+                ctx.font = '28px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+                section.lines.forEach(line => {
+                    if (line === '') {
+                        y += 16;
+                        return;
+                    }
+                    ctx.fillText(line, paddingX, y);
+                    y += 36;
+                });
+                y += 14;
+            });
+
+            ctx.fillStyle = '#7b6f67';
+            ctx.font = '18px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Storyteller Ritual Console', width / 2, height - 34);
+            ctx.textAlign = 'left';
+
+            return canvas;
         }
         function fallbackCopyText(text) {
             const textarea = document.createElement('textarea');
@@ -2442,6 +2635,24 @@ button.night-btn {
                 `初级玩法：${getRoleBasicPlay(roleName)}`,
                 `进阶玩法：${getRoleAdvancedPlay(roleName)}`
             ].join('\n');
+            const canvas = createRoleProfileCanvas(player);
+            const imageBlob = await canvasToBlob(canvas);
+            const imageFileName = `${sanitizeFileName(player.name)}_${sanitizeFileName(roleName)}.png`;
+
+            if (imageBlob && navigator.clipboard && window.isSecureContext && typeof ClipboardItem !== 'undefined') {
+                try {
+                    await navigator.clipboard.write([new ClipboardItem({ 'image/png': imageBlob })]);
+                    alert('已复制角色资料图片。');
+                    return;
+                } catch (error) {
+                    // Fall through to file download or text fallback.
+                }
+            }
+
+            if (imageBlob && downloadRoleProfileImage(imageBlob, imageFileName)) {
+                alert('当前环境不支持直接复制图片，已为你下载角色资料图片。');
+                return;
+            }
 
             let copied = false;
             if (navigator.clipboard && window.isSecureContext) {
