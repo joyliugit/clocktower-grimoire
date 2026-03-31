@@ -1006,6 +1006,18 @@ button.action-btn {
     box-shadow: 0 0 12px rgba(197, 165, 106, 0.22);
 }
 
+.seat-badge.vote {
+    border-color: rgba(118, 142, 178, 0.62);
+    background: rgba(24, 34, 54, 0.96);
+    box-shadow: 0 0 12px rgba(118, 142, 178, 0.24);
+}
+
+.seat-badge.nominate {
+    border-color: rgba(176, 106, 164, 0.62);
+    background: rgba(52, 24, 49, 0.96);
+    box-shadow: 0 0 12px rgba(176, 106, 164, 0.24);
+}
+
 .seat-badge.execution {
     border-color: rgba(170, 84, 98, 0.68);
     background: rgba(63, 19, 28, 0.96);
@@ -5023,7 +5035,9 @@ button.night-btn {
                 { token: '🍺 醉酒', label: '🍺 醉酒' },
                 { token: '🛡️ 保护', label: '🛡️ 保护' },
                 { token: '🔮 死敌', label: '🔮 死敌' },
-                { token: '👑 主人', label: '👑 主人' }
+                { token: '👑 主人', label: '👑 主人' },
+                { token: '🗳️ 今日投票', label: '🗳️ 今日投票' },
+                { token: '📢 今日提名', label: '📢 今日提名' }
             ];
             const demonBlocked = player.isAlive && isProtectedFromDemon(player);
             title.innerText = `${player.name} 的状态标记`;
@@ -5364,6 +5378,51 @@ button.night-btn {
             }
             return { count, names };
         }
+        function getCircularPlayersBetween(firstId, secondId) {
+            const total = players.length;
+            const firstIndex = players.findIndex(player => player.id === firstId);
+            const secondIndex = players.findIndex(player => player.id === secondId);
+            if (firstIndex === -1 || secondIndex === -1 || firstIndex === secondIndex || total < 2) return 0;
+            const clockwise = (secondIndex - firstIndex - 1 + total) % total;
+            const counterClockwise = (firstIndex - secondIndex - 1 + total) % total;
+            return Math.min(clockwise, counterClockwise);
+        }
+        function getClockmakerReading() {
+            const demons = players.filter(player => getRoleCategory(normalizeRoleName(player.role)) === 'Demon');
+            const minions = players.filter(player => getRoleCategory(normalizeRoleName(player.role)) === 'Minion');
+            if (!demons.length || !minions.length) return null;
+            let best = null;
+            demons.forEach(demon => {
+                minions.forEach(minion => {
+                    const count = getCircularPlayersBetween(demon.id, minion.id);
+                    if (!best || count < best.count) {
+                        best = { count, demon, minion };
+                    }
+                });
+            });
+            return best;
+        }
+        function getOracleReading() {
+            const evilDeadPlayers = players.filter(player => !player.isAlive && isPlayerOnCamp(player, 'evil'));
+            return {
+                count: evilDeadPlayers.length,
+                names: evilDeadPlayers.map(player => player.name)
+            };
+        }
+        function didDemonVoteToday() {
+            const votedDemons = players.filter(player => getRoleCategory(normalizeRoleName(player.role)) === 'Demon' && hasPlayerToken(player, '🗳️ 今日投票'));
+            return {
+                result: votedDemons.length > 0,
+                names: votedDemons.map(player => player.name)
+            };
+        }
+        function didMinionNominateToday() {
+            const nominatingMinions = players.filter(player => getRoleCategory(normalizeRoleName(player.role)) === 'Minion' && hasPlayerToken(player, '📢 今日提名'));
+            return {
+                result: nominatingMinions.length > 0,
+                names: nominatingMinions.map(player => player.name)
+            };
+        }
         function getAvailableGoodBluffs() {
             const activeRoles = players.map(player => normalizeRoleName(player.role));
             const activePoolGood = getCurrentPoolGood();
@@ -5413,7 +5472,11 @@ button.night-btn {
                 '🔮 死敌': { icon: '🔮', className: 'rival' },
                 '🔮死敌': { icon: '🔮', className: 'rival' },
                 '👑 主人': { icon: '👑', className: 'master' },
-                '👑主人': { icon: '👑', className: 'master' }
+                '👑主人': { icon: '👑', className: 'master' },
+                '🗳️ 今日投票': { icon: '🗳️', className: 'vote' },
+                '🗳️今日投票': { icon: '🗳️', className: 'vote' },
+                '📢 今日提名': { icon: '📢', className: 'nominate' },
+                '📢今日提名': { icon: '📢', className: 'nominate' }
             };
             const badges = [];
             if (player.deathType === 'execution') badges.push(badgeMap.__execution);
@@ -5534,6 +5597,45 @@ button.night-btn {
                 }
                 return { title: '💡 计算结果', options: [`存活邻座 [${real.names.join('] 和 [')}]，邪恶共有 <b>${real.count}</b> 人。`] };
             }
+            if (roleStr === '镇民：钟表匠') {
+                const reading = getClockmakerReading();
+                if (!reading) return { title: '💡 计算结果', options: ['当前缺少恶魔或爪牙，暂时无法计算钟表匠读数。'] };
+                const options = [`最近的一组为恶魔 <b>[${reading.demon.name}]</b> 与爪牙 <b>[${reading.minion.name}]</b>，中间相隔 <b>${reading.count}</b> 人。`];
+                if (hasRole('恶魔：涡流')) {
+                    const fakeCount = getAlternativeCountExcluding(reading.count, 0, Math.max(0, Math.floor((players.length - 2) / 2)), [reading.count]);
+                    options.push(`若按涡流给假信息，可改报 <b>${fakeCount}</b>。`);
+                }
+                return { title: '💡 计算结果', options };
+            }
+            if (roleStr === '镇民：卖花女孩') {
+                const reading = didDemonVoteToday();
+                const options = [reading.result
+                    ? `按当前标记，恶魔 <b>[${reading.names.join(']、[')}]</b> 今天投过票，应向其 <b>点头</b>。`
+                    : '按当前标记，恶魔今天没有投票，应向其 <b>摇头</b>。'];
+                options.push('若你还没在轮盘上标记“🗳️ 今日投票”，请先补记后再结算。');
+                if (hasRole('恶魔：涡流')) options.push(`若按涡流给假信息，则应${reading.result ? '摇头' : '点头'}。`);
+                return { title: '💡 计算结果', options };
+            }
+            if (roleStr === '镇民：城镇公告员') {
+                const reading = didMinionNominateToday();
+                const options = [reading.result
+                    ? `按当前标记，爪牙 <b>[${reading.names.join(']、[')}]</b> 今天提名过玩家，应向其 <b>点头</b>。`
+                    : '按当前标记，今天没有爪牙提名，应向其 <b>摇头</b>。'];
+                options.push('若你还没在轮盘上标记“📢 今日提名”，请先补记后再结算。');
+                if (hasRole('恶魔：涡流')) options.push(`若按涡流给假信息，则应${reading.result ? '摇头' : '点头'}。`);
+                return { title: '💡 计算结果', options };
+            }
+            if (roleStr === '镇民：神谕者') {
+                const reading = getOracleReading();
+                const options = [reading.count
+                    ? `当前死亡的邪恶玩家共有 <b>${reading.count}</b> 名：<b>[${reading.names.join(']、[')}]</b>。`
+                    : '当前死亡的邪恶玩家共有 <b>0</b> 名。'];
+                if (hasRole('恶魔：涡流')) {
+                    const fakeCount = getAlternativeCountExcluding(reading.count, 0, Math.max(players.filter(player => !player.isAlive).length, 1), [reading.count]);
+                    options.push(`若按涡流给假信息，可改报 <b>${fakeCount}</b>。`);
+                }
+                return { title: '💡 计算结果', options };
+            }
             if (roleStr === '镇民：占卜师') {
                 return { title: '💡 结算提示', options: ['若其今夜点中恶魔或死敌，则点头；否则摇头。'] };
             }
@@ -5577,6 +5679,25 @@ button.night-btn {
                 const fakeCount = getAlternativeCountExcluding(real.count, 0, 2, [real.count, spy.count]);
                 return [`对存活邻座 [${real.names.join('] 和 [')}] 也可以报 <b>${fakeCount}</b> 人邪恶。`];
             }
+            if (roleStr === '镇民：钟表匠') {
+                const reading = getClockmakerReading();
+                if (!reading) return [];
+                const fakeCount = getAlternativeCountExcluding(reading.count, 0, Math.max(0, Math.floor((players.length - 2) / 2)), [reading.count]);
+                return [`你也可以把钟表匠读数改报为 <b>${fakeCount}</b>。`];
+            }
+            if (roleStr === '镇民：卖花女孩') {
+                const reading = didDemonVoteToday();
+                return [`你也可以把卖花女孩结果反着给：当前应${reading.result ? '点头' : '摇头'}，也可改成${reading.result ? '摇头' : '点头'}。`];
+            }
+            if (roleStr === '镇民：城镇公告员') {
+                const reading = didMinionNominateToday();
+                return [`你也可以把城镇公告员结果反着给：当前应${reading.result ? '点头' : '摇头'}，也可改成${reading.result ? '摇头' : '点头'}。`];
+            }
+            if (roleStr === '镇民：神谕者') {
+                const reading = getOracleReading();
+                const fakeCount = getAlternativeCountExcluding(reading.count, 0, Math.max(players.filter(player => !player.isAlive).length, 1), [reading.count]);
+                return [`你也可以把神谕者读数改报为 <b>${fakeCount}</b>。`];
+            }
             if (roleStr === '镇民：占卜师') {
                 return ['你也可以反着给：命中恶魔或死敌时摇头，未命中时点头。'];
             }
@@ -5595,11 +5716,16 @@ button.night-btn {
             const impairment = getPlayerImpairment(currentPlayer);
             if (!impairment) return '';
             const normalData = getRoleRecommendationData(roleStr, currentPlayer);
-            const correctOptions = (normalData?.options?.length ? normalData.options : ['该技能本夜若要结算，请按真实信息正常给出。'])
+            const normalOptions = normalData?.options?.length ? normalData.options : ['该技能本夜若要结算，请按真实信息正常给出。'];
+            const correctBaseOptions = normalOptions.filter(option => !`${option}`.startsWith('若按涡流'));
+            const extraNotes = normalOptions
+                .filter(option => `${option}`.startsWith('若按涡流'))
+                .map(option => `额外提示：${option}`);
+            const correctOptions = (correctBaseOptions.length ? correctBaseOptions : ['该技能本夜若要结算，请按真实信息正常给出。'])
                 .map(option => `正确结果（${impairment}）：${option}`);
             const falseOptions = getRoleFalseOptions(roleStr, currentPlayer)
                 .map(option => `错误结果建议：${option}`);
-            return renderSuggestionBox(`⚠️ ${currentPlayer.name} 当前为${impairment}结算`, [...correctOptions, ...falseOptions]);
+            return renderSuggestionBox(`⚠️ ${currentPlayer.name} 当前为${impairment}结算`, [...correctOptions, ...extraNotes, ...falseOptions]);
         }
 
         function getAIRecommendation(roleStr, currentPlayer) {
@@ -5997,6 +6123,7 @@ button.night-btn {
             if (selectedScript === 'mycx' && hasRole('恶魔：涡流')) hints.push({ type: 'warning', text: '本局有涡流：镇民信息都应为假，且白天若无人被处决，邪恶会直接获胜。' });
             if (selectedScript === 'mycx' && hasRole('镇民：博学者')) hints.push({ type: 'system', text: '本局有博学者：记得每天白天给出两条信息，其中一真一假。' });
             if (selectedScript === 'mycx' && hasRole('外来者：畸形秀演员')) hints.push({ type: 'warning', text: '本局有畸形秀演员：若其疯狂地宣称自己是外来者，可能会被立刻处决。' });
+            if (selectedScript === 'mycx' && (hasRole('镇民：卖花女孩') || hasRole('镇民：城镇公告员'))) hints.push({ type: 'system', text: '本局有卖花女孩/城镇公告员：白天结束前可在轮盘上给对应玩家手动标记“🗳️ 今日投票 / 📢 今日提名”，夜晚顺序会按这些标记自动计算。' });
             if (drunkFacadePlayers.length) hints.push({ type: 'system', text: `本局含酒鬼伪装：${drunkFacadePlayers.map(player => `[${player.name}]`).join('、')} 已自动以镇民身份入座，并带有“🍺 醉酒”标记。` });
             if (scarletWomanPromotion) hints.push({ type: 'warning', text: `小恶魔已死亡，且 [${scarletWomanPromotion.name}] 满足红唇女郎接任条件。<button type="button" class="inline-reveal-btn" onclick="showScarletWomanPromotionModal()">全屏展示“你已成为小恶魔”</button>` });
             if (hasSpyInPlay() && (hasRole('镇民：厨师') || hasRole('镇民：共情者'))) hints.push({ type: 'system', text: '本局有间谍：夜晚顺序中的厨师/共情者会给出真实值与注册值两种结果，按说书人裁定任选其一。' });
