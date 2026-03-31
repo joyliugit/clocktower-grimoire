@@ -2012,6 +2012,7 @@ button.night-btn {
         let seriesGames = 0;
         let finalMvp = '';
         const COMPETITIVE_MVP_MIN_GAMES = 3;
+        const SEAT_LONG_PRESS_MS = 520;
         let selectedScript = 'tb';
         let travelerFeatureEnabled = false;
         let activeSeatAssignPlayerId = null;
@@ -2683,6 +2684,13 @@ button.night-btn {
             const currentMvpEntries = getCurrentMvpEntries();
             return currentMvpEntries.length ? currentMvpEntries[0][1].wins : 0;
         }
+        function getValiantEntries(sortedEntries, excludedNames = []) {
+            const excludedSet = new Set((excludedNames || []).filter(Boolean));
+            const candidates = (sortedEntries || []).filter(([name]) => !excludedSet.has(name));
+            if (!candidates.length) return [];
+            const topEntry = candidates[0][1];
+            return candidates.filter(([, entry]) => isSameCompetitiveStanding(entry, topEntry));
+        }
         function clearFinalMvpAward() {
             if (!finalMvp) return;
             finalMvp.split('、').filter(Boolean).forEach(name => {
@@ -2803,10 +2811,12 @@ button.night-btn {
             if (!currentMvpEntries.length) return alert(`当前还没有达到 ${COMPETITIVE_MVP_MIN_GAMES} 局参评门槛的玩家。`);
             const currentMvpNames = currentMvpEntries.map(([name]) => name);
             const mvpWinCount = getCurrentMvpWinCount();
+            const sortedEntries = getSortedScoreBoardEntries();
+            const valiantEntries = getValiantEntries(sortedEntries, currentMvpNames);
             applyFinalMvpAward(currentMvpNames);
             saveData();
             renderScoreBoard();
-            const canvas = createMvpAwardCanvas(currentMvpNames, mvpWinCount, seriesGames);
+            const canvas = createMvpAwardCanvas(currentMvpNames, mvpWinCount, seriesGames, sortedEntries, valiantEntries.map(([name]) => name));
             if (!canvas) {
                 alert(`本轮赛季 MVP：${finalMvp}`);
                 return;
@@ -2816,13 +2826,13 @@ button.night-btn {
                     alert(`本轮赛季 MVP：${finalMvp}`);
                     return;
                 }
-                const fileName = `${sanitizeFileName(selectedScript === 'dycs' ? '黯月初升' : '暗流魔典')}_${sanitizeFileName(finalMvp)}_MVP荣誉图.png`;
+                const fileName = `${sanitizeFileName(selectedScript === 'dycs' ? '黯月初升' : '暗流魔典')}_${sanitizeFileName(finalMvp)}_赛季结算图.png`;
                 openRoleCardPreviewModal(canvas, blob, fileName, {
-                    title: 'MVP 荣誉图',
+                    title: '赛季结算图',
                     subtitle: '手机上可长按下方荣誉图保存到相册，或直接使用系统分享。',
-                    shareTitle: 'MVP 荣誉图',
-                    shareLabel: '📤 系统分享 MVP 荣誉图',
-                    downloadLabel: '⬇️ 下载 MVP 荣誉图'
+                    shareTitle: '赛季结算图',
+                    shareLabel: '📤 系统分享赛季结算图',
+                    downloadLabel: '⬇️ 下载赛季结算图'
                 });
             });
         }
@@ -3307,24 +3317,42 @@ button.night-btn {
 
             ctx.restore();
         }
-        function createMvpAwardCanvas(mvpNames, winCount, totalGames) {
+        function truncateCanvasText(ctx, text, maxWidth) {
+            const source = `${text || ''}`;
+            if (!source) return '';
+            if (ctx.measureText(source).width <= maxWidth) return source;
+            let output = source;
+            while (output.length > 1 && ctx.measureText(`${output}…`).width > maxWidth) {
+                output = output.slice(0, -1);
+            }
+            return `${output}…`;
+        }
+        function createMvpAwardCanvas(mvpNames, winCount, totalGames, rankedEntries = [], valiantNames = []) {
             const names = Array.isArray(mvpNames) ? mvpNames.filter(Boolean) : [];
             if (!names.length) return null;
             const portrait = isMobileLikeDevice();
-            const width = portrait ? 920 : 1120;
-            const paddingX = portrait ? 72 : 88;
-            const topPad = portrait ? 70 : 78;
+            const width = portrait ? 980 : 1220;
+            const paddingX = portrait ? 64 : 86;
+            const topPad = portrait ? 64 : 78;
             const contentWidth = width - paddingX * 2;
             const honorTitle = getMvpHonorTitle(winCount, names.length);
-            const sectionGap = portrait ? 18 : 20;
-            const nameFontSize = portrait ? 48 : 54;
-            const bodyFontSize = portrait ? 28 : 30;
-            const bodyLineHeight = portrait ? 40 : 44;
+            const nameFontSize = portrait ? 46 : 54;
+            const bodyFontSize = portrait ? 24 : 28;
+            const bodyLineHeight = portrait ? 34 : 38;
+            const headerTitleSize = portrait ? 54 : 66;
+            const rowHeight = portrait ? 72 : 64;
+            const boardHeaderHeight = 54;
             const nameBlock = names.join(' / ');
+            const sortedEntries = Array.isArray(rankedEntries) && rankedEntries.length ? rankedEntries : getSortedScoreBoardEntries();
+            const valiantList = Array.isArray(valiantNames) ? valiantNames.filter(Boolean) : [];
+            const valiantBlock = valiantList.join(' / ');
+            const mvpSet = new Set(names);
+            const valiantSet = new Set(valiantList);
             const summaryLines = [
                 `胜利局数  ${winCount} 局`,
                 `记录局数  ${totalGames} 局`,
-                names.length > 1 ? '本赛季由多位玩家并列摘得 MVP 冠冕。' : '本赛季由这位玩家摘得唯一 MVP 冠冕。'
+                names.length > 1 ? '本赛季由多位玩家并列摘得 MVP 冠冕。' : '本赛季由这位玩家摘得唯一 MVP 冠冕。',
+                valiantList.length ? `虽败犹荣：${valiantBlock}` : '本赛季未产生“虽败犹荣”称号。'
             ];
 
             const canvas = document.createElement('canvas');
@@ -3340,11 +3368,14 @@ button.night-btn {
                 return wrapped;
             });
 
-            let height = topPad + 260;
+            let height = topPad + 220;
             height += nameLines.reduce((sum, line) => sum + (line === '' ? 16 : nameFontSize + 10), 0);
-            height += 210;
+            height += 240;
             height += infoLines.reduce((sum, line) => sum + (line === '' ? 18 : bodyLineHeight), 0);
-            height += 90;
+            height += 60;
+            height += boardHeaderHeight + 26;
+            height += sortedEntries.length * (rowHeight + 10);
+            height += 96;
 
             canvas.width = width;
             canvas.height = height;
@@ -3388,24 +3419,24 @@ button.night-btn {
             ctx.fillText(`${selectedScript === 'dycs' ? '黯月初升' : '暗流魔典'} · 第 ${Math.max(totalGames, 1)} 局封卷`, width - paddingX, topPad);
             ctx.textAlign = 'left';
 
-            drawMvpCrown(ctx, width / 2, topPad + 116, portrait ? 0.9 : 1);
+            drawMvpCrown(ctx, width / 2, topPad + 92, portrait ? 0.8 : 0.9);
 
             ctx.fillStyle = '#f7e9cf';
-            ctx.font = `${portrait ? 66 : 76}px "Georgia", "Noto Serif SC", serif`;
+            ctx.font = `${headerTitleSize}px "Georgia", "Noto Serif SC", serif`;
             ctx.textAlign = 'center';
-            ctx.fillText('MVP', width / 2, topPad + 238);
+            ctx.fillText('赛季结算', width / 2, topPad + 188);
 
-            ctx.font = `${portrait ? 24 : 26}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
-            drawRoundedRect(ctx, width / 2 - 132, topPad + 264, 264, 44, 22);
+            ctx.font = `${portrait ? 22 : 24}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            drawRoundedRect(ctx, width / 2 - 150, topPad + 206, 300, 42, 21);
             ctx.fillStyle = 'rgba(197, 165, 106, 0.16)';
             ctx.fill();
             ctx.strokeStyle = 'rgba(225, 187, 114, 0.34)';
             ctx.lineWidth = 1.2;
             ctx.stroke();
             ctx.fillStyle = '#f0d7a0';
-            ctx.fillText(`${honorTitle} · 闪耀称号`, width / 2, topPad + 294);
+            ctx.fillText(`${honorTitle} · 闪耀称号`, width / 2, topPad + 234);
 
-            const nameCardY = topPad + 340;
+            const nameCardY = topPad + 276;
             drawRoundedRect(ctx, paddingX, nameCardY, contentWidth, 120 + nameLines.length * (nameFontSize + 6), 28);
             ctx.fillStyle = 'rgba(61, 24, 31, 0.56)';
             ctx.fill();
@@ -3439,7 +3470,8 @@ button.night-btn {
             });
 
             const summaryY = nameCardY + 148 + nameLines.length * (nameFontSize + 6);
-            drawRoundedRect(ctx, paddingX, summaryY, contentWidth, 178 + Math.max(0, infoLines.length - 3) * 10, 26);
+            const summaryHeight = 194 + Math.max(0, infoLines.length - 4) * 10;
+            drawRoundedRect(ctx, paddingX, summaryY, contentWidth, summaryHeight, 26);
             ctx.fillStyle = 'rgba(25, 21, 27, 0.68)';
             ctx.fill();
             ctx.strokeStyle = 'rgba(197, 165, 106, 0.18)';
@@ -3447,13 +3479,13 @@ button.night-btn {
             ctx.stroke();
 
             const chipY = summaryY + 28;
-            const chipWidth = (contentWidth - 44) / 2;
-            [['胜利局数', `${winCount} 局`], ['赛季总局数', `${totalGames} 局`]].forEach(([label, value], index) => {
+            const chipWidth = (contentWidth - 52) / 3;
+            [['胜利局数', `${winCount} 局`], ['赛季总局数', `${totalGames} 局`], ['参评门槛', `${COMPETITIVE_MVP_MIN_GAMES} 局`]].forEach(([label, value], index) => {
                 const chipX = paddingX + 18 + index * (chipWidth + 8);
                 drawRoundedRect(ctx, chipX, chipY, chipWidth, 74, 22);
-                ctx.fillStyle = index === 0 ? 'rgba(116, 41, 56, 0.5)' : 'rgba(69, 51, 31, 0.5)';
+                ctx.fillStyle = index === 0 ? 'rgba(116, 41, 56, 0.5)' : index === 1 ? 'rgba(69, 51, 31, 0.5)' : 'rgba(42, 58, 76, 0.46)';
                 ctx.fill();
-                ctx.strokeStyle = index === 0 ? 'rgba(193, 98, 118, 0.26)' : 'rgba(225, 187, 114, 0.24)';
+                ctx.strokeStyle = index === 0 ? 'rgba(193, 98, 118, 0.26)' : index === 1 ? 'rgba(225, 187, 114, 0.24)' : 'rgba(123, 144, 167, 0.26)';
                 ctx.lineWidth = 1;
                 ctx.stroke();
 
@@ -3477,6 +3509,104 @@ button.night-btn {
                 }
                 ctx.fillText(line, paddingX + 24, infoY);
                 infoY += bodyLineHeight;
+            });
+
+            const boardY = summaryY + summaryHeight + 34;
+            drawRoundedRect(ctx, paddingX, boardY, contentWidth, boardHeaderHeight + sortedEntries.length * (rowHeight + 10) + 28, 26);
+            ctx.fillStyle = 'rgba(14, 12, 16, 0.76)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(197, 165, 106, 0.18)';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+
+            ctx.fillStyle = '#f6e3b1';
+            ctx.font = `600 ${portrait ? 28 : 30}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            ctx.textAlign = 'left';
+            ctx.fillText('全员战绩结算', paddingX + 24, boardY + 36);
+
+            const headerY = boardY + 56;
+            const tableLeft = paddingX + 24;
+            const tableRight = width - paddingX - 24;
+            const rankX = tableLeft + 10;
+            const nameX = tableLeft + 92;
+            const pointsX = tableRight - (portrait ? 264 : 292);
+            const winsX = tableRight - (portrait ? 188 : 208);
+            const gamesX = tableRight - (portrait ? 118 : 126);
+            const rateX = tableRight - 12;
+
+            ctx.fillStyle = '#a99c90';
+            ctx.font = `600 ${portrait ? 18 : 19}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+            ctx.fillText('排名', rankX, headerY);
+            ctx.fillText('玩家', nameX, headerY);
+            ctx.textAlign = 'right';
+            ctx.fillText('积分', pointsX, headerY);
+            ctx.fillText('胜场', winsX, headerY);
+            ctx.fillText('出场', gamesX, headerY);
+            ctx.fillText('胜率', rateX, headerY);
+            ctx.textAlign = 'left';
+
+            let rowY = headerY + 18;
+            sortedEntries.forEach(([playerName, entry], index) => {
+                const isMvp = mvpSet.has(playerName);
+                const isValiant = !isMvp && valiantSet.has(playerName);
+                drawRoundedRect(ctx, tableLeft - 4, rowY, contentWidth - 40, rowHeight, 20);
+                ctx.fillStyle = isMvp
+                    ? 'rgba(105, 61, 26, 0.66)'
+                    : isValiant
+                        ? 'rgba(33, 51, 71, 0.62)'
+                        : index % 2 === 0
+                            ? 'rgba(39, 28, 33, 0.68)'
+                            : 'rgba(23, 19, 23, 0.64)';
+                ctx.fill();
+                ctx.strokeStyle = isMvp
+                    ? 'rgba(225, 187, 114, 0.42)'
+                    : isValiant
+                        ? 'rgba(123, 144, 167, 0.34)'
+                        : 'rgba(255, 255, 255, 0.05)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                drawRoundedRect(ctx, rankX - 4, rowY + 14, 46, 30, 15);
+                ctx.fillStyle = isMvp ? 'rgba(132, 92, 41, 0.9)' : isValiant ? 'rgba(56, 78, 108, 0.86)' : 'rgba(59, 45, 31, 0.72)';
+                ctx.fill();
+                ctx.fillStyle = '#f7e9cf';
+                ctx.font = `600 ${portrait ? 17 : 18}px "Georgia", "Noto Serif SC", serif`;
+                ctx.textAlign = 'center';
+                ctx.fillText(`#${index + 1}`, rankX + 19, rowY + 35);
+
+                if (isMvp || isValiant) {
+                    const tagText = isMvp ? 'MVP' : '虽败犹荣';
+                    ctx.font = `600 ${portrait ? 15 : 16}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+                    const tagWidth = ctx.measureText(tagText).width + 24;
+                    const tagX = rateX - tagWidth - 8;
+                    drawRoundedRect(ctx, tagX, rowY + 12, tagWidth, 28, 14);
+                    ctx.fillStyle = isMvp ? 'rgba(160, 112, 52, 0.96)' : 'rgba(74, 108, 151, 0.92)';
+                    ctx.fill();
+                    ctx.fillStyle = '#fff5de';
+                    ctx.fillText(tagText, tagX + tagWidth / 2, rowY + 31);
+                }
+
+                ctx.textAlign = 'left';
+                ctx.fillStyle = isMvp ? '#fff3d2' : isValiant ? '#d9e6f2' : '#f2eadc';
+                ctx.font = `600 ${portrait ? 22 : 23}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+                ctx.fillText(truncateCanvasText(ctx, playerName, pointsX - nameX - 26), nameX, rowY + 31);
+
+                ctx.fillStyle = isMvp ? '#f4dd9d' : isValiant ? '#bad0e8' : '#a99c90';
+                ctx.font = `${portrait ? 14 : 15}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+                ctx.fillText(`竞技积分榜`, nameX, rowY + 52);
+
+                ctx.textAlign = 'right';
+                ctx.fillStyle = isMvp ? '#ffe5ab' : '#f0d7a0';
+                ctx.font = `600 ${portrait ? 22 : 24}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+                ctx.fillText(`${entry.points}`, pointsX, rowY + 34);
+                ctx.fillStyle = '#d7c7b3';
+                ctx.font = `${portrait ? 20 : 22}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
+                ctx.fillText(`${entry.wins}`, winsX, rowY + 34);
+                ctx.fillText(`${entry.games}`, gamesX, rowY + 34);
+                ctx.fillText(formatScoreBoardWinRate(entry), rateX, rowY + 34);
+                ctx.textAlign = 'left';
+
+                rowY += rowHeight + 10;
             });
 
             ctx.fillStyle = 'rgba(245, 218, 145, 0.88)';
@@ -3922,13 +4052,83 @@ button.night-btn {
             btn.classList.toggle('mode-on', isRenameMode);
             tip.innerText = isRenameMode
                 ? '当前点轮盘座位会弹出入座面板，可从已录入名单中选择玩家入座。'
-                : '当前点轮盘座位会弹出面板，可快速切换状态并处理处决、恶魔刀、复活。';
+                : '当前短按轮盘座位会打开状态面板；长按座位可直接保存或分享该玩家角色卡。';
         }
         function toggleRenameMode() {
             isRenameMode = !isRenameMode;
             if (isRenameMode) closeSeatTokenModal();
             else closeSeatAssignModal();
             updateRenameModeUi();
+        }
+        function bindSeatInteractions(seat, playerId) {
+            if (!seat) return;
+            let pressTimer = null;
+            let pressPoint = null;
+            let suppressClickUntil = 0;
+
+            const clearPressTimer = () => {
+                if (pressTimer) {
+                    clearTimeout(pressTimer);
+                    pressTimer = null;
+                }
+            };
+            const getPoint = event => {
+                if (event.touches && event.touches[0]) return event.touches[0];
+                if (event.changedTouches && event.changedTouches[0]) return event.changedTouches[0];
+                return event;
+            };
+            const beginPress = event => {
+                if (event.button !== undefined && event.button !== 0) return;
+                if (event.touches && event.touches.length > 1) return;
+                const point = getPoint(event);
+                if (!point) return;
+                pressPoint = { x: point.clientX, y: point.clientY };
+                clearPressTimer();
+                pressTimer = setTimeout(() => {
+                    pressTimer = null;
+                    pressPoint = null;
+                    suppressClickUntil = Date.now() + 900;
+                    if (navigator.vibrate) navigator.vibrate(18);
+                    copyRoleProfile(playerId);
+                }, SEAT_LONG_PRESS_MS);
+            };
+            const movePress = event => {
+                if (!pressTimer || !pressPoint) return;
+                const point = getPoint(event);
+                if (!point) return;
+                if (Math.abs(point.clientX - pressPoint.x) > 10 || Math.abs(point.clientY - pressPoint.y) > 10) {
+                    clearPressTimer();
+                    pressPoint = null;
+                }
+            };
+            const endPress = event => {
+                clearPressTimer();
+                pressPoint = null;
+                if (Date.now() < suppressClickUntil && event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+            };
+
+            seat.addEventListener('touchstart', beginPress, { passive: true });
+            seat.addEventListener('touchmove', movePress, { passive: true });
+            seat.addEventListener('touchend', endPress);
+            seat.addEventListener('touchcancel', endPress);
+            seat.addEventListener('mousedown', beginPress);
+            seat.addEventListener('mousemove', movePress);
+            seat.addEventListener('mouseup', endPress);
+            seat.addEventListener('mouseleave', endPress);
+            seat.addEventListener('contextmenu', event => {
+                if (Date.now() < suppressClickUntil) event.preventDefault();
+            });
+            seat.addEventListener('click', event => {
+                if (Date.now() < suppressClickUntil) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                handleSeatClick(playerId);
+            });
         }
         function handleSeatClick(id) {
             if (isRenameMode) {
@@ -5126,7 +5326,8 @@ button.night-btn {
                 const seatRoleClass = roleCategory === 'minion' ? 'seat-minion' : roleCategory === 'demon' ? 'seat-demon' : roleCategory === 'traveler' ? 'seat-traveler' : '';
                 seat.className = `seat ${seatRoleClass} ${p.isAlive ? '' : 'dead-seat'}`.trim();
                 seat.style.cssText = `left: ${x}px; top: ${y}px;`;
-                seat.onclick = () => handleSeatClick(p.id);
+                seat.title = `${p.name}：短按切换状态，长按保存/分享角色卡`;
+                bindSeatInteractions(seat, p.id);
                 const roleName = normalizeRoleName(p.role);
                 const shortRole = getPlayerRoleShortName(p);
                 const badgeHtml = getSeatBadgesHtml(p);
@@ -5189,7 +5390,6 @@ button.night-btn {
                     <div class="row" style="margin-bottom: 4px;"><select onchange="updateRole(${p.id}, this.value)">${roleOptions}</select></div>
                     ${primaryAbilityHtml}
                     ${travelerEditorHtml}
-                    <button class="copy-role-btn" onclick="copyRoleProfile(${p.id})">🖼️ 保存/分享角色卡</button>
                 `;
                 list.appendChild(card);
             });
