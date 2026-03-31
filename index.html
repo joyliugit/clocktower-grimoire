@@ -1579,159 +1579,6 @@ button.night-btn {
     text-align: center;
 }
 
-.recap-panel {
-    margin: 16px 0 14px;
-    padding: 14px;
-    border: 1px solid rgba(197, 165, 106, 0.12);
-    border-radius: 18px;
-    background: linear-gradient(180deg, rgba(20, 16, 19, 0.62), rgba(12, 10, 12, 0.72));
-}
-
-.recap-header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
-.recap-header .display-panel-title {
-    margin-bottom: 0;
-    text-align: left;
-}
-
-.recap-tip {
-    color: var(--text-muted);
-    font-size: 0.78rem;
-}
-
-.recap-grid {
-    display: grid;
-    gap: 10px;
-}
-
-.recap-input,
-.recap-textarea {
-    width: 100%;
-    padding: 12px 14px;
-    color: var(--text-main);
-    background: rgba(9, 8, 10, 0.42);
-    border: 1px solid rgba(197, 165, 106, 0.18);
-    border-radius: 14px;
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
-}
-
-.recap-textarea {
-    min-height: 90px;
-    resize: vertical;
-    line-height: 1.7;
-}
-
-.recap-actions {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.recap-action-secondary {
-    background: linear-gradient(180deg, rgba(48, 43, 40, 0.96), rgba(26, 23, 22, 0.99));
-    border-color: rgba(129, 117, 103, 0.24);
-    color: #e4d9cf;
-}
-
-.match-history-list {
-    display: grid;
-    gap: 10px;
-    margin-top: 14px;
-}
-
-.match-history-item {
-    border: 1px solid rgba(197, 165, 106, 0.12);
-    border-radius: 16px;
-    background: rgba(18, 14, 17, 0.5);
-    overflow: hidden;
-}
-
-.match-history-item summary {
-    cursor: pointer;
-    list-style: none;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 14px;
-    color: var(--text-main);
-    font-weight: 600;
-}
-
-.match-history-item summary::-webkit-details-marker {
-    display: none;
-}
-
-.match-history-meta {
-    color: var(--text-dim);
-    font-size: 0.78rem;
-    font-weight: 400;
-}
-
-.match-history-body {
-    padding: 0 14px 14px;
-    display: grid;
-    gap: 10px;
-}
-
-.match-history-block {
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: 1px solid rgba(197, 165, 106, 0.1);
-    background: rgba(10, 9, 11, 0.28);
-}
-
-.match-history-label {
-    margin-bottom: 6px;
-    color: var(--gold);
-    font-size: 0.76rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-}
-
-.match-history-text {
-    color: var(--text-dim);
-    font-size: 0.84rem;
-    line-height: 1.7;
-    white-space: pre-wrap;
-}
-
-.match-history-roster {
-    display: grid;
-    gap: 6px;
-}
-
-.match-history-roster-line {
-    color: var(--text-dim);
-    font-size: 0.82rem;
-    line-height: 1.6;
-}
-
-.match-history-tag-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-}
-
-.match-history-tag {
-    display: inline-flex;
-    align-items: center;
-    min-height: 26px;
-    padding: 3px 8px;
-    border-radius: 999px;
-    border: 1px solid rgba(197, 165, 106, 0.12);
-    color: var(--text-dim);
-    font-size: 0.75rem;
-    background: rgba(26, 22, 24, 0.52);
-}
 
 .scoreboard-list {
     display: grid;
@@ -1926,9 +1773,6 @@ button.night-btn {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .recap-actions {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
 }
 
 @media (min-width: 560px) {
@@ -2170,22 +2014,6 @@ button.night-btn {
                 <button class="action-btn score-btn-evil" onclick="recordCampWin('evil')">😈 邪恶胜利</button>
                 <button class="action-btn score-btn-clear" onclick="clearScoreBoard()">🗑️ 清空积分栏</button>
             </div>
-            <div class="recap-panel">
-                <div class="recap-header">
-                    <div class="display-panel-title">本局复盘</div>
-                    <div class="recap-tip">点胜利按钮时会自动入档并计入赛季复盘。</div>
-                </div>
-                <div class="recap-grid">
-                    <input id="recapTitleInput" class="recap-input" type="text" placeholder="本局标题，例如：方古跳车翻盘局" oninput="updateMatchRecordDraft()">
-                    <textarea id="recapEventsInput" class="recap-textarea" placeholder="记录本局关键进程，例如：第1天谁带队、哪次处决改变局势、谁被误导、谁做出关键发言。" oninput="updateMatchRecordDraft()"></textarea>
-                    <textarea id="recapHighlightsInput" class="recap-textarea" placeholder="记录高光与争议，例如：关键刀口、关键票型、关键 bluff、说书人裁定点。" oninput="updateMatchRecordDraft()"></textarea>
-                    <textarea id="recapStorytellerInput" class="recap-textarea" placeholder="给复盘或 AI 的额外备注，例如：某玩家手动加减分原因、这局想重点分析什么。" oninput="updateMatchRecordDraft()"></textarea>
-                </div>
-                <div class="recap-actions">
-                    <button class="show-bluff-btn" onclick="exportSeasonRecordForAi()">📤 导出对局记录给 AI（含提示词）</button>
-                    <button class="reset-btn recap-action-secondary" onclick="clearMatchRecordDraft(true)">🧹 清空本局复盘</button>
-                </div>
-            </div>
             <div id="seriesSummary" class="score-summary">已记录 0 局，当前未结算 MVP。</div>
             <div id="scoreBoardList" class="scoreboard-list"><div class="score-empty">暂无记分记录。</div></div>
             <div class="score-mvp-row">
@@ -2193,7 +2021,6 @@ button.night-btn {
                 <button class="show-bluff-btn" onclick="finalizeSeriesMvp()">🏁 结束并记录 MVP</button>
             </div>
             <div id="mvpSummary" class="score-summary">当前赛季 MVP：未产生</div>
-            <div id="matchHistoryList" class="match-history-list"><div class="score-empty">暂无对局复盘。</div></div>
         </section>
     </main>
 
@@ -2211,14 +2038,6 @@ button.night-btn {
         let scoreBoard = {};
         let seriesGames = 0;
         let finalMvp = '';
-        let matchHistory = [];
-        let scoreAuditLog = [];
-        let matchRecordDraft = {
-            title: '',
-            events: '',
-            highlights: '',
-            storytellerNote: ''
-        };
         const COMPETITIVE_MVP_MIN_GAMES = 3;
         const SEAT_LONG_PRESS_MS = 520;
         let selectedScript = 'tb';
@@ -3138,284 +2957,6 @@ button.night-btn {
             saveData();
             updatePlayerListLayoutUi();
         }
-        function normalizeMatchRecordDraft(draft) {
-            return {
-                title: `${draft?.title || ''}`.trim(),
-                events: `${draft?.events || ''}`.trim(),
-                highlights: `${draft?.highlights || ''}`.trim(),
-                storytellerNote: `${draft?.storytellerNote || ''}`.trim()
-            };
-        }
-        function normalizeMatchHistoryEntry(entry, index) {
-            return {
-                id: `${entry?.id || `match-${index + 1}`}`,
-                gameNo: Math.max(1, Math.round(Number(entry?.gameNo ?? index + 1) || index + 1)),
-                script: `${entry?.script || '暗流魔典'}`,
-                winnerCamp: entry?.winnerCamp === 'evil' ? 'evil' : 'good',
-                title: `${entry?.title || ''}`.trim(),
-                events: `${entry?.events || ''}`.trim(),
-                highlights: `${entry?.highlights || ''}`.trim(),
-                storytellerNote: `${entry?.storytellerNote || ''}`.trim(),
-                winners: Array.isArray(entry?.winners) ? entry.winners.filter(Boolean) : [],
-                lineup: Array.isArray(entry?.lineup) ? entry.lineup.map(item => ({
-                    seat: Math.max(1, Math.round(Number(item?.seat ?? 0) || 0)),
-                    name: `${item?.name || `座位 ${item?.seat || '?'}`}`.trim(),
-                    role: `${item?.role || '❓ 未分配'}`.trim(),
-                    camp: `${item?.camp || '未定'}`.trim(),
-                    isAlive: item?.isAlive !== false,
-                    deathType: `${item?.deathType || ''}`.trim(),
-                    tokens: Array.isArray(item?.tokens) ? item.tokens.filter(Boolean) : []
-                })) : [],
-                scoreBoardAfterGame: Array.isArray(entry?.scoreBoardAfterGame) ? entry.scoreBoardAfterGame.map(item => ({
-                    name: `${item?.name || ''}`.trim(),
-                    points: Math.max(0, Math.round(Number(item?.points ?? 0) || 0)),
-                    wins: Math.max(0, Math.round(Number(item?.wins ?? 0) || 0)),
-                    games: Math.max(0, Math.round(Number(item?.games ?? 0) || 0)),
-                    winRate: Math.max(0, Number(item?.winRate ?? 0) || 0)
-                })).filter(item => item.name) : [],
-                recordedAt: `${entry?.recordedAt || ''}`.trim()
-            };
-        }
-        function normalizeScoreAuditEntry(entry, index) {
-            return {
-                id: `${entry?.id || `audit-${index + 1}`}`,
-                type: `${entry?.type || 'unknown'}`.trim(),
-                message: `${entry?.message || ''}`.trim(),
-                at: `${entry?.at || ''}`.trim()
-            };
-        }
-        function updateMatchRecordDraft() {
-            matchRecordDraft = normalizeMatchRecordDraft({
-                title: document.getElementById('recapTitleInput')?.value,
-                events: document.getElementById('recapEventsInput')?.value,
-                highlights: document.getElementById('recapHighlightsInput')?.value,
-                storytellerNote: document.getElementById('recapStorytellerInput')?.value
-            });
-            saveData();
-        }
-        function renderMatchRecordDraft() {
-            const draft = normalizeMatchRecordDraft(matchRecordDraft);
-            const titleInput = document.getElementById('recapTitleInput');
-            const eventsInput = document.getElementById('recapEventsInput');
-            const highlightsInput = document.getElementById('recapHighlightsInput');
-            const noteInput = document.getElementById('recapStorytellerInput');
-            if (titleInput && titleInput.value !== draft.title) titleInput.value = draft.title;
-            if (eventsInput && eventsInput.value !== draft.events) eventsInput.value = draft.events;
-            if (highlightsInput && highlightsInput.value !== draft.highlights) highlightsInput.value = draft.highlights;
-            if (noteInput && noteInput.value !== draft.storytellerNote) noteInput.value = draft.storytellerNote;
-        }
-        function clearMatchRecordDraft(shouldSave = false) {
-            matchRecordDraft = normalizeMatchRecordDraft({});
-            renderMatchRecordDraft();
-            if (shouldSave) saveData();
-        }
-        function getPlayerCampText(player) {
-            if (isTravelerPlayer(player)) return `旅行者/${getTravelerCampLabel(player)}`;
-            return isPlayerOnCamp(player, 'evil') ? '邪恶' : '善良';
-        }
-        function getDeathText(player) {
-            if (player.isAlive) return '存活';
-            if (player.deathType === 'demon') return '死于恶魔刀';
-            return '被处决';
-        }
-        function getLineupSnapshot() {
-            return players
-                .slice()
-                .sort((a, b) => a.id - b.id)
-                .map(player => ({
-                    seat: player.id + 1,
-                    name: player.name,
-                    role: getPlayerRoleLabel(player),
-                    camp: getPlayerCampText(player),
-                    isAlive: player.isAlive,
-                    deathType: player.deathType || '',
-                    tokens: [...player.tokens]
-                }));
-        }
-        function getScoreBoardSnapshot() {
-            return getSortedScoreBoardEntries().map(([name, entry]) => ({
-                name,
-                points: entry.points,
-                wins: entry.wins,
-                games: entry.games,
-                winRate: getScoreBoardWinRate(entry)
-            }));
-        }
-        function pushScoreAudit(message, type = 'note') {
-            scoreAuditLog.push(normalizeScoreAuditEntry({
-                id: `audit-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
-                type,
-                message,
-                at: new Date().toISOString()
-            }, scoreAuditLog.length));
-        }
-        function buildCurrentMatchRecord(camp, gameNo, winners) {
-            const draft = normalizeMatchRecordDraft(matchRecordDraft);
-            return normalizeMatchHistoryEntry({
-                id: `match-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
-                gameNo,
-                script: getCurrentScriptDisplayName(),
-                winnerCamp: camp,
-                title: draft.title || `${getCurrentScriptDisplayName()} 第 ${gameNo} 局`,
-                events: draft.events,
-                highlights: draft.highlights,
-                storytellerNote: draft.storytellerNote,
-                winners: winners.map(player => player.name),
-                lineup: getLineupSnapshot(),
-                recordedAt: new Date().toISOString()
-            }, matchHistory.length);
-        }
-        function formatLocalDateTime(value) {
-            if (!value) return '未记录时间';
-            const date = new Date(value);
-            if (Number.isNaN(date.getTime())) return value;
-            return `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}-${`${date.getDate()}`.padStart(2, '0')} ${`${date.getHours()}`.padStart(2, '0')}:${`${date.getMinutes()}`.padStart(2, '0')}`;
-        }
-        function renderMatchHistory() {
-            const container = document.getElementById('matchHistoryList');
-            if (!container) return;
-            const records = [...matchHistory].sort((a, b) => (b.gameNo - a.gameNo) || b.id.localeCompare(a.id));
-            container.innerHTML = records.length
-                ? records.map(record => {
-                    const winnerLabel = record.winnerCamp === 'evil' ? '邪恶胜利' : '善良胜利';
-                    const lineupHtml = record.lineup.length
-                        ? `<div class="match-history-roster">${record.lineup.map(item => `<div class="match-history-roster-line">座位 ${item.seat}｜${escapeHtml(item.name)}｜${escapeHtml(item.role)}｜${escapeHtml(item.camp)}｜${item.isAlive ? '存活' : escapeHtml(item.deathType === 'demon' ? '恶魔刀' : '处决')}${item.tokens.length ? `｜标记：${escapeHtml(item.tokens.join('、'))}` : ''}</div>`).join('')}</div>`
-                        : '<div class="match-history-text">无阵容快照。</div>';
-                    const scoreTags = record.scoreBoardAfterGame.length
-                        ? `<div class="match-history-tag-row">${record.scoreBoardAfterGame.slice(0, 6).map(item => `<span class="match-history-tag">${escapeHtml(item.name)} ${item.points}分/${item.wins}胜/${item.games}场</span>`).join('')}</div>`
-                        : '<div class="match-history-text">无赛后积分快照。</div>';
-                    return `
-                        <details class="match-history-item">
-                            <summary>
-                                <span>第 ${record.gameNo} 局｜${escapeHtml(record.title || record.script)}</span>
-                                <span class="match-history-meta">${escapeHtml(record.script)}｜${winnerLabel}｜${formatLocalDateTime(record.recordedAt)}</span>
-                            </summary>
-                            <div class="match-history-body">
-                                <div class="match-history-block">
-                                    <div class="match-history-label">胜者</div>
-                                    <div class="match-history-text">${escapeHtml(record.winners.join('、') || '未记录')}｜${winnerLabel}</div>
-                                </div>
-                                <div class="match-history-block">
-                                    <div class="match-history-label">关键事件</div>
-                                    <div class="match-history-text">${escapeHtml(record.events || '未填写。')}</div>
-                                </div>
-                                <div class="match-history-block">
-                                    <div class="match-history-label">高光与争议</div>
-                                    <div class="match-history-text">${escapeHtml(record.highlights || '未填写。')}</div>
-                                </div>
-                                <div class="match-history-block">
-                                    <div class="match-history-label">说书人备注</div>
-                                    <div class="match-history-text">${escapeHtml(record.storytellerNote || '未填写。')}</div>
-                                </div>
-                                <div class="match-history-block">
-                                    <div class="match-history-label">阵容快照</div>
-                                    ${lineupHtml}
-                                </div>
-                                <div class="match-history-block">
-                                    <div class="match-history-label">赛后积分快照</div>
-                                    ${scoreTags}
-                                </div>
-                            </div>
-                        </details>
-                    `;
-                }).join('')
-                : '<div class="score-empty">暂无对局复盘。</div>';
-        }
-        function buildSeasonRecordForAi() {
-            const sortedEntries = getSortedScoreBoardEntries();
-            const currentMvpNames = finalMvp ? finalMvp.split('、').filter(Boolean) : getCurrentMvpNames();
-            const draft = normalizeMatchRecordDraft(matchRecordDraft);
-            const lines = [];
-            lines.push('你是一名《血染钟楼》赛季复盘分析师。请只根据我提供的完整对局记录，输出一份“最终积分报告”。');
-            lines.push('输出要求：');
-            lines.push('1. 先给最终积分榜表格，列出：排名、玩家、积分、胜场、出场、胜率。');
-            lines.push('2. 再给每位玩家的赛季表现总结，每人 2-4 句。');
-            lines.push('3. 评出赛季 MVP，并说明理由。');
-            lines.push('4. 评出“虽败犹荣”，并说明理由。');
-            lines.push('5. 如果记录里存在手动加减分，请单独说明这些调整如何影响了最终排名。');
-            lines.push('6. 最后给说书人一段简短建议，指出下赛季适合改进的点。');
-            lines.push('7. 不要虚构未记录的对局细节；信息不足时请明确说信息不足。');
-            lines.push('');
-            lines.push('【赛季概况】');
-            lines.push(`已记录局数：${seriesGames}`);
-            lines.push(`当前剧本：${getCurrentScriptDisplayName()}`);
-            lines.push(`当前赛季 MVP：${currentMvpNames.length ? currentMvpNames.join('、') : `未产生（至少 ${COMPETITIVE_MVP_MIN_GAMES} 局）`}`);
-            lines.push('');
-            lines.push('【最终积分榜】');
-            if (sortedEntries.length) {
-                sortedEntries.forEach(([name, entry], index) => {
-                    lines.push(`${index + 1}. ${name}｜积分 ${entry.points}｜胜场 ${entry.wins}｜出场 ${entry.games}｜胜率 ${formatScoreBoardWinRate(entry)}`);
-                });
-            } else {
-                lines.push('暂无积分数据。');
-            }
-            lines.push('');
-            lines.push('【逐局复盘】');
-            if (matchHistory.length) {
-                matchHistory
-                    .slice()
-                    .sort((a, b) => a.gameNo - b.gameNo)
-                    .forEach(record => {
-                        lines.push(`### 第 ${record.gameNo} 局｜${record.script}｜${record.winnerCamp === 'evil' ? '邪恶胜利' : '善良胜利'}`);
-                        lines.push(`标题：${record.title || `${record.script} 第 ${record.gameNo} 局`}`);
-                        lines.push(`记录时间：${formatLocalDateTime(record.recordedAt)}`);
-                        lines.push(`胜者名单：${record.winners.join('、') || '未记录'}`);
-                        lines.push(`关键事件：${record.events || '未填写。'}`);
-                        lines.push(`高光与争议：${record.highlights || '未填写。'}`);
-                        lines.push(`说书人备注：${record.storytellerNote || '未填写。'}`);
-                        lines.push('阵容快照：');
-                        if (record.lineup.length) {
-                            record.lineup.forEach(item => {
-                                lines.push(`- 座位 ${item.seat}｜${item.name}｜${item.role}｜${item.camp}｜${item.isAlive ? '存活' : (item.deathType === 'demon' ? '死于恶魔刀' : '被处决')}${item.tokens.length ? `｜标记：${item.tokens.join('、')}` : ''}`);
-                            });
-                        } else {
-                            lines.push('- 无阵容快照。');
-                        }
-                        if (record.scoreBoardAfterGame.length) {
-                            lines.push('赛后积分快照：');
-                            record.scoreBoardAfterGame.forEach((item, index) => {
-                                lines.push(`- #${index + 1} ${item.name}｜积分 ${item.points}｜胜场 ${item.wins}｜出场 ${item.games}｜胜率 ${Math.round(item.winRate * 100)}%`);
-                            });
-                        }
-                        lines.push('');
-                    });
-            } else {
-                lines.push('暂无逐局复盘。');
-                lines.push('');
-            }
-            lines.push('【手动调分与赛季操作记录】');
-            if (scoreAuditLog.length) {
-                scoreAuditLog.forEach((entry, index) => {
-                    lines.push(`${index + 1}. [${formatLocalDateTime(entry.at)}] ${entry.message}`);
-                });
-            } else {
-                lines.push('暂无额外手动调分或赛季操作记录。');
-            }
-            if (draft.title || draft.events || draft.highlights || draft.storytellerNote) {
-                lines.push('');
-                lines.push('【尚未入档的当前草稿】');
-                lines.push(`标题：${draft.title || '未填写'}`);
-                lines.push(`关键事件：${draft.events || '未填写'}`);
-                lines.push(`高光与争议：${draft.highlights || '未填写'}`);
-                lines.push(`说书人备注：${draft.storytellerNote || '未填写'}`);
-            }
-            return lines.join('\n');
-        }
-        async function exportSeasonRecordForAi() {
-            const text = buildSeasonRecordForAi();
-            let copied = false;
-            if (navigator.clipboard && window.isSecureContext) {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    copied = true;
-                } catch (error) {
-                    copied = fallbackCopyText(text);
-                }
-            } else {
-                copied = fallbackCopyText(text);
-            }
-            alert(copied ? '已复制完整对局记录与 AI 分析指令。你现在可以直接粘贴给 AI。' : '复制失败，请重试。');
-        }
         function normalizeScoreBoardEntry(entry) {
             if (typeof entry === 'number') {
                 const legacyPoints = Math.max(0, Math.round(entry));
@@ -3557,7 +3098,7 @@ button.night-btn {
                     `;
                 }).join('')
                 : '<div class="score-empty">暂无记分记录。</div>';
-            summary.innerText = `已记录 ${seriesGames} 局，当前共有 ${entries.length} 名玩家进入榜单，已沉淀 ${matchHistory.length} 份逐局复盘。赛季 MVP 至少需出场 ${COMPETITIVE_MVP_MIN_GAMES} 局。`;
+            summary.innerText = `已记录 ${seriesGames} 局，当前共有 ${entries.length} 名玩家进入榜单。赛季 MVP 至少需出场 ${COMPETITIVE_MVP_MIN_GAMES} 局。`;
             mvpSummary.innerText = `当前赛季 MVP：${finalMvp || (currentMvpNames.length ? currentMvpNames.join('、') : `未产生（至少 ${COMPETITIVE_MVP_MIN_GAMES} 局）`)}`;
         }
         function addScoreToPlayer(name, amount = 1) {
@@ -3570,8 +3111,6 @@ button.night-btn {
             if (!name || !delta) return;
             clearFinalMvpAward();
             addScoreToPlayer(name, delta);
-            const entry = scoreBoard[name];
-            pushScoreAudit(`手动调分：${name} ${delta > 0 ? '+' : ''}${delta} 分，当前积分 ${entry?.points || 0}。`, 'manual_adjust');
             saveData();
             renderScoreBoard();
         }
@@ -3588,8 +3127,6 @@ button.night-btn {
             const participants = getPlayersEligibleForScore();
             const winners = participants.filter(player => isPlayerOnCamp(player, camp));
             if (!winners.length) return alert('当前没有可计分的胜利阵营玩家。');
-            const nextGameNo = seriesGames + 1;
-            const matchRecord = buildCurrentMatchRecord(camp, nextGameNo, winners);
             clearFinalMvpAward();
             participants.forEach(player => {
                 const entry = ensureScoreBoardEntry(player.name);
@@ -3601,27 +3138,18 @@ button.night-btn {
                 entry.wins += 1;
                 entry.points += 1;
             });
-            seriesGames = nextGameNo;
-            matchRecord.scoreBoardAfterGame = getScoreBoardSnapshot();
-            matchHistory.push(matchRecord);
-            pushScoreAudit(`第 ${nextGameNo} 局记录完成：${getCurrentScriptDisplayName()}，${camp === 'evil' ? '邪恶阵营' : '善良阵营'}胜利。`, 'match_result');
-            clearMatchRecordDraft();
+            seriesGames += 1;
             saveData();
             renderScoreBoard();
-            renderMatchHistory();
             alert(`${camp === 'evil' ? '邪恶阵营' : '善良阵营'}已加分，并已更新出场、胜场与胜率。`);
         }
         function clearScoreBoard() {
-            if (!confirm('确定要清空积分栏吗？这会重置所有玩家积分、已记录局数、逐局复盘、调分日志和当前赛季 MVP。')) return;
+            if (!confirm('确定要清空积分栏吗？这会重置所有玩家积分、已记录局数和当前赛季 MVP。')) return;
             scoreBoard = {};
             seriesGames = 0;
             finalMvp = '';
-            matchHistory = [];
-            scoreAuditLog = [];
-            clearMatchRecordDraft();
             saveData();
             renderScoreBoard();
-            renderMatchHistory();
         }
         function finalizeSeriesMvp() {
             const currentMvpEntries = getCurrentMvpEntries();
@@ -3631,7 +3159,6 @@ button.night-btn {
             const sortedEntries = getSortedScoreBoardEntries();
             const valiantEntries = getValiantEntries(sortedEntries, currentMvpNames);
             applyFinalMvpAward(currentMvpNames);
-            pushScoreAudit(`赛季结算：MVP 为 ${currentMvpNames.join('、')}。${valiantEntries.length ? `虽败犹荣：${valiantEntries.map(([name]) => name).join('、')}。` : ''}`, 'season_mvp');
             saveData();
             renderScoreBoard();
             const canvas = createMvpAwardCanvas(currentMvpNames, mvpWinCount, seriesGames, sortedEntries, valiantEntries.map(([name]) => name));
@@ -6182,7 +5709,7 @@ button.night-btn {
 
         function saveData() { 
             bluffs[0] = document.getElementById('bluff1').value; bluffs[1] = document.getElementById('bluff2').value; bluffs[2] = document.getElementById('bluff3').value;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, bluffs, currentNightOrderType, playerListLayout, scoreBoard, seriesGames, finalMvp, selectedScript, travelerFeatureEnabled, matchHistory, scoreAuditLog, matchRecordDraft })); 
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, bluffs, currentNightOrderType, playerListLayout, scoreBoard, seriesGames, finalMvp, selectedScript, travelerFeatureEnabled })); 
         }
 
         function loadData() { 
@@ -6197,9 +5724,6 @@ button.night-btn {
                 scoreBoard = normalizeScoreBoardData(data.scoreBoard || {});
                 seriesGames = typeof data.seriesGames === 'number' ? data.seriesGames : 0;
                 finalMvp = data.finalMvp || '';
-                matchHistory = Array.isArray(data.matchHistory) ? data.matchHistory.map((entry, index) => normalizeMatchHistoryEntry(entry, index)) : [];
-                scoreAuditLog = Array.isArray(data.scoreAuditLog) ? data.scoreAuditLog.map((entry, index) => normalizeScoreAuditEntry(entry, index)) : [];
-                matchRecordDraft = normalizeMatchRecordDraft(data.matchRecordDraft || {});
                 travelerFeatureEnabled = typeof data.travelerFeatureEnabled === 'boolean'
                     ? data.travelerFeatureEnabled
                     : players.some(player => isTravelerPlayer(player));
@@ -6208,9 +5732,6 @@ button.night-btn {
                 playerListLayout = window.innerWidth >= 720 ? 'double' : 'single';
                 selectedScript = 'tb';
                 travelerFeatureEnabled = false;
-                matchHistory = [];
-                scoreAuditLog = [];
-                matchRecordDraft = normalizeMatchRecordDraft({});
             }
             initBluffSelects(); initRoleRevealSelect(); updateScriptUi(); renderAll(); updateTimerDisplay();
         }
@@ -6270,9 +5791,7 @@ button.night-btn {
             renderList();
             updateRenameModeUi();
             updatePlayerListLayoutUi();
-            renderMatchRecordDraft();
             renderScoreBoard();
-            renderMatchHistory();
             refreshNightOrderIfOpen();
         }
 
