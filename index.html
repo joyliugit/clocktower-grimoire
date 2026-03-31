@@ -3942,10 +3942,8 @@ button.night-btn {
             const scriptNameForFile = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
             const imageFileName = `${sanitizeFileName(scriptNameForFile)}_${sanitizeFileName(roleLabel)}_角色卡.png`;
             const isMobileLike = isMobileLikeDevice();
-            const preferDownload = !!options.preferDownload;
-
             if (imageBlob && isMobileLike) {
-                if (!preferDownload && canShareRoleCard(imageBlob, imageFileName)) {
+                if (canShareRoleCard(imageBlob, imageFileName)) {
                     try {
                         const file = new File([imageBlob], imageFileName, { type: 'image/png' });
                         await navigator.share({
@@ -4091,7 +4089,7 @@ button.night-btn {
                     pressPoint = null;
                     suppressClickUntil = Date.now() + 900;
                     if (navigator.vibrate) navigator.vibrate(18);
-                    copyRoleProfile(playerId, { preferDownload: true });
+                    copyRoleProfile(playerId, { preferShare: true });
                 }, SEAT_LONG_PRESS_MS);
             };
             const movePress = event => {
