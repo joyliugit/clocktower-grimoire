@@ -3002,6 +3002,9 @@ button.night-btn {
             return /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '')
                 || !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
         }
+        function isWeChatBrowser() {
+            return /MicroMessenger/i.test(navigator.userAgent || '');
+        }
         function getRoleCardPalette(roleName) {
             switch (getRoleCategory(roleName)) {
                 case 'Townsfolk':
@@ -3942,7 +3945,16 @@ button.night-btn {
             const scriptNameForFile = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
             const imageFileName = `${sanitizeFileName(scriptNameForFile)}_${sanitizeFileName(roleLabel)}_角色卡.png`;
             const isMobileLike = isMobileLikeDevice();
+            const preferWeChatPreview = !!options.preferWeChatPreview;
             if (imageBlob && isMobileLike) {
+                if (preferWeChatPreview && isWeChatBrowser() && openRoleCardPreviewModal(canvas, imageBlob, imageFileName, {
+                    title: '微信角色卡预览',
+                    subtitle: '现在请直接长按下方角色卡图片，使用微信原生菜单转发给朋友。',
+                    shareLabel: '📤 系统分享角色卡',
+                    downloadLabel: '⬇️ 下载角色卡图片'
+                })) {
+                    return;
+                }
                 if (canShareRoleCard(imageBlob, imageFileName)) {
                     try {
                         const file = new File([imageBlob], imageFileName, { type: 'image/png' });
@@ -4089,7 +4101,7 @@ button.night-btn {
                     pressPoint = null;
                     suppressClickUntil = Date.now() + 900;
                     if (navigator.vibrate) navigator.vibrate(18);
-                    copyRoleProfile(playerId, { preferShare: true });
+                    copyRoleProfile(playerId, { preferWeChatPreview: true });
                 }, SEAT_LONG_PRESS_MS);
             };
             const movePress = event => {
