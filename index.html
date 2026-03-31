@@ -56,6 +56,18 @@ body {
         linear-gradient(180deg, #090809 0%, #100d10 48%, #140e11 100%);
 }
 
+body * {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+input,
+textarea,
+[contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
 body::before {
     content: "";
     position: fixed;
@@ -5258,6 +5270,19 @@ button.night-btn {
             initBluffSelects(); initRoleRevealSelect(); updateScriptUi(); renderAll(); updateTimerDisplay();
         }
         function setupUiGuards() {
+            const allowTextInteraction = target => target instanceof Element && !!target.closest('input, textarea, [contenteditable="true"]');
+            if (!document.body.dataset.copyGuardBound) {
+                document.addEventListener('copy', event => {
+                    if (!allowTextInteraction(event.target)) event.preventDefault();
+                });
+                document.addEventListener('cut', event => {
+                    if (!allowTextInteraction(event.target)) event.preventDefault();
+                });
+                document.addEventListener('selectstart', event => {
+                    if (!allowTextInteraction(event.target)) event.preventDefault();
+                });
+                document.body.dataset.copyGuardBound = '1';
+            }
             const seatTokenPanel = document.getElementById('seatTokenModalPanel');
             if (seatTokenPanel && !seatTokenPanel.dataset.bound) {
                 seatTokenPanel.addEventListener('click', event => event.stopPropagation());
