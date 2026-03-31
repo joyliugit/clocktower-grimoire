@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>血染钟楼 - 魔典 v2.0</title>
+    <title>血染钟楼 - 魔典 v2.1</title>
     <style>
 :root {
     --bg-void: #070708;
@@ -304,12 +304,6 @@ button.night-btn:active,
     text-transform: uppercase;
 }
 
-.roster-panel {
-    margin: 18px 0 12px;
-    padding-top: 14px;
-    border-top: 1px solid rgba(197, 165, 106, 0.14);
-}
-
 .roster-label {
     display: block;
     margin-bottom: 10px;
@@ -319,89 +313,38 @@ button.night-btn:active,
     text-transform: uppercase;
 }
 
-.roster-entry {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 10px;
-}
-
-.roster-input {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1px solid rgba(197, 165, 106, 0.18);
-    border-radius: 14px;
-    color: var(--text-main);
-    background: linear-gradient(180deg, rgba(12, 10, 13, 0.9), rgba(20, 15, 18, 0.96));
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
-    caret-color: var(--gold);
-    -webkit-text-fill-color: var(--text-main);
-}
-
-.roster-input::placeholder {
-    color: var(--text-muted);
-    opacity: 1;
-}
-
-.roster-add-btn {
-    width: 100%;
-}
-
-.roster-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.roster-chip {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    min-height: 38px;
-    padding: 8px 10px;
-    border: 1px solid rgba(197, 165, 106, 0.14);
-    border-radius: 999px;
-    background: rgba(23, 18, 21, 0.58);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-
-.roster-chip.assigned {
-    border-color: rgba(197, 165, 106, 0.26);
-    background: rgba(56, 42, 22, 0.34);
-}
-
-.roster-chip-name {
-    color: var(--text-main);
-    font-size: 0.82rem;
-    font-weight: 600;
-}
-
-.roster-chip-seat {
-    color: var(--text-dim);
-    font-size: 0.76rem;
-}
-
-.roster-chip-remove {
-    min-height: 28px;
-    min-width: 28px;
-    padding: 0 7px;
-    border: 1px solid rgba(160, 74, 88, 0.2);
-    border-radius: 999px;
-    color: #e6c9c6;
-    background: rgba(67, 21, 30, 0.62);
-    box-shadow: none;
-}
-
-.roster-empty {
-    color: var(--text-muted);
-    font-size: 0.82rem;
-    font-style: italic;
-}
-
 .traveler-panel {
     margin: 18px 0 12px;
     padding-top: 14px;
     border-top: 1px solid rgba(197, 165, 106, 0.14);
+}
+
+.traveler-toggle-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(197, 165, 106, 0.14);
+}
+
+.traveler-toggle-btn {
+    min-height: 34px;
+    padding: 6px 12px;
+    border: 1px solid rgba(123, 144, 167, 0.26);
+    border-radius: 999px;
+    color: #ccd7e1;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    background: linear-gradient(180deg, rgba(34, 40, 48, 0.92), rgba(20, 24, 29, 0.98));
+    box-shadow: 0 8px 14px rgba(0, 0, 0, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.traveler-toggle-btn.is-enabled {
+    border-color: rgba(197, 165, 106, 0.3);
+    color: #f3e7d0;
+    background: linear-gradient(180deg, rgba(92, 74, 46, 0.96), rgba(52, 39, 24, 0.99));
 }
 
 .traveler-grid,
@@ -715,47 +658,6 @@ button.action-btn {
     gap: 10px;
 }
 
-.seat-assign-list {
-    display: grid;
-    gap: 10px;
-    max-height: min(44vh, 340px);
-    overflow-y: auto;
-    padding-right: 4px;
-}
-
-.seat-assign-btn {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    width: 100%;
-    min-height: 48px;
-    padding: 12px 14px;
-    border: 1px solid rgba(197, 165, 106, 0.18);
-    border-radius: 14px;
-    color: var(--text-main);
-    text-align: left;
-    background: linear-gradient(180deg, rgba(39, 31, 34, 0.96), rgba(22, 18, 21, 0.99));
-}
-
-.seat-assign-btn.active {
-    border-color: rgba(197, 165, 106, 0.42);
-    color: #fff4de;
-    background: linear-gradient(180deg, rgba(106, 73, 38, 0.96), rgba(67, 44, 21, 0.99));
-}
-
-.seat-assign-btn.occupied {
-    border-color: rgba(120, 140, 158, 0.26);
-    color: #dce4ec;
-    background: linear-gradient(180deg, rgba(46, 53, 65, 0.96), rgba(27, 31, 39, 0.99));
-}
-
-.seat-assign-meta {
-    color: var(--text-dim);
-    font-size: 0.76rem;
-    white-space: nowrap;
-}
-
 .seat-assign-manual {
     display: grid;
     gap: 10px;
@@ -768,17 +670,6 @@ button.action-btn {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
-}
-
-.seat-assign-empty {
-    padding: 14px 12px;
-    border: 1px dashed rgba(197, 165, 106, 0.16);
-    border-radius: 14px;
-    color: var(--text-dim);
-    font-size: 0.84rem;
-    line-height: 1.6;
-    text-align: center;
-    background: rgba(20, 17, 20, 0.44);
 }
 
 .seat-token-btn {
@@ -1793,15 +1684,6 @@ button.night-btn {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
-    .roster-entry {
-        grid-template-columns: minmax(0, 1fr) auto;
-    }
-
-    .roster-add-btn {
-        width: auto;
-        min-width: 120px;
-    }
-
     .traveler-grid,
     .traveler-editor-row {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1902,7 +1784,7 @@ button.night-btn {
     </div>
 
     <div id="roleRevealModal" class="modal-overlay" onclick="hideRoleRevealModal()">
-        <div class="modal-title">🜂 向对方展示角色</div>
+        <div id="roleRevealTitle" class="modal-title">🜂 向对方展示角色</div>
         <div id="roleRevealCard" class="modal-bluff-card"></div>
         <div id="roleRevealNote" class="modal-role-note"></div>
         <div class="modal-close-tip">-- 点击屏幕任意处关闭 --</div>
@@ -1933,13 +1815,12 @@ button.night-btn {
 
     <div id="seatAssignModal" class="modal-overlay" onclick="closeSeatAssignModal()">
         <div id="seatAssignModalPanel" class="modal-panel">
-            <div class="seat-token-title" id="seatAssignTitle">选择入座玩家</div>
-            <div class="seat-token-subtitle">从已录入名单中选择玩家入座，也可以在下方手动录入一个名字。</div>
-            <div id="seatAssignList" class="seat-assign-list"></div>
+            <div class="seat-token-title" id="seatAssignTitle">修改座位名</div>
+            <div class="seat-token-subtitle">直接输入该座位要显示的玩家姓名，或清空恢复默认座位名。</div>
             <div class="seat-assign-manual">
-                <input type="text" id="seatAssignInput" class="add-token-input" placeholder="手动输入入座玩家姓名">
+                <input type="text" id="seatAssignInput" class="add-token-input" placeholder="输入座位上要显示的姓名">
                 <div class="seat-assign-actions">
-                    <button type="button" class="seat-token-btn active" onclick="applySeatAssignmentFromInput()">✅ 确定入座</button>
+                    <button type="button" class="seat-token-btn active" onclick="applySeatAssignmentFromInput()">✅ 确定修改</button>
                     <button type="button" class="seat-token-btn clear" onclick="clearSeatAssignment()">↺ 清空座位名</button>
                 </div>
             </div>
@@ -1960,7 +1841,7 @@ button.night-btn {
                 </div>
             </div>
             <h2>
-                <span id="appTitleText" class="title-text">📖 暗流魔典 v2.0</span>
+                <span id="appTitleText" class="title-text">📖 暗流魔典 v2.1</span>
                 <button class="reset-btn" onclick="clearData()">🔄 洗牌重开</button>
             </h2>
             <p id="appSubtitle" class="hero-subtitle">夜烛之下，圆桌、伪装、唤醒与审判都在同一座祭坛上完成。</p>
@@ -1968,19 +1849,15 @@ button.night-btn {
 
         <section class="panel control-panel text-center">
             <label>设定玩家总数</label>
-            <input type="number" id="playerCountInput" min="5" max="15" value="8" oninput="updateRoleInfo(false)" onchange="updateRoleInfo(true)">
+            <select id="playerCountInput" onchange="updateRoleInfo(true)"></select>
             <div id="roleInfo" class="role-info">标准配置: 读取中...</div>
 
-            <div class="roster-panel">
-                <div class="roster-label">🪑 录入玩家姓名</div>
-                <div class="roster-entry">
-                    <input type="text" id="rosterInput" class="roster-input" placeholder="输入姓名后加入名单" onkeypress="handleRosterInput(event)">
-                    <button type="button" class="bluff-random-btn roster-add-btn" onclick="addRosterName()">+ 加入名单</button>
-                </div>
-                <div id="rosterList" class="roster-list"></div>
+            <div class="traveler-toggle-row">
+                <div class="roster-label">🧳 旅行者功能</div>
+                <button id="travelerToggleBtn" type="button" class="traveler-toggle-btn" onclick="toggleTravelerFeature()">关闭</button>
             </div>
 
-            <div class="traveler-panel">
+            <div id="travelerPanel" class="traveler-panel">
                 <div class="roster-label">🧳 添加旅行者</div>
                 <div class="traveler-grid">
                     <select id="travelerSeatSelect" class="traveler-meta-input" onchange="syncTravelerEditorFromSeat()"></select>
@@ -2089,7 +1966,7 @@ button.night-btn {
         let seriesGames = 0;
         let finalMvp = '';
         let selectedScript = 'tb';
-        let playerRoster = [];
+        let travelerFeatureEnabled = false;
         let activeSeatAssignPlayerId = null;
         let latestRoleCardBlob = null;
         let latestRoleCardFileName = '';
@@ -2167,23 +2044,23 @@ button.night-btn {
 
         const scriptMeta = {
             tb: {
-                title: '📖 暗流魔典 v2.0',
+                title: '📖 暗流魔典 v2.1',
                 subtitle: '夜烛之下，圆桌、伪装、唤醒与审判都在同一座祭坛上完成。',
-                pageTitle: '血染钟楼 - 暗流魔典 v2.0',
+                pageTitle: '血染钟楼 - 暗流魔典 v2.1',
                 minPlayers: 5,
                 maxPlayers: 15
             },
             dycs: {
-                title: '📖 黯月初升 v2.0',
+                title: '📖 黯月初升 v2.1',
                 subtitle: '死而复生、醉酒与多重夜杀并存的剧本，适合偏向混乱、翻盘与高戏剧性的夜晚。',
-                pageTitle: '血染钟楼 - 黯月初升 v2.0',
+                pageTitle: '血染钟楼 - 黯月初升 v2.1',
                 minPlayers: 7,
                 maxPlayers: 15
             }
         };
 
-        const allRoles = ['❓ 未分配', '镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：隐士', '外来者：圣徒', '爪牙：投毒者', '爪牙：间谍', '爪牙：红唇女郎', '爪牙：男爵', '恶魔：小恶魔', TRAVELER_ROLE];
-        const poolGood = ['镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：隐士', '外来者：圣徒'];
+        const allRoles = ['❓ 未分配', '镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：陌客', '外来者：圣徒', '爪牙：投毒者', '爪牙：间谍', '爪牙：红唇女郎', '爪牙：男爵', '恶魔：小恶魔', TRAVELER_ROLE];
+        const poolGood = ['镇民：洗衣妇', '镇民：图书管理员', '镇民：调查员', '镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：僧侣', '镇民：守鸦人', '镇民：贞洁者', '镇民：猎人', '镇民：士兵', '镇民：镇长', '外来者：管家', '外来者：酒鬼', '外来者：陌客', '外来者：圣徒'];
         const poolTownsfolk = poolGood.slice(0, 13);
         const poolOutsiders = poolGood.slice(13);
         const poolMinions = ['爪牙：投毒者', '爪牙：间谍', '爪牙：红唇女郎', '爪牙：男爵'];
@@ -2211,7 +2088,7 @@ button.night-btn {
             '镇民：镇长': '白天仅3人存活且未处决任何人则好人获胜；夜晚遇害时，另一人可能代替你死。',
             '外来者：管家': '每晚选一名主人，明天白天只有主人投票时你才能投票。',
             '外来者：酒鬼': '自以为是镇民(不知情)，但技能可能会得到错误信息。',
-            '外来者：隐士': '即使是好人，也可能被视为邪恶阵营(爪牙或恶魔)。',
+            '外来者：陌客': '即使是好人，也可能被视为邪恶阵营(爪牙或恶魔)。',
             '外来者：圣徒': '如果你被处决，好人阵营立刻落败。',
             '爪牙：投毒者': '每晚使一名玩家中毒(技能失效或得到错误信息)。',
             '爪牙：间谍': '每晚可查看魔典。即使是坏人，也可能被视为善良阵营。',
@@ -2237,7 +2114,7 @@ button.night-btn {
             '镇民：镇长': '前期别轻易暴露，终盘三人局时你的存活价值最高。',
             '外来者：管家': '尽快锁定一个你信任的主人，并观察他的投票和发言是否稳定。',
             '外来者：酒鬼': '拿到的信息先别全信，更要依赖逻辑、票型和别人反馈交叉验证。',
-            '外来者：隐士': '你容易造成注册混乱，发言时要提醒别人留意隐士干扰的可能。',
+            '外来者：陌客': '你容易造成注册混乱，发言时要提醒别人留意陌客干扰的可能。',
             '外来者：圣徒': '核心任务是避免被处决，越到后期越要主动让团队避开你。',
             '爪牙：投毒者': '优先毒高价值信息位或保护位，持续制造信息冲突。',
             '爪牙：间谍': '充分利用魔典和注册干扰能力，帮恶魔规划白天叙事。',
@@ -2249,7 +2126,7 @@ button.night-btn {
         const roleAdvancedPlay = {
             '❓ 未分配': '先观察桌面结构与配置变化，再决定你要走明牌还是暗牌路线。',
             '镇民：洗衣妇': '不要只盯两人范围本身，更要结合谁敢主动撞身份、谁在刻意绕开该信息。',
-            '镇民：图书管理员': '若场上出现醉酒、男爵或隐士干扰，优先把“外来者是否异常增多”作为破局点。',
+            '镇民：图书管理员': '若场上出现醉酒、男爵或陌客干扰，优先把“外来者是否异常增多”作为破局点。',
             '镇民：调查员': '别急着直接拍死两人范围，可先用模糊压力看谁会过度防守或抢先编故事。',
             '镇民：厨师': '把读数和座位、夜死顺序、可疑抱团发言一起看，常能在中期锁出恶魔落点。',
             '镇民：共情者': '两侧一旦有人死亡就要立刻重算价值链，新的邻座关系往往比旧读数更关键。',
@@ -2263,7 +2140,7 @@ button.night-btn {
             '镇民：镇长': '高阶镇长要学会在残局前隐藏自己，同时让坏人不敢轻易赌你会触发替死或三人胜利。',
             '外来者：管家': '你最有价值的不是投票限制本身，而是借主人位建立稳定的白天站边锚点。',
             '外来者：酒鬼': '如果你怀疑自己是酒鬼，就把信息降权处理，主动把自己变成帮助别人校准信息的样本。',
-            '外来者：隐士': '高阶隐士要主动提醒“注册异常”存在，但不能提醒得太像为坏人脱罪。',
+            '外来者：陌客': '高阶陌客要主动提醒“注册异常”存在，但不能提醒得太像为坏人脱罪。',
             '外来者：圣徒': '你要让全桌形成共识：处决你是最低收益路线，从而逼坏人改走夜刀或舆论路线。',
             '爪牙：投毒者': '最强毒法不是乱封技能，而是持续毒同一条信息链，让好人建立一整套错误世界观。',
             '爪牙：间谍': '有魔典优势就要主动设计白天叙事，让好人误以为他们在依据真实链路推理。',
@@ -2289,7 +2166,7 @@ button.night-btn {
             '镇民：镇长': '终盘可改写胜负',
             '外来者：管家': '每晚选主人',
             '外来者：酒鬼': '信息可能全错',
-            '外来者：隐士': '可注册成邪恶',
+            '外来者：陌客': '可注册成邪恶',
             '外来者：圣徒': '被处决则好人败',
             '爪牙：投毒者': '每晚使一人中毒',
             '爪牙：间谍': '每晚看魔典',
@@ -2316,7 +2193,7 @@ button.night-btn {
             '镇民：占卜师': { ability: '技能：每晚查验两名玩家中是否有恶魔。', action: '唤醒占卜师。让他指两名玩家。如果是恶魔(或死敌)，点头；否则摇头。' },
             '外来者：管家': { ability: '技能：每晚选择一名玩家作主人。', action: '唤醒管家。让他指向一名玩家。为该玩家添加“👑主人”标记。让他闭眼。' },
             '镇民：僧侣': { ability: '技能：每晚保护除自己外一名玩家。', action: '唤醒僧侣。让他指向一名玩家。为该玩家添加“🛡️保护”标记。让他闭眼。' },
-            '爪牙：红唇女郎': { ability: '技能：如果恶魔死亡且存活>=5人，你变成恶魔。', action: '悄悄替换恶魔标记。' },
+            '爪牙：红唇女郎': { ability: '技能：如果恶魔死亡且存活>=5人，你变成恶魔。', action: '悄悄替换恶魔标记。若需要展示接任信息，可点击 <button type="button" class="inline-reveal-btn" onclick="showScarletWomanPromotionModal()">全屏告知她已成为小恶魔</button>。' },
             '恶魔：小恶魔': { ability: '技能：每晚杀害一名玩家。', action: '唤醒小恶魔。让他指向一名玩家。放置死亡标记。让他闭眼。' },
             '镇民：守鸦人': { ability: '技能：被杀时得知一名玩家真实角色。', action: '（⚠️仅当他今晚被恶魔杀害时唤醒）指向一名玩家，展示其真实角色。' },
             '镇民：送葬者': { ability: '技能：得知白天被处决死亡玩家的真实角色。', action: '（⚠️仅当白天有人被处决才唤醒）展示死者真实角色标记。' }
@@ -2495,6 +2372,23 @@ button.night-btn {
         function getCurrentWheelAbilityMap() { return selectedScript === 'dycs' ? dycsWheelAbilityShort : wheelAbilityShort; }
         function getCurrentNightOrder() { return selectedScript === 'dycs' ? dycsNightOrder : nightOrder; }
         function getCurrentRoleDetails() { return selectedScript === 'dycs' ? dycsRoleDetails : roleDetails; }
+        function shouldHideTbEvilIntroSteps() {
+            return selectedScript === 'tb' && players.length > 0 && players.length < 7;
+        }
+        function toggleTravelerFeature() {
+            travelerFeatureEnabled = !travelerFeatureEnabled;
+            saveData();
+            renderAll();
+        }
+        function updateTravelerFeatureUi() {
+            const toggleBtn = document.getElementById('travelerToggleBtn');
+            const travelerPanel = document.getElementById('travelerPanel');
+            if (toggleBtn) {
+                toggleBtn.innerText = travelerFeatureEnabled ? '已开启' : '已关闭';
+                toggleBtn.classList.toggle('is-enabled', travelerFeatureEnabled);
+            }
+            if (travelerPanel) travelerPanel.style.display = travelerFeatureEnabled ? 'block' : 'none';
+        }
 
         // --- 全屏放大伪装 ---
         function showBluffsModal() {
@@ -2512,12 +2406,30 @@ button.night-btn {
         function hideBluffsModal() {
             document.getElementById('bluffsModal').style.display = 'none';
         }
+        function showCustomRevealModal(cardText, noteText = '', titleText = '🜂 向对方展示角色') {
+            const title = document.getElementById('roleRevealTitle');
+            const card = document.getElementById('roleRevealCard');
+            const note = document.getElementById('roleRevealNote');
+            const modal = document.getElementById('roleRevealModal');
+            const safeCard = `${cardText || ''}`
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;')
+                .replace(/\n/g, '<br>');
+            if (title) title.innerText = titleText;
+            if (card) card.innerHTML = safeCard;
+            if (note) note.innerText = noteText;
+            if (modal) modal.style.display = 'flex';
+        }
         function showRoleRevealModal(roleStr) {
             const shortRole = (roleStr || '').split('：')[1] || roleStr || '未知角色';
             const category = (roleStr || '').split('：')[0] || '';
-            document.getElementById('roleRevealCard').innerText = shortRole;
-            document.getElementById('roleRevealNote').innerText = category ? `类别：${category}` : '';
-            document.getElementById('roleRevealModal').style.display = 'flex';
+            showCustomRevealModal(shortRole, category ? `类别：${category}` : '', '🜂 向对方展示角色');
+        }
+        function showScarletWomanPromotionModal() {
+            showCustomRevealModal('小恶魔', '你已成为小恶魔。', '😈 向红唇女郎展示');
         }
         function hideRoleRevealModal() {
             document.getElementById('roleRevealModal').style.display = 'none';
@@ -2525,16 +2437,17 @@ button.night-btn {
         function initRoleRevealSelect() {
             const select = document.getElementById('roleRevealSelect');
             if (!select) return;
-            const roleOptions = getCurrentAllRoles()
-                .filter(role => role !== '❓ 未分配')
-                .map(role => `<option value="${role}">${role === TRAVELER_ROLE ? '旅行者：自定义' : role}</option>`)
+            const revealRoles = getCurrentAllRoles()
+                .filter(role => role !== '❓ 未分配' && (travelerFeatureEnabled || role !== TRAVELER_ROLE));
+            const roleOptions = revealRoles
+                .map(role => `<option value="${role}">${role === TRAVELER_ROLE ? '旅行者：官方列表' : role}</option>`)
                 .join('');
             const travelerOptions = players
                 .filter(player => isTravelerPlayer(player))
                 .map(player => `<option value="traveler:${player.id}">旅行者：${escapeHtml(getTravelerName(player))}</option>`)
                 .join('');
             const validValues = [
-                ...getCurrentAllRoles().filter(role => role !== '❓ 未分配'),
+                ...revealRoles,
                 ...players.filter(player => isTravelerPlayer(player)).map(player => `traveler:${player.id}`)
             ];
             select.innerHTML = roleOptions + travelerOptions;
@@ -2565,11 +2478,18 @@ button.night-btn {
             if (title) title.innerText = meta.title;
             if (subtitle) subtitle.innerText = meta.subtitle;
             if (playerCountInput) {
-                playerCountInput.min = meta.minPlayers || 5;
-                playerCountInput.max = meta.maxPlayers || 15;
                 const currentValue = parseInt(playerCountInput.value, 10);
-                if (Number.isNaN(currentValue) || currentValue < playerCountInput.min) playerCountInput.value = playerCountInput.min;
-                if (currentValue > playerCountInput.max) playerCountInput.value = playerCountInput.max;
+                const minPlayers = meta.minPlayers || 5;
+                const maxPlayers = meta.maxPlayers || 15;
+                const nextValue = Number.isNaN(currentValue)
+                    ? minPlayers
+                    : Math.min(maxPlayers, Math.max(minPlayers, currentValue));
+                let options = '';
+                for (let count = minPlayers; count <= maxPlayers; count++) {
+                    options += `<option value="${count}">${count} 人</option>`;
+                }
+                playerCountInput.innerHTML = options;
+                playerCountInput.value = `${nextValue}`;
             }
             document.title = meta.pageTitle;
             updateRoleInfo();
@@ -3751,55 +3671,6 @@ button.night-btn {
             }
             alert(copied ? '已复制角色资料。' : '复制失败，请重试。');
         }
-        function renderRosterList() {
-            const list = document.getElementById('rosterList');
-            if (!list) return;
-            if (playerRoster.length === 0) {
-                list.innerHTML = '<span class="roster-empty">暂无已录入玩家。</span>';
-                return;
-            }
-            list.innerHTML = playerRoster.map(name => {
-                const seat = getAssignedSeatByName(name);
-                const seatText = seat ? getDefaultSeatName(seat.id) : '未入座';
-                const encodedName = encodeURIComponent(name);
-                return `
-                    <div class="roster-chip ${seat ? 'assigned' : ''}">
-                        <span class="roster-chip-name">${escapeHtml(name)}</span>
-                        <span class="roster-chip-seat">${escapeHtml(seatText)}</span>
-                        <button type="button" class="roster-chip-remove" onclick="removeRosterName(decodeURIComponent('${encodedName}'))">×</button>
-                    </div>
-                `;
-            }).join('');
-        }
-        function addRosterName() {
-            const input = document.getElementById('rosterInput');
-            if (!input) return;
-            const name = input.value.trim();
-            if (!name) return;
-            if (!playerRoster.includes(name)) playerRoster.push(name);
-            input.value = '';
-            saveData();
-            renderAll();
-        }
-        function handleRosterInput(event) {
-            if (event.key !== 'Enter') return;
-            event.preventDefault();
-            addRosterName();
-        }
-        function removeRosterName(name) {
-            const seat = getAssignedSeatByName(name);
-            const promptText = seat
-                ? `移除玩家 [${name}] 后，会同时清空 ${getDefaultSeatName(seat.id)} 的座位名。确定继续吗？`
-                : `确定从名单移除玩家 [${name}] 吗？`;
-            if (!confirm(promptText)) return;
-            playerRoster = playerRoster.filter(item => item !== name);
-            players.forEach(player => {
-                if (player.name === name) player.name = getDefaultSeatName(player.id);
-            });
-            closeSeatAssignModal();
-            saveData();
-            renderAll();
-        }
         function assignSeatName(id, name) {
             const player = players.find(item => item.id === id);
             const cleanName = `${name || ''}`.trim();
@@ -3807,7 +3678,6 @@ button.night-btn {
             const otherSeat = players.find(item => item.id !== id && item.name === cleanName);
             if (otherSeat) otherSeat.name = getDefaultSeatName(otherSeat.id);
             player.name = cleanName;
-            if (!playerRoster.includes(cleanName)) playerRoster.push(cleanName);
             saveData();
             renderAll();
             closeSeatAssignModal();
@@ -3818,27 +3688,9 @@ button.night-btn {
             activeSeatAssignPlayerId = id;
             const modal = document.getElementById('seatAssignModal');
             const title = document.getElementById('seatAssignTitle');
-            const list = document.getElementById('seatAssignList');
             const input = document.getElementById('seatAssignInput');
-            title.innerText = `${getDefaultSeatName(id)} 选择入座玩家`;
+            title.innerText = `${getDefaultSeatName(id)} 修改座位名`;
             input.value = isDefaultSeatName(player.name, player.id) ? '' : player.name;
-            list.innerHTML = playerRoster.length > 0
-                ? playerRoster.map(name => {
-                    const assignedSeat = getAssignedSeatByName(name);
-                    const isActive = player.name === name;
-                    const occupiedElsewhere = assignedSeat && assignedSeat.id !== id;
-                    const meta = assignedSeat
-                        ? occupiedElsewhere ? `${getDefaultSeatName(assignedSeat.id)} 已入座` : '当前已入座'
-                        : '未入座';
-                    const encodedName = encodeURIComponent(name);
-                    return `
-                        <button type="button" class="seat-assign-btn ${isActive ? 'active' : ''} ${occupiedElsewhere ? 'occupied' : ''}" onclick="assignRosterToActiveSeat(decodeURIComponent('${encodedName}'))">
-                            <span>${escapeHtml(name)}</span>
-                            <span class="seat-assign-meta">${escapeHtml(meta)}</span>
-                        </button>
-                    `;
-                }).join('')
-                : '<div class="seat-assign-empty">还没有录入任何玩家姓名。先在上方面板加入名单，再点座位安排入座。</div>';
             modal.style.display = 'flex';
         }
         function closeSeatAssignModal() {
@@ -3846,17 +3698,13 @@ button.night-btn {
             const modal = document.getElementById('seatAssignModal');
             if (modal) modal.style.display = 'none';
         }
-        function assignRosterToActiveSeat(name) {
-            if (activeSeatAssignPlayerId === null) return;
-            assignSeatName(activeSeatAssignPlayerId, name);
-        }
         function applySeatAssignmentFromInput() {
             if (activeSeatAssignPlayerId === null) return;
             const input = document.getElementById('seatAssignInput');
             if (!input) return;
             const name = input.value.trim();
             if (!name) {
-                alert('请输入要入座的玩家姓名。');
+                alert('请输入要显示的座位姓名。');
                 return;
             }
             assignSeatName(activeSeatAssignPlayerId, name);
@@ -4065,23 +3913,6 @@ button.night-btn {
         }
         function getDefaultSeatName(id) { return `座位 ${id + 1}`; }
         function isDefaultSeatName(name, id) { return `${name || ''}`.trim() === getDefaultSeatName(id); }
-        function normalizeRosterList(list) {
-            const result = [];
-            (Array.isArray(list) ? list : []).forEach(item => {
-                const name = `${item || ''}`.trim();
-                if (name && !result.includes(name)) result.push(name);
-            });
-            return result;
-        }
-        function inferRosterFromPlayers(sourcePlayers = players) {
-            return normalizeRosterList((sourcePlayers || []).map(player => {
-                const name = `${player.name || ''}`.trim();
-                return isDefaultSeatName(name, player.id) ? '' : name;
-            }));
-        }
-        function getAssignedSeatByName(name) {
-            return players.find(player => player.name === name);
-        }
         function escapeHtml(str) {
             return `${str || ''}`
                 .replace(/&/g, '&amp;')
@@ -4115,6 +3946,7 @@ button.night-btn {
                 '镇民：驱魔师': '镇民：驱魔人',
                 '镇民：茶女郎': '镇民：茶艺师',
                 '外来者：打手': '外来者：莽夫',
+                '外来者：隐士': '外来者：陌客',
                 '爪牙：黑手党首领': '爪牙：教父',
                 '爪牙：恶魔拥护者': '爪牙：魔鬼代言人',
                 '爪牙：幕后主谋': '爪牙：主谋',
@@ -4633,6 +4465,210 @@ button.night-btn {
             return array;
         }
 
+        function pickWeightedRole(candidates, weightMap = {}) {
+            if (!Array.isArray(candidates) || !candidates.length) return '';
+            const totalWeight = candidates.reduce((sum, role) => sum + Math.max(0, weightMap[role] ?? 1), 0);
+            if (totalWeight <= 0) return candidates[0];
+            let roll = Math.random() * totalWeight;
+            for (const role of candidates) {
+                roll -= Math.max(0, weightMap[role] ?? 1);
+                if (roll <= 0) return role;
+            }
+            return candidates[candidates.length - 1];
+        }
+
+        function pickWeightedUniqueRoles(candidates, count, weightMap = {}) {
+            const pool = [...candidates];
+            const picked = [];
+            while (picked.length < count && pool.length) {
+                const role = pickWeightedRole(pool, weightMap);
+                if (!role) break;
+                picked.push(role);
+                const idx = pool.indexOf(role);
+                if (idx >= 0) pool.splice(idx, 1);
+            }
+            return picked;
+        }
+
+        function insertUniqueRole(list, role, index = list.length) {
+            if (!role || list.includes(role)) return;
+            const safeIndex = Math.max(0, Math.min(index, list.length));
+            list.splice(safeIndex, 0, role);
+        }
+
+        function clearPlayerTokenEverywhere(tokenStr) {
+            const variants = tokenVariants(tokenStr);
+            players.forEach(player => {
+                player.tokens = player.tokens.filter(token => !variants.includes(token));
+            });
+        }
+
+        function getTbReasonableSetupStyle(count, outsiderRoles, minionRoles) {
+            if (minionRoles.includes('爪牙：间谍') || outsiderRoles.includes('外来者：陌客')) return 'advanced';
+            if (minionRoles.includes('爪牙：男爵') || outsiderRoles.includes('外来者：酒鬼') || outsiderRoles.length >= 2 || count <= 7) return 'info';
+            return Math.random() < 0.5 ? 'info' : 'quiet';
+        }
+
+        function getTbMinionWeights(count) {
+            return {
+                '爪牙：投毒者': 4,
+                '爪牙：红唇女郎': count >= 7 ? 3 : 4,
+                '爪牙：间谍': count >= 7 ? 2 : 0,
+                '爪牙：男爵': count >= 7 ? (count >= 11 ? 3 : 2) : 0
+            };
+        }
+
+        function chooseReasonableTbMinions(count, minionCount) {
+            let candidatePool = [...poolMinions];
+            if (count <= 6) candidatePool = candidatePool.filter(role => !['爪牙：男爵', '爪牙：间谍'].includes(role));
+            const picked = [];
+            while (picked.length < minionCount) {
+                let currentPool = candidatePool.filter(role => !picked.includes(role));
+                if (count <= 8 && picked.includes('爪牙：间谍')) currentPool = currentPool.filter(role => role !== '爪牙：男爵');
+                if (count <= 8 && picked.includes('爪牙：男爵')) currentPool = currentPool.filter(role => role !== '爪牙：间谍');
+                if (!currentPool.length) currentPool = candidatePool.filter(role => !picked.includes(role));
+                const role = pickWeightedRole(currentPool, getTbMinionWeights(count));
+                if (!role) break;
+                picked.push(role);
+            }
+            return picked;
+        }
+
+        function getTbOutsiderWeights(count, minionRoles) {
+            const weights = {
+                '外来者：酒鬼': 4,
+                '外来者：管家': 3,
+                '外来者：陌客': minionRoles.includes('爪牙：间谍') ? 3 : 2,
+                '外来者：圣徒': count >= 9 ? 2 : 1
+            };
+            if (minionRoles.includes('爪牙：男爵')) {
+                weights['外来者：酒鬼'] += 1;
+                weights['外来者：管家'] += 1;
+            }
+            return weights;
+        }
+
+        function chooseReasonableTbOutsiders(count, outsiderCount, minionRoles) {
+            if (outsiderCount <= 0) return [];
+            let picked = pickWeightedUniqueRoles(poolOutsiders, outsiderCount, getTbOutsiderWeights(count, minionRoles));
+            if (count <= 8 && picked.includes('外来者：酒鬼') && picked.includes('外来者：圣徒')) {
+                const replacement = ['外来者：管家', '外来者：陌客'].find(role => !picked.includes(role));
+                if (replacement) picked = picked.map(role => role === '外来者：圣徒' ? replacement : role);
+            }
+            return picked;
+        }
+
+        function chooseReasonableTbTownsfolk(count, townsfolkCount, outsiderRoles, minionRoles) {
+            const templates = {
+                info: {
+                    core: ['镇民：厨师', '镇民：共情者', '镇民：占卜师', '镇民：送葬者', '镇民：贞洁者'],
+                    extras: ['镇民：调查员', '镇民：图书管理员', '镇民：洗衣妇', '镇民：僧侣', '镇民：守鸦人', '镇民：猎人', '镇民：士兵', '镇民：镇长']
+                },
+                quiet: {
+                    core: ['镇民：共情者', '镇民：占卜师', '镇民：守鸦人', '镇民：猎人', '镇民：镇长'],
+                    extras: ['镇民：僧侣', '镇民：士兵', '镇民：送葬者', '镇民：洗衣妇', '镇民：调查员', '镇民：厨师', '镇民：图书管理员', '镇民：贞洁者']
+                },
+                advanced: {
+                    core: ['镇民：洗衣妇', '镇民：占卜师', '镇民：送葬者', '镇民：猎人', '镇民：贞洁者'],
+                    extras: ['镇民：调查员', '镇民：僧侣', '镇民：守鸦人', '镇民：共情者', '镇民：士兵', '镇民：镇长', '镇民：图书管理员', '镇民：厨师']
+                }
+            };
+            const style = getTbReasonableSetupStyle(count, outsiderRoles, minionRoles);
+            const template = templates[style];
+            const orderedCore = [...template.core];
+
+            if (outsiderRoles.length) insertUniqueRole(orderedCore, '镇民：图书管理员', 1);
+            if (outsiderRoles.includes('外来者：酒鬼')) insertUniqueRole(orderedCore, '镇民：调查员', 2);
+            if (minionRoles.includes('爪牙：间谍') || outsiderRoles.includes('外来者：陌客')) {
+                insertUniqueRole(orderedCore, '镇民：洗衣妇', 0);
+                insertUniqueRole(orderedCore, '镇民：占卜师', 2);
+            }
+            if (minionRoles.includes('爪牙：男爵')) insertUniqueRole(orderedCore, '镇民：图书管理员', 0);
+
+            const selected = [];
+            const addRole = role => {
+                if (!role || selected.includes(role) || selected.length >= townsfolkCount) return;
+                selected.push(role);
+            };
+
+            orderedCore.forEach(addRole);
+            shuffle([...template.extras]).forEach(addRole);
+            shuffle([...poolTownsfolk.filter(role => !selected.includes(role))]).forEach(addRole);
+            return selected.slice(0, townsfolkCount);
+        }
+
+        function buildReasonableTbSetup(count) {
+            const dist = roleDistribution[count];
+            const minionRoles = chooseReasonableTbMinions(count, dist[2]);
+            let townsfolkCount = dist[0];
+            let outsiderCount = dist[1];
+            const hasBaron = minionRoles.includes('爪牙：男爵');
+            if (hasBaron) {
+                outsiderCount = Math.min(poolOutsiders.length, outsiderCount + 2);
+                townsfolkCount = Math.max(0, townsfolkCount - 2);
+            }
+            const outsiderRoles = chooseReasonableTbOutsiders(count, outsiderCount, minionRoles);
+            const townsfolkRoles = chooseReasonableTbTownsfolk(count, townsfolkCount, outsiderRoles, minionRoles);
+            return {
+                selectedRoles: [...townsfolkRoles, ...outsiderRoles, ...minionRoles, '恶魔：小恶魔'],
+                hasBaron,
+                hasDrunk: outsiderRoles.includes('外来者：酒鬼')
+            };
+        }
+
+        function assignTbDrunkFacadeRole() {
+            const drunkPlayer = players.find(player => normalizeRoleName(player.role) === '外来者：酒鬼');
+            if (!drunkPlayer) return null;
+            const preferredFacadePool = [
+                '镇民：调查员',
+                '镇民：图书管理员',
+                '镇民：洗衣妇',
+                '镇民：厨师',
+                '镇民：共情者',
+                '镇民：占卜师',
+                '镇民：送葬者',
+                '镇民：守鸦人',
+                '镇民：僧侣',
+                '镇民：士兵',
+                '镇民：镇长',
+                '镇民：猎人',
+                '镇民：贞洁者'
+            ];
+            const inPlayRoles = players.map(player => normalizeRoleName(player.role));
+            const availableFacadePool = preferredFacadePool.filter(role => !inPlayRoles.includes(role));
+            const fallbackPool = poolTownsfolk.filter(role => !inPlayRoles.includes(role));
+            const facadeRole = availableFacadePool[0] || fallbackPool[0] || '镇民：调查员';
+            drunkPlayer.role = facadeRole;
+            if (!hasPlayerToken(drunkPlayer, '🍺 醉酒')) drunkPlayer.tokens.push('🍺 醉酒');
+            return drunkPlayer;
+        }
+
+        function assignTbFortuneTellerRedHerring() {
+            const fortuneTeller = players.find(player => normalizeRoleName(player.role) === '镇民：占卜师');
+            clearPlayerTokenEverywhere('🔮 死敌');
+            if (!fortuneTeller) return null;
+            const goodPlayers = players.filter(player => !isEvil(normalizeRoleName(player.role)) && !isTravelerPlayer(player));
+            if (!goodPlayers.length) return null;
+            let redHerring = null;
+            if (players.length <= 6 && Math.random() < 0.65) {
+                redHerring = fortuneTeller;
+            } else if (players.length <= 8 && Math.random() < 0.35) {
+                redHerring = fortuneTeller;
+            } else {
+                redHerring = shuffle([...goodPlayers])[0];
+            }
+            if (!redHerring.tokens.includes('🔮 死敌')) redHerring.tokens.push('🔮 死敌');
+            return redHerring;
+        }
+        function getScarletWomanPromotionCandidate() {
+            if (selectedScript !== 'tb') return null;
+            const deadImp = players.find(player => normalizeRoleName(player.role) === '恶魔：小恶魔' && !player.isAlive);
+            const scarletWoman = players.find(player => normalizeRoleName(player.role) === '爪牙：红唇女郎' && player.isAlive);
+            if (!deadImp || !scarletWoman) return null;
+            const aliveCount = players.filter(player => player.isAlive).length;
+            return aliveCount >= 4 ? scarletWoman : null;
+        }
+
         function generateAndDeal() {
             const { min, max } = getCurrentPlayerRange();
             let count = parseInt(document.getElementById('playerCountInput').value);
@@ -4646,15 +4682,30 @@ button.night-btn {
             players = []; bluffs = ['❓ 未分配', '❓ 未分配', '❓ 未分配'];
             for (let i = 0; i < count; i++) players.push(createPlayer(i, preservedNames[i]));
 
-            const dist = roleDistribution[count];
-            let selectedRoles = [].concat(
-                shuffle([...getCurrentPoolTownsfolk()]).slice(0, dist[0]),
-                shuffle([...getCurrentPoolOutsiders()]).slice(0, dist[1]),
-                shuffle([...getCurrentPoolMinions()]).slice(0, dist[2]),
-                shuffle([...getCurrentPoolDemons()]).slice(0, dist[3])
-            );
+            let selectedRoles = [];
+            let setupNotes = [];
+            if (selectedScript === 'tb') {
+                const tbSetup = buildReasonableTbSetup(count);
+                selectedRoles = [...tbSetup.selectedRoles];
+                if (tbSetup.hasBaron) setupNotes.push('男爵已自动按 +2 外来者处理');
+            } else {
+                const dist = roleDistribution[count];
+                selectedRoles = [].concat(
+                    shuffle([...getCurrentPoolTownsfolk()]).slice(0, dist[0]),
+                    shuffle([...getCurrentPoolOutsiders()]).slice(0, dist[1]),
+                    shuffle([...getCurrentPoolMinions()]).slice(0, dist[2]),
+                    shuffle([...getCurrentPoolDemons()]).slice(0, dist[3])
+                );
+            }
             selectedRoles = shuffle(selectedRoles);
             for (let i = 0; i < count; i++) players[i].role = selectedRoles[i];
+
+            if (selectedScript === 'tb') {
+                const drunkPlayer = assignTbDrunkFacadeRole();
+                const redHerringPlayer = assignTbFortuneTellerRedHerring();
+                if (drunkPlayer) setupNotes.push(`${drunkPlayer.name} 已自动以镇民身份入座并标记醉酒`);
+                if (redHerringPlayer) setupNotes.push(`${redHerringPlayer.name} 已自动标记为占卜师死敌`);
+            }
 
             const outOfPlayGood = getAvailableGoodBluffs();
             bluffs = [outOfPlayGood[0], outOfPlayGood[1], outOfPlayGood[2]];
@@ -4662,7 +4713,7 @@ button.night-btn {
             setTimer(300); document.getElementById('timerPanel').style.display = 'block'; 
             initBluffSelects();
             currentNightOrderType = 'first';
-            saveData(); renderAll(); alert("✅ 魔典布置完毕！座位、身份及恶魔伪装已自动生成。");
+            saveData(); renderAll(); alert(`✅ 魔典布置完毕！座位、身份及恶魔伪装已自动生成。${setupNotes.length ? `\n${setupNotes.join('；')}` : ''}`);
         }
 
         function editName(id) { openSeatAssignModal(id); }
@@ -4707,8 +4758,21 @@ button.night-btn {
             }
 
             const hints = [];
-            if (hasRole('镇民：占卜师')) hints.push({ type: 'warning', text: '本局有占卜师：开始夜晚前先设定一名死敌，并提前记好“🔮 死敌”标记。' });
-            if (hasRole('爪牙：男爵')) hints.push({ type: 'warning', text: '本局有男爵：外来者数量 +2，请以两名外来者替换两名镇民。' });
+            const fortuneTellerRival = players.find(player => hasPlayerToken(player, '🔮 死敌'));
+            const drunkFacadePlayers = selectedScript === 'tb'
+                ? players.filter(player => hasPlayerToken(player, '🍺 醉酒') && getRoleCategory(normalizeRoleName(player.role)) === 'Townsfolk')
+                : [];
+            const scarletWomanPromotion = getScarletWomanPromotionCandidate();
+            if (hasRole('镇民：占卜师')) {
+                if (fortuneTellerRival) {
+                    hints.push({ type: 'system', text: `本局有占卜师：已自动将 [${fortuneTellerRival.name}] 标记为死敌。` });
+                } else {
+                    hints.push({ type: 'warning', text: '本局有占卜师：开始夜晚前先设定一名死敌，并提前记好“🔮 死敌”标记。' });
+                }
+            }
+            if (hasRole('爪牙：男爵')) hints.push({ type: 'system', text: '本局有男爵：一键发牌时已按 +2 外来者处理；若你是手动改出的男爵，请自行检查阵容。' });
+            if (drunkFacadePlayers.length) hints.push({ type: 'system', text: `本局含酒鬼伪装：${drunkFacadePlayers.map(player => `[${player.name}]`).join('、')} 已自动以镇民身份入座，并带有“🍺 醉酒”标记。` });
+            if (scarletWomanPromotion) hints.push({ type: 'warning', text: `小恶魔已死亡，且 [${scarletWomanPromotion.name}] 满足红唇女郎接任条件。<button type="button" class="inline-reveal-btn" onclick="showScarletWomanPromotionModal()">全屏展示“你已成为小恶魔”</button>` });
             if (hasSpyInPlay() && (hasRole('镇民：厨师') || hasRole('镇民：共情者'))) hints.push({ type: 'system', text: '本局有间谍：夜晚顺序中的厨师/共情者会给出真实值与注册值两种结果，按说书人裁定任选其一。' });
             if (players.some(player => isTravelerPlayer(player))) hints.push({ type: 'system', text: '本局有旅行者：旅行者不参与随机发牌，建议公开其阵营与技能边界后再进入白天讨论。' });
             if (hints.length === 0) hints.push({ type: 'normal', text: '当前无特殊开局提醒，可直接进入夜晚流程。' });
@@ -4729,10 +4793,14 @@ button.night-btn {
             const activeRoles = players.map(p => normalizeRoleName(p.role));
             const activeNightOrder = getCurrentNightOrder();
             const activeRoleDetails = getCurrentRoleDetails();
+            const hideTbEvilIntroSteps = shouldHideTbEvilIntroSteps();
             let html = `<h3 class="night-order-title">${type === 'first' ? '🌙 首夜降临' : '🌘 其余夜晚'}</h3><ul class="night-list">`;
             let stepCount = 1;
 
             activeNightOrder[type].forEach(role => {
+                if (hideTbEvilIntroSteps && (role === '【系统：爪牙互相确认】' || role === '【系统：恶魔确认爪牙及3个伪装】')) {
+                    return;
+                }
                 const details = activeRoleDetails[role] || { ability: '', action: '无详细操作说明' };
                 if (role.startsWith('【')) {
                     html += `<li class="night-item"><div class="night-header">${stepCount}. <span class="system-prompt">${role}</span></div><div class="storyteller-action">👉 <b>说书人：</b>${details.action}</div></li>`;
@@ -4761,7 +4829,7 @@ button.night-btn {
 
         function saveData() { 
             bluffs[0] = document.getElementById('bluff1').value; bluffs[1] = document.getElementById('bluff2').value; bluffs[2] = document.getElementById('bluff3').value;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, bluffs, currentNightOrderType, playerListLayout, scoreBoard, seriesGames, finalMvp, playerRoster, selectedScript })); 
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, bluffs, currentNightOrderType, playerListLayout, scoreBoard, seriesGames, finalMvp, selectedScript, travelerFeatureEnabled })); 
         }
 
         function loadData() { 
@@ -4776,13 +4844,14 @@ button.night-btn {
                 scoreBoard = data.scoreBoard || {};
                 seriesGames = typeof data.seriesGames === 'number' ? data.seriesGames : 0;
                 finalMvp = data.finalMvp || '';
-                playerRoster = normalizeRosterList(data.playerRoster);
-                if (playerRoster.length === 0) playerRoster = inferRosterFromPlayers(players);
+                travelerFeatureEnabled = typeof data.travelerFeatureEnabled === 'boolean'
+                    ? data.travelerFeatureEnabled
+                    : players.some(player => isTravelerPlayer(player));
                 if(players.length > 0) document.getElementById('timerPanel').style.display = 'block';
             } else {
                 playerListLayout = window.innerWidth >= 720 ? 'double' : 'single';
-                playerRoster = [];
                 selectedScript = 'tb';
+                travelerFeatureEnabled = false;
             }
             initBluffSelects(); initRoleRevealSelect(); updateScriptUi(); renderAll(); updateTimerDisplay();
         }
@@ -4820,8 +4889,8 @@ button.night-btn {
         }
 
         function renderAll() {
-            renderRosterList();
             initTravelerControls();
+            updateTravelerFeatureUi();
             initRoleRevealSelect();
             updateRoleInfo();
             renderCircle();
@@ -4891,7 +4960,8 @@ button.night-btn {
             players.forEach(p => {
                 const card = document.createElement('div'); card.className = `player-card ${p.isAlive ? '' : 'dead'}`;
                 const roleName = normalizeRoleName(p.role);
-                let roleOptions = getCurrentAllRoles().map(r => `<option value="${r}" ${roleName === r ? 'selected' : ''}>${r === TRAVELER_ROLE ? '旅行者：自定义' : r}</option>`).join('');
+                const roleChoices = getCurrentAllRoles().filter(role => travelerFeatureEnabled || role !== TRAVELER_ROLE || roleName === TRAVELER_ROLE);
+                let roleOptions = roleChoices.map(r => `<option value="${r}" ${roleName === r ? 'selected' : ''}>${r === TRAVELER_ROLE ? '旅行者：官方列表' : r}</option>`).join('');
                 let ghostBtnHtml = p.isAlive ? '' : `<button class="${p.hasGhostVote ? 'ghost-btn' : 'no-ghost'}" onclick="toggleGhostVote(${p.id})">${p.hasGhostVote ? '👻 有票' : '❌ 无票'}</button>`;
                 let abilityDesc = getPlayerAbilityText(p);
                 const deathLabel = p.deathType === 'demon' ? '🗡️ 恶魔刀' : '☠️ 已处决';
@@ -4900,8 +4970,9 @@ button.night-btn {
                     ? ''
                     : `<div class="actions">${ghostBtnHtml}<button class="revive-btn" onclick="revivePlayer(${p.id})">✨ 复活</button><button class="death-mark ${deathClass}" disabled>${deathLabel}</button></div>`;
                 const travelerPresetOptions = getTravelerPresetList().map(preset => `<option value="${preset.name}" ${getTravelerName(p) === preset.name ? 'selected' : ''}>${preset.name}</option>`).join('');
-                const primaryAbilityHtml = isTravelerPlayer(p) ? '' : `<div class="role-desc">ℹ️ ${abilityDesc}</div>`;
-                const travelerEditorHtml = isTravelerPlayer(p)
+                const showTravelerEditor = travelerFeatureEnabled && isTravelerPlayer(p);
+                const primaryAbilityHtml = showTravelerEditor ? '' : `<div class="role-desc">ℹ️ ${abilityDesc}</div>`;
+                const travelerEditorHtml = showTravelerEditor
                     ? `
                         <div class="traveler-editor">
                             <div class="traveler-editor-row">
