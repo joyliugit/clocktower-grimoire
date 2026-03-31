@@ -5581,7 +5581,7 @@ button.night-btn {
             setTimer(300); document.getElementById('timerPanel').style.display = 'block'; 
             initBluffSelects();
             currentNightOrderType = 'first';
-            saveData(); renderAll(); alert(`✅ 魔典布置完毕！座位、身份及恶魔伪装已自动生成。${setupNotes.length ? `\n${setupNotes.join('；')}` : ''}`);
+            saveData(); renderAll();
         }
 
         function editName(id) { openSeatAssignModal(id); }
