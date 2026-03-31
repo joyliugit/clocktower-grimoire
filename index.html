@@ -2241,8 +2241,8 @@ button.night-btn {
         };
 
         const roleDetails = {
-            '【系统：爪牙互相确认】': { ability: '爪牙互认环节', action: '唤醒所有爪牙。展示“这是恶魔”提示牌，并指向恶魔。让他闭眼。' },
-            '【系统：恶魔确认爪牙及3个伪装】': { ability: '恶魔信息环节', action: '唤醒恶魔。展示“这些是你的爪牙”并指向爪牙。点击【全屏放大给恶魔】向其展示伪装。让他闭眼。' },
+            '【系统：爪牙互相确认】': { ability: '爪牙互认环节', action: '唤醒所有爪牙。展示“这是恶魔”提示牌，并指向恶魔。若需要全屏提示牌，可点击<button type="button" class="inline-reveal-btn" onclick="showThisIsDemonModal()">全屏展示“这是恶魔”</button>。让他闭眼。' },
+            '【系统：恶魔确认爪牙及3个伪装】': { ability: '恶魔信息环节', action: '唤醒恶魔。展示“这些是你的爪牙”并指向爪牙。若需要全屏提示牌，可点击<button type="button" class="inline-reveal-btn" onclick="showTheseAreYourMinionsModal()">全屏展示“这是你的爪牙”</button>。点击【全屏放大给恶魔】向其展示伪装。让他闭眼。' },
             '爪牙：投毒者': { ability: '技能：每晚可选择一名玩家中毒。', action: '唤醒投毒者。让他指向一名玩家，为该玩家添加“🧪中毒”标记。让他闭眼。' },
             '爪牙：间谍': { ability: '技能：每晚可查看魔典。', action: '唤醒间谍。向他展示你的魔典。让他闭眼。' },
             '镇民：洗衣妇': { ability: '技能：首夜得知具体的哪一个镇民在特定两名玩家之中。', action: '唤醒洗衣妇。展示具体“镇民”角色标记，指向两名玩家。让他闭眼。' },
@@ -2386,8 +2386,8 @@ button.night-btn {
         };
 
         const dycsRoleDetails = {
-            '【系统：爪牙互相确认】': { ability: '爪牙互认环节', action: '唤醒所有爪牙。展示“这是恶魔”提示牌，并指向恶魔。让他们闭眼。' },
-            '【系统：恶魔确认爪牙及3个伪装】': { ability: '恶魔信息环节', action: '唤醒恶魔。展示“这些是你的爪牙”，并向其展示 3 个不在场善良角色伪装。让他闭眼。' },
+            '【系统：爪牙互相确认】': { ability: '爪牙互认环节', action: '唤醒所有爪牙。展示“这是恶魔”提示牌，并指向恶魔。若需要全屏提示牌，可点击<button type="button" class="inline-reveal-btn" onclick="showThisIsDemonModal()">全屏展示“这是恶魔”</button>。让他们闭眼。' },
+            '【系统：恶魔确认爪牙及3个伪装】': { ability: '恶魔信息环节', action: '唤醒恶魔。展示“这些是你的爪牙”，并向其展示 3 个不在场善良角色伪装。若需要全屏提示牌，可点击<button type="button" class="inline-reveal-btn" onclick="showTheseAreYourMinionsModal()">全屏展示“这是你的爪牙”</button>。让他闭眼。' },
             '【系统：造谣者真话判定】': { ability: '造谣者公开声明结算', action: '回顾今天所有造谣者声明。若其中存在真实声明，可在今晚安排一名玩家死亡。' },
             '爪牙：教父': { ability: '技能：首夜得知外来者；若今天有外来者死亡，今夜可杀一人。', action: '首夜展示外来者在场信息。若今天有外来者死亡，则在今夜唤醒教父，令其选择一名玩家死亡。' },
             '爪牙：魔鬼代言人': { ability: '技能：每晚保护一名玩家免于明日被处决死亡。', action: '唤醒魔鬼代言人，让他选择一名存活玩家。若该玩家明天被处决，则不死。' },
@@ -2432,6 +2432,90 @@ button.night-btn {
         function getCurrentWheelAbilityMap() { return selectedScript === 'dycs' ? dycsWheelAbilityShort : wheelAbilityShort; }
         function getCurrentNightOrder() { return selectedScript === 'dycs' ? dycsNightOrder : nightOrder; }
         function getCurrentRoleDetails() { return selectedScript === 'dycs' ? dycsRoleDetails : roleDetails; }
+        const roleIconMap = {
+            '镇民：洗衣妇': '👕',
+            '镇民：图书管理员': '📚',
+            '镇民：调查员': '🕵️',
+            '镇民：厨师': '🍳',
+            '镇民：共情者': '💞',
+            '镇民：占卜师': '🔮',
+            '镇民：送葬者': '⚱️',
+            '镇民：僧侣': '🙏',
+            '镇民：守鸦人': '🐦',
+            '镇民：贞洁者': '🕊️',
+            '镇民：猎人': '🏹',
+            '镇民：士兵': '🛡️',
+            '镇民：镇长': '👑',
+            '外来者：管家': '🗝️',
+            '外来者：酒鬼': '🍺',
+            '外来者：陌客': '🎭',
+            '外来者：圣徒': '✨',
+            '爪牙：投毒者': '🧪',
+            '爪牙：间谍': '🕶️',
+            '爪牙：红唇女郎': '💋',
+            '爪牙：男爵': '🎩',
+            '恶魔：小恶魔': '😈',
+            '镇民：祖母': '👵',
+            '镇民：水手': '⚓',
+            '镇民：侍女': '🪞',
+            '镇民：驱魔人': '✟',
+            '镇民：旅店老板': '🏨',
+            '镇民：赌徒': '🎲',
+            '镇民：造谣者': '📣',
+            '镇民：侍臣': '⏳',
+            '镇民：教授': '🎓',
+            '镇民：吟游诗人': '🎼',
+            '镇民：茶艺师': '🍵',
+            '镇民：和平主义者': '🕊️',
+            '镇民：弄臣': '🎪',
+            '外来者：莽夫': '💪',
+            '外来者：疯子': '🌀',
+            '外来者：修补匠': '🔧',
+            '外来者：月之子': '🌙',
+            '爪牙：教父': '🩸',
+            '爪牙：魔鬼代言人': '🗣️',
+            '爪牙：刺客': '🗡️',
+            '爪牙：主谋': '♟️',
+            '恶魔：僵怖': '🧟',
+            '恶魔：普卡': '🐍',
+            '恶魔：沙巴洛斯': '🦷',
+            '恶魔：朴': '🌺'
+        };
+        const travelerRoleIconMap = {
+            '枪手': '🔫',
+            '乞丐': '🥣',
+            '官僚': '📜',
+            '小偷': '🗝️',
+            '替罪羊': '🐐',
+            '主教': '✝️',
+            '法官': '⚖️',
+            '女族长': '👑',
+            '巫毒师': '🕯️',
+            '学徒': '📘'
+        };
+        function getRoleIcon(roleStr, player = null) {
+            if (isTravelerPlayer(player)) return travelerRoleIconMap[getTravelerName(player)] || '🧳';
+            const normalizedRole = normalizeRoleName(roleStr || player?.role);
+            if (!normalizedRole || normalizedRole === '❓ 未分配') return '❓';
+            if (normalizedRole === TRAVELER_ROLE || `${normalizedRole}`.startsWith('旅行者：')) {
+                const travelerName = player ? getTravelerName(player) : `${normalizedRole}`.split('：')[1];
+                return travelerRoleIconMap[travelerName] || '🧳';
+            }
+            if (roleIconMap[normalizedRole]) return roleIconMap[normalizedRole];
+            const category = getRoleCategory(normalizedRole);
+            if (category === 'Townsfolk') return '✦';
+            if (category === 'Outsider') return '◇';
+            if (category === 'Minion') return '◆';
+            if (category === 'Demon') return '✹';
+            if (category === 'Traveler') return '🧳';
+            return '❓';
+        }
+        function getRoleLabelWithIcon(roleStr, player = null) {
+            const normalizedRole = normalizeRoleName(roleStr || player?.role);
+            if (isTravelerPlayer(player)) return `${getRoleIcon(normalizedRole, player)} 旅行者：${getTravelerName(player)}`;
+            if (normalizedRole === TRAVELER_ROLE || `${normalizedRole}`.startsWith('旅行者：')) return `${getRoleIcon(normalizedRole, player)} ${normalizedRole === TRAVELER_ROLE ? '旅行者：官方列表' : normalizedRole}`;
+            return `${getRoleIcon(normalizedRole, player)} ${normalizedRole || '❓ 未分配'}`;
+        }
         function shouldHideTbEvilIntroSteps() {
             return selectedScript === 'tb' && players.length > 0 && players.length < 7;
         }
@@ -2486,10 +2570,16 @@ button.night-btn {
         function showRoleRevealModal(roleStr) {
             const shortRole = (roleStr || '').split('：')[1] || roleStr || '未知角色';
             const category = (roleStr || '').split('：')[0] || '';
-            showCustomRevealModal(shortRole, category ? `类别：${category}` : '', '🜂 向对方展示角色');
+            showCustomRevealModal(`${getRoleIcon(roleStr)} ${shortRole}`, category ? `类别：${category}` : '', '🜂 向对方展示角色');
+        }
+        function showThisIsDemonModal() {
+            showCustomRevealModal('😈 这是恶魔', '请同时用手指向真正的恶魔。', '🜂 向爪牙展示');
+        }
+        function showTheseAreYourMinionsModal() {
+            showCustomRevealModal('🩸 这些是你的爪牙', '请同时指向场上的全部爪牙。', '🜂 向恶魔展示');
         }
         function showScarletWomanPromotionModal() {
-            showCustomRevealModal('小恶魔', '你已成为小恶魔。', '😈 向红唇女郎展示');
+            showCustomRevealModal(`${getRoleIcon('恶魔：小恶魔')} 小恶魔`, '你已成为小恶魔。', '😈 向红唇女郎展示');
         }
         function hideRoleRevealModal() {
             document.getElementById('roleRevealModal').style.display = 'none';
@@ -2500,11 +2590,11 @@ button.night-btn {
             const revealRoles = getCurrentAllRoles()
                 .filter(role => role !== '❓ 未分配' && (travelerFeatureEnabled || role !== TRAVELER_ROLE));
             const roleOptions = revealRoles
-                .map(role => `<option value="${role}">${role === TRAVELER_ROLE ? '旅行者：官方列表' : role}</option>`)
+                .map(role => `<option value="${role}">${escapeHtml(getRoleLabelWithIcon(role))}</option>`)
                 .join('');
             const travelerOptions = players
                 .filter(player => isTravelerPlayer(player))
-                .map(player => `<option value="traveler:${player.id}">旅行者：${escapeHtml(getTravelerName(player))}</option>`)
+                .map(player => `<option value="traveler:${player.id}">${escapeHtml(getRoleLabelWithIcon(player.role, player))}</option>`)
                 .join('');
             const validValues = [
                 ...revealRoles,
@@ -3640,6 +3730,7 @@ button.night-btn {
             const travelerCampLabel = getTravelerCampValue(player) === 'undecided' ? '' : ` · ${getTravelerCampLabel(player)}`;
             const categoryLabel = isTraveler ? `旅行者${travelerCampLabel}` : (parts.length > 1 ? parts[0] : '身份');
             const shortRoleName = isTraveler ? getTravelerName(player) : (parts.length > 1 ? parts[1] : roleName);
+            const roleIcon = getRoleIcon(roleName, player);
             const scriptName = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
             const palette = getRoleCardPalette(roleName);
             const portrait = isMobileLikeDevice();
@@ -3726,7 +3817,7 @@ button.night-btn {
 
             ctx.fillStyle = '#f4eadc';
             ctx.font = `${portrait ? 64 : 58}px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif`;
-            ctx.fillText(shortRoleName, paddingX, topPad + 82);
+            ctx.fillText(`${roleIcon} ${shortRoleName}`, paddingX, topPad + 82);
 
             ctx.font = '20px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
             const badgeText = ` ${categoryLabel} `;
@@ -3815,6 +3906,7 @@ button.night-btn {
             const roleParts = `${roleName}`.split('：');
             const category = isTravelerPlayer(player) ? '旅行者' : (roleParts.length > 1 ? roleParts[0] : '身份');
             const shortRoleName = isTravelerPlayer(player) ? getTravelerName(player) : (roleParts.length > 1 ? roleParts[1] : roleName);
+            const roleIcon = getRoleIcon(roleName, player);
             const scriptName = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
             const sections = [
                 { label: '技能', text: getPlayerAbilityText(player) },
@@ -3878,7 +3970,7 @@ button.night-btn {
 
             ctx.fillStyle = '#f2eadc';
             ctx.font = '600 52px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
-            ctx.fillText(shortRoleName, paddingX, 128);
+            ctx.fillText(`${roleIcon} ${shortRoleName}`, paddingX, 128);
 
             const badgeText = ` ${category} `;
             ctx.font = '20px "Noto Serif SC", "Source Han Serif SC", "Songti SC", serif';
@@ -4304,6 +4396,10 @@ button.night-btn {
             if (isTravelerPlayer(player)) return getTravelerName(player);
             const roleName = normalizeRoleName(player?.role);
             return roleName === '❓ 未分配' ? '待分配' : (roleName.split('：')[1] || roleName);
+        }
+        function getPlayerRoleShortNameWithIcon(player) {
+            const roleName = normalizeRoleName(player?.role);
+            return `${getRoleIcon(roleName, player)} ${getPlayerRoleShortName(player)}`;
         }
         function getPlayerAbilityText(player) {
             if (isTravelerPlayer(player)) return getTravelerAbilityText(player);
@@ -5366,7 +5462,7 @@ button.night-btn {
                 seat.title = `${p.name}：短按切换状态，长按保存/分享角色卡`;
                 bindSeatInteractions(seat, p.id);
                 const roleName = normalizeRoleName(p.role);
-                const shortRole = getPlayerRoleShortName(p);
+                const shortRole = getPlayerRoleShortNameWithIcon(p);
                 const badgeHtml = getSeatBadgesHtml(p);
                 const abilityNote = document.createElement('div');
                 abilityNote.className = `seat-ability ${roleCategory === 'demon' ? 'demon' : roleCategory === 'minion' ? 'evil' : roleCategory === 'traveler' ? 'traveler' : ''}`.trim();
@@ -5389,7 +5485,7 @@ button.night-btn {
                 const card = document.createElement('div'); card.className = `player-card ${p.isAlive ? '' : 'dead'}`;
                 const roleName = normalizeRoleName(p.role);
                 const roleChoices = getCurrentAllRoles().filter(role => travelerFeatureEnabled || role !== TRAVELER_ROLE || roleName === TRAVELER_ROLE);
-                let roleOptions = roleChoices.map(r => `<option value="${r}" ${roleName === r ? 'selected' : ''}>${r === TRAVELER_ROLE ? '旅行者：官方列表' : r}</option>`).join('');
+                let roleOptions = roleChoices.map(r => `<option value="${r}" ${roleName === r ? 'selected' : ''}>${escapeHtml(getRoleLabelWithIcon(r))}</option>`).join('');
                 let ghostBtnHtml = p.isAlive ? '' : `<button class="${p.hasGhostVote ? 'ghost-btn' : 'no-ghost'}" onclick="toggleGhostVote(${p.id})">${p.hasGhostVote ? '👻 有票' : '❌ 无票'}</button>`;
                 let abilityDesc = getPlayerAbilityText(p);
                 const deathLabel = p.deathType === 'demon' ? '🗡️ 恶魔刀' : '☠️ 已处决';
@@ -5397,7 +5493,7 @@ button.night-btn {
                 const actionHtml = p.isAlive
                     ? ''
                     : `<div class="actions">${ghostBtnHtml}<button class="revive-btn" onclick="revivePlayer(${p.id})">✨ 复活</button><button class="death-mark ${deathClass}" disabled>${deathLabel}</button></div>`;
-                const travelerPresetOptions = getTravelerPresetList().map(preset => `<option value="${preset.name}" ${getTravelerName(p) === preset.name ? 'selected' : ''}>${preset.name}</option>`).join('');
+                const travelerPresetOptions = getTravelerPresetList().map(preset => `<option value="${preset.name}" ${getTravelerName(p) === preset.name ? 'selected' : ''}>${escapeHtml(`${travelerRoleIconMap[preset.name] || '🧳'} ${preset.name}`)}</option>`).join('');
                 const showTravelerEditor = travelerFeatureEnabled && isTravelerPlayer(p);
                 const primaryAbilityHtml = showTravelerEditor ? '' : `<div class="role-desc">ℹ️ ${abilityDesc}</div>`;
                 const travelerEditorHtml = showTravelerEditor
