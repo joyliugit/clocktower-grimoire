@@ -1573,8 +1573,54 @@ button.night-btn {
     color: var(--text-main);
 }
 
+.scoreboard-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.scoreboard-rank {
+    flex: 0 0 auto;
+    min-width: 36px;
+    padding: 5px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    color: var(--gold);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-align: center;
+    background: rgba(79, 60, 35, 0.16);
+}
+
+.scoreboard-text {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
 .scoreboard-name {
     font-weight: 600;
+}
+
+.scoreboard-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.score-stat {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(197, 165, 106, 0.12);
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    background: rgba(26, 22, 24, 0.52);
 }
 
 .scoreboard-controls {
@@ -1944,10 +1990,10 @@ button.night-btn {
             <div id="seriesSummary" class="score-summary">已记录 0 局，当前未结算 MVP。</div>
             <div id="scoreBoardList" class="scoreboard-list"><div class="score-empty">暂无记分记录。</div></div>
             <div class="score-mvp-row">
-                <div class="score-mvp-note">系统会按当前最高分自动评为 MVP；若同分，则并列记为 MVP。</div>
+                <div class="score-mvp-note">竞技排序按 积分 &gt; 胜率 &gt; 赛季MVP &gt; 胜场；至少出场 3 局才可参评赛季 MVP。右侧 +/- 只调整积分，不改胜场和出场。</div>
                 <button class="show-bluff-btn" onclick="finalizeSeriesMvp()">🏁 结束并记录 MVP</button>
             </div>
-            <div id="mvpSummary" class="score-summary">当前赛季 MVP：未选择</div>
+            <div id="mvpSummary" class="score-summary">当前赛季 MVP：未产生</div>
         </section>
     </main>
 
@@ -1965,6 +2011,7 @@ button.night-btn {
         let scoreBoard = {};
         let seriesGames = 0;
         let finalMvp = '';
+        const COMPETITIVE_MVP_MIN_GAMES = 3;
         let selectedScript = 'tb';
         let travelerFeatureEnabled = false;
         let activeSeatAssignPlayerId = null;
@@ -2564,72 +2611,187 @@ button.night-btn {
             saveData();
             updatePlayerListLayoutUi();
         }
-        function getCurrentMvpNames() {
-            const entries = Object.entries(scoreBoard);
-            if (!entries.length) return [];
-            const maxScore = Math.max(...entries.map(([, score]) => score));
-            return entries
-                .filter(([, score]) => score === maxScore)
-                .map(([name]) => name)
-                .sort((a, b) => a.localeCompare(b, 'zh-CN'));
+        function normalizeScoreBoardEntry(entry) {
+            if (typeof entry === 'number') {
+                const legacyPoints = Math.max(0, Math.round(entry));
+                return { points: legacyPoints, wins: legacyPoints, games: legacyPoints, seasonMvp: 0 };
+            }
+            const normalized = {
+                points: Math.max(0, Math.round(Number(entry?.points ?? entry?.score ?? 0) || 0)),
+                wins: Math.max(0, Math.round(Number(entry?.wins ?? 0) || 0)),
+                games: Math.max(0, Math.round(Number(entry?.games ?? 0) || 0)),
+                seasonMvp: Math.max(0, Math.round(Number(entry?.seasonMvp ?? entry?.mvpCount ?? entry?.mvp ?? 0) || 0))
+            };
+            if (normalized.games < normalized.wins) normalized.games = normalized.wins;
+            return normalized;
         }
-        function getCurrentMvpScore() {
-            const entries = Object.entries(scoreBoard);
-            if (!entries.length) return 0;
-            return Math.max(...entries.map(([, score]) => score));
+        function hasScoreBoardActivity(entry) {
+            return !!entry && (entry.points > 0 || entry.wins > 0 || entry.games > 0 || entry.seasonMvp > 0);
+        }
+        function normalizeScoreBoardData(data) {
+            return Object.entries(data || {}).reduce((acc, [name, entry]) => {
+                const normalized = normalizeScoreBoardEntry(entry);
+                if (hasScoreBoardActivity(normalized)) acc[name] = normalized;
+                return acc;
+            }, {});
+        }
+        function ensureScoreBoardEntry(name) {
+            if (!name) return null;
+            const normalized = normalizeScoreBoardEntry(scoreBoard[name]);
+            scoreBoard[name] = normalized;
+            return normalized;
+        }
+        function cleanupScoreBoardEntry(name) {
+            if (!name || !(name in scoreBoard)) return;
+            if (!hasScoreBoardActivity(scoreBoard[name])) delete scoreBoard[name];
+        }
+        function getScoreBoardWinRate(entry) {
+            return entry && entry.games > 0 ? entry.wins / entry.games : 0;
+        }
+        function formatScoreBoardWinRate(entry) {
+            return `${Math.round(getScoreBoardWinRate(entry) * 100)}%`;
+        }
+        function compareScoreBoardEntries([nameA, entryA], [nameB, entryB]) {
+            const winRateDiff = getScoreBoardWinRate(entryB) - getScoreBoardWinRate(entryA);
+            return (entryB.points - entryA.points)
+                || winRateDiff
+                || (entryB.seasonMvp - entryA.seasonMvp)
+                || (entryB.wins - entryA.wins)
+                || (entryB.games - entryA.games)
+                || nameA.localeCompare(nameB, 'zh-CN');
+        }
+        function getSortedScoreBoardEntries() {
+            scoreBoard = normalizeScoreBoardData(scoreBoard);
+            return Object.entries(scoreBoard).sort(compareScoreBoardEntries);
+        }
+        function isSameCompetitiveStanding(entryA, entryB) {
+            if (!entryA || !entryB) return false;
+            return entryA.points === entryB.points
+                && entryA.wins === entryB.wins
+                && entryA.games === entryB.games
+                && entryA.seasonMvp === entryB.seasonMvp
+                && Math.abs(getScoreBoardWinRate(entryA) - getScoreBoardWinRate(entryB)) < 0.000001;
+        }
+        function getCurrentMvpEntries() {
+            const eligibleEntries = getSortedScoreBoardEntries().filter(([, entry]) => entry.games >= COMPETITIVE_MVP_MIN_GAMES);
+            if (!eligibleEntries.length) return [];
+            const topEntry = eligibleEntries[0][1];
+            return eligibleEntries.filter(([, entry]) => isSameCompetitiveStanding(entry, topEntry));
+        }
+        function getCurrentMvpNames() {
+            return getCurrentMvpEntries().map(([name]) => name).sort((a, b) => a.localeCompare(b, 'zh-CN'));
+        }
+        function getCurrentMvpWinCount() {
+            const currentMvpEntries = getCurrentMvpEntries();
+            return currentMvpEntries.length ? currentMvpEntries[0][1].wins : 0;
+        }
+        function clearFinalMvpAward() {
+            if (!finalMvp) return;
+            finalMvp.split('、').filter(Boolean).forEach(name => {
+                const entry = ensureScoreBoardEntry(name);
+                if (!entry) return;
+                entry.seasonMvp = Math.max(0, entry.seasonMvp - 1);
+                cleanupScoreBoardEntry(name);
+            });
+            finalMvp = '';
+        }
+        function applyFinalMvpAward(names) {
+            const nextNames = Array.isArray(names) ? names.filter(Boolean) : [];
+            const prevNames = finalMvp ? finalMvp.split('、').filter(Boolean) : [];
+            const prevSet = new Set(prevNames);
+            const nextSet = new Set(nextNames);
+            prevNames.forEach(name => {
+                if (nextSet.has(name)) return;
+                const entry = ensureScoreBoardEntry(name);
+                if (!entry) return;
+                entry.seasonMvp = Math.max(0, entry.seasonMvp - 1);
+                cleanupScoreBoardEntry(name);
+            });
+            nextNames.forEach(name => {
+                if (prevSet.has(name)) return;
+                const entry = ensureScoreBoardEntry(name);
+                if (!entry) return;
+                entry.seasonMvp += 1;
+            });
+            finalMvp = nextNames.join('、');
         }
         function renderScoreBoard() {
             const list = document.getElementById('scoreBoardList');
             const summary = document.getElementById('seriesSummary');
             const mvpSummary = document.getElementById('mvpSummary');
             if (!list || !summary || !mvpSummary) return;
-            const entries = Object.entries(scoreBoard).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh-CN'));
+            const entries = getSortedScoreBoardEntries();
             const currentMvpNames = getCurrentMvpNames();
             list.innerHTML = entries.length
-                ? entries.map(([name, score]) => {
+                ? entries.map(([name, entry], index) => {
                     const encodedName = encodeURIComponent(name);
                     return `
                         <div class="scoreboard-item">
-                            <span class="scoreboard-name">${escapeHtml(name)}</span>
+                            <div class="scoreboard-main">
+                                <div class="scoreboard-rank">#${index + 1}</div>
+                                <div class="scoreboard-text">
+                                    <span class="scoreboard-name">${escapeHtml(name)}</span>
+                                    <div class="scoreboard-meta">
+                                        <span class="score-stat">胜场 ${entry.wins}</span>
+                                        <span class="score-stat">出场 ${entry.games}</span>
+                                        <span class="score-stat">胜率 ${formatScoreBoardWinRate(entry)}</span>
+                                        <span class="score-stat">赛季MVP ${entry.seasonMvp}</span>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="scoreboard-controls">
                                 <button type="button" class="score-adjust-btn minus" onclick="adjustPlayerScore(decodeURIComponent('${encodedName}'), -1)">-</button>
-                                <span class="scoreboard-score">${score} 分</span>
+                                <span class="scoreboard-score">${entry.points} 分</span>
                                 <button type="button" class="score-adjust-btn plus" onclick="adjustPlayerScore(decodeURIComponent('${encodedName}'), 1)">+</button>
                             </div>
                         </div>
                     `;
                 }).join('')
                 : '<div class="score-empty">暂无记分记录。</div>';
-            summary.innerText = `已记录 ${seriesGames} 局，当前共有 ${entries.length} 名玩家进入记分。`;
-            mvpSummary.innerText = `当前赛季 MVP：${finalMvp || (currentMvpNames.length ? currentMvpNames.join('、') : '未产生')}`;
+            summary.innerText = `已记录 ${seriesGames} 局，当前共有 ${entries.length} 名玩家进入榜单。赛季 MVP 至少需出场 ${COMPETITIVE_MVP_MIN_GAMES} 局。`;
+            mvpSummary.innerText = `当前赛季 MVP：${finalMvp || (currentMvpNames.length ? currentMvpNames.join('、') : `未产生（至少 ${COMPETITIVE_MVP_MIN_GAMES} 局）`)}`;
         }
         function addScoreToPlayer(name, amount = 1) {
-            if (!name) return;
-            const nextScore = (scoreBoard[name] || 0) + amount;
-            if (nextScore <= 0) delete scoreBoard[name];
-            else scoreBoard[name] = nextScore;
+            const entry = ensureScoreBoardEntry(name);
+            if (!entry) return;
+            entry.points = Math.max(0, entry.points + amount);
+            cleanupScoreBoardEntry(name);
         }
         function adjustPlayerScore(name, delta) {
             if (!name || !delta) return;
+            clearFinalMvpAward();
             addScoreToPlayer(name, delta);
-            finalMvp = '';
             saveData();
             renderScoreBoard();
         }
-        function recordCampWin(camp) {
-            if (!players.length) return alert('请先布置本局玩家和身份。');
-            const winners = players.filter(player => {
+        function getPlayersEligibleForScore() {
+            return players.filter(player => {
                 const roleName = normalizeRoleName(player.role);
                 if (roleName === '❓ 未分配') return false;
-                return isPlayerOnCamp(player, camp);
+                if (isTravelerPlayer(player)) return getTravelerCampValue(player) !== 'undecided';
+                return true;
             });
+        }
+        function recordCampWin(camp) {
+            if (!players.length) return alert('请先布置本局玩家和身份。');
+            const participants = getPlayersEligibleForScore();
+            const winners = participants.filter(player => isPlayerOnCamp(player, camp));
             if (!winners.length) return alert('当前没有可计分的胜利阵营玩家。');
-            winners.forEach(player => addScoreToPlayer(player.name, 1));
+            clearFinalMvpAward();
+            participants.forEach(player => {
+                const entry = ensureScoreBoardEntry(player.name);
+                if (entry) entry.games += 1;
+            });
+            winners.forEach(player => {
+                const entry = ensureScoreBoardEntry(player.name);
+                if (!entry) return;
+                entry.wins += 1;
+                entry.points += 1;
+            });
             seriesGames += 1;
-            finalMvp = '';
             saveData();
             renderScoreBoard();
-            alert(`${camp === 'evil' ? '邪恶阵营' : '善良阵营'}已加分。`);
+            alert(`${camp === 'evil' ? '邪恶阵营' : '善良阵营'}已加分，并已更新出场、胜场与胜率。`);
         }
         function clearScoreBoard() {
             if (!confirm('确定要清空积分栏吗？这会重置所有玩家积分、已记录局数和当前赛季 MVP。')) return;
@@ -2640,13 +2802,14 @@ button.night-btn {
             renderScoreBoard();
         }
         function finalizeSeriesMvp() {
-            const currentMvpNames = getCurrentMvpNames();
-            if (!currentMvpNames.length) return alert('当前还没有可结算的 MVP 分数。');
-            const mvpScore = getCurrentMvpScore();
-            finalMvp = currentMvpNames.join('、');
+            const currentMvpEntries = getCurrentMvpEntries();
+            if (!currentMvpEntries.length) return alert(`当前还没有达到 ${COMPETITIVE_MVP_MIN_GAMES} 局参评门槛的玩家。`);
+            const currentMvpNames = currentMvpEntries.map(([name]) => name);
+            const mvpWinCount = getCurrentMvpWinCount();
+            applyFinalMvpAward(currentMvpNames);
             saveData();
             renderScoreBoard();
-            const canvas = createMvpAwardCanvas(currentMvpNames, mvpScore, seriesGames);
+            const canvas = createMvpAwardCanvas(currentMvpNames, mvpWinCount, seriesGames);
             if (!canvas) {
                 alert(`本轮赛季 MVP：${finalMvp}`);
                 return;
@@ -2668,8 +2831,22 @@ button.night-btn {
         }
         function migratePlayerScoreName(oldName, newName) {
             if (!oldName || !newName || oldName === newName || !(oldName in scoreBoard)) return;
-            scoreBoard[newName] = (scoreBoard[newName] || 0) + scoreBoard[oldName];
+            const oldEntry = normalizeScoreBoardEntry(scoreBoard[oldName]);
+            const newEntry = normalizeScoreBoardEntry(scoreBoard[newName]);
+            scoreBoard[newName] = {
+                points: newEntry.points + oldEntry.points,
+                wins: newEntry.wins + oldEntry.wins,
+                games: newEntry.games + oldEntry.games,
+                seasonMvp: newEntry.seasonMvp + oldEntry.seasonMvp
+            };
             delete scoreBoard[oldName];
+            if (finalMvp) {
+                finalMvp = finalMvp
+                    .split('、')
+                    .filter(Boolean)
+                    .map(name => name === oldName ? newName : name)
+                    .join('、');
+            }
         }
         function wrapProfileText(ctx, text, maxWidth) {
             const lines = [];
@@ -4841,7 +5018,7 @@ button.night-btn {
                 bluffs = (data.bluffs || ['❓ 未分配', '❓ 未分配', '❓ 未分配']).map(normalizeRoleName);
                 currentNightOrderType = data.currentNightOrderType || '';
                 playerListLayout = data.playerListLayout || (window.innerWidth >= 720 ? 'double' : 'single');
-                scoreBoard = data.scoreBoard || {};
+                scoreBoard = normalizeScoreBoardData(data.scoreBoard || {});
                 seriesGames = typeof data.seriesGames === 'number' ? data.seriesGames : 0;
                 finalMvp = data.finalMvp || '';
                 travelerFeatureEnabled = typeof data.travelerFeatureEnabled === 'boolean'
