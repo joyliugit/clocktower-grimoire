@@ -2893,10 +2893,6 @@ button.night-btn {
                 updateScriptUi();
                 return;
             }
-            if (players.length && !confirm('切换剧本会清空当前身份、标记、夜晚顺序与恶魔伪装，但保留座位名、玩家名单和记分。确定切换吗？')) {
-                updateScriptUi();
-                return;
-            }
             selectedScript = nextScript;
             if (players.length) {
                 const preservedNames = players.map(player => player.name);
@@ -3144,7 +3140,6 @@ button.night-btn {
             alert(`${camp === 'evil' ? '邪恶阵营' : '善良阵营'}已加分，并已更新出场、胜场与胜率。`);
         }
         function clearScoreBoard() {
-            if (!confirm('确定要清空积分栏吗？这会重置所有玩家积分、已记录局数和当前赛季 MVP。')) return;
             scoreBoard = {};
             seriesGames = 0;
             finalMvp = '';
@@ -5540,8 +5535,6 @@ button.night-btn {
             const { min, max } = getCurrentPlayerRange();
             let count = parseInt(document.getElementById('playerCountInput').value);
             if (isNaN(count) || count < min || count > max) return alert(`人数必须在 ${min} 到 ${max} 人之间！`);
-            if(players.length > 0 && !confirm("重新开局将重置身份、状态和伪装并重新发牌，座位名会保留，确定吗？")) return;
-
             const preservedNames = players.map(player => player.name);
             isRenameMode = false;
             closeSeatTokenModal();
@@ -5623,7 +5616,7 @@ button.night-btn {
             if (!player.tokens.includes(tokenStr)) { player.tokens.push(tokenStr); saveData(); renderAll(); }
         }
         function removeToken(id, tokenIndex) { players.find(p => p.id === id).tokens.splice(tokenIndex, 1); saveData(); renderAll(); }
-        function clearData() { if(confirm("确定要洗牌重开吗？这会清空座位名、身份和所有标记。")) { players = []; bluffs = ['❓ 未分配', '❓ 未分配', '❓ 未分配']; currentNightOrderType = ''; isRenameMode = false; closeSeatTokenModal(); closeSeatAssignModal(); document.getElementById('nightOrderDisplay').style.display = 'none'; document.getElementById('timerPanel').style.display = 'none'; pauseTimer(); setTimer(300); initBluffSelects(); saveData(); renderAll(); } }
+        function clearData() { players = []; bluffs = ['❓ 未分配', '❓ 未分配', '❓ 未分配']; currentNightOrderType = ''; isRenameMode = false; closeSeatTokenModal(); closeSeatAssignModal(); document.getElementById('nightOrderDisplay').style.display = 'none'; document.getElementById('timerPanel').style.display = 'none'; pauseTimer(); setTimer(300); initBluffSelects(); saveData(); renderAll(); }
         function renderHints() {
             const panel = document.getElementById('storytellerHints');
             if (players.length === 0) {
