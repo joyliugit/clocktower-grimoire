@@ -1990,7 +1990,7 @@ button.night-btn {
             <div id="seriesSummary" class="score-summary">已记录 0 局，当前未结算 MVP。</div>
             <div id="scoreBoardList" class="scoreboard-list"><div class="score-empty">暂无记分记录。</div></div>
             <div class="score-mvp-row">
-                <div class="score-mvp-note">竞技排序按 积分 &gt; 胜率 &gt; 赛季MVP &gt; 胜场；至少出场 3 局才可参评赛季 MVP。右侧 +/- 只调整积分，不改胜场和出场。</div>
+                <div class="score-mvp-note">竞技排序按 积分 &gt; 胜率 &gt; 胜场 &gt; 出场；至少出场 3 局才可参评赛季 MVP。右侧 +/- 只调整积分，不改胜场和出场。</div>
                 <button class="show-bluff-btn" onclick="finalizeSeriesMvp()">🏁 结束并记录 MVP</button>
             </div>
             <div id="mvpSummary" class="score-summary">当前赛季 MVP：未产生</div>
@@ -2655,7 +2655,6 @@ button.night-btn {
             const winRateDiff = getScoreBoardWinRate(entryB) - getScoreBoardWinRate(entryA);
             return (entryB.points - entryA.points)
                 || winRateDiff
-                || (entryB.seasonMvp - entryA.seasonMvp)
                 || (entryB.wins - entryA.wins)
                 || (entryB.games - entryA.games)
                 || nameA.localeCompare(nameB, 'zh-CN');
@@ -2669,7 +2668,6 @@ button.night-btn {
             return entryA.points === entryB.points
                 && entryA.wins === entryB.wins
                 && entryA.games === entryB.games
-                && entryA.seasonMvp === entryB.seasonMvp
                 && Math.abs(getScoreBoardWinRate(entryA) - getScoreBoardWinRate(entryB)) < 0.000001;
         }
         function getCurrentMvpEntries() {
@@ -2735,7 +2733,6 @@ button.night-btn {
                                         <span class="score-stat">胜场 ${entry.wins}</span>
                                         <span class="score-stat">出场 ${entry.games}</span>
                                         <span class="score-stat">胜率 ${formatScoreBoardWinRate(entry)}</span>
-                                        <span class="score-stat">赛季MVP ${entry.seasonMvp}</span>
                                     </div>
                                 </div>
                             </div>
@@ -3815,8 +3812,24 @@ button.night-btn {
             const imageFileName = `${sanitizeFileName(scriptNameForFile)}_${sanitizeFileName(roleLabel)}_角色卡.png`;
             const isMobileLike = isMobileLikeDevice();
 
-            if (imageBlob && (isMobileLike || !navigator.clipboard || !window.isSecureContext || typeof ClipboardItem === 'undefined') && openRoleCardPreviewModal(canvas, imageBlob, imageFileName)) {
-                return;
+            if (imageBlob && isMobileLike) {
+                if (canShareRoleCard(imageBlob, imageFileName)) {
+                    try {
+                        const file = new File([imageBlob], imageFileName, { type: 'image/png' });
+                        await navigator.share({
+                            title: `${roleLabel} 角色卡`,
+                            files: [file]
+                        });
+                        return;
+                    } catch (error) {
+                        if (error?.name === 'AbortError') return;
+                    }
+                }
+                if (downloadRoleProfileImage(imageBlob, imageFileName)) {
+                    alert('已直接为你保存/下载角色卡图片。');
+                    return;
+                }
+                if (openRoleCardPreviewModal(canvas, imageBlob, imageFileName)) return;
             }
 
             if (imageBlob && navigator.clipboard && window.isSecureContext && typeof ClipboardItem !== 'undefined') {
