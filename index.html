@@ -1567,6 +1567,160 @@ button.night-btn {
     text-align: center;
 }
 
+.recap-panel {
+    margin: 16px 0 14px;
+    padding: 14px;
+    border: 1px solid rgba(197, 165, 106, 0.12);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(20, 16, 19, 0.62), rgba(12, 10, 12, 0.72));
+}
+
+.recap-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.recap-header .display-panel-title {
+    margin-bottom: 0;
+    text-align: left;
+}
+
+.recap-tip {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+}
+
+.recap-grid {
+    display: grid;
+    gap: 10px;
+}
+
+.recap-input,
+.recap-textarea {
+    width: 100%;
+    padding: 12px 14px;
+    color: var(--text-main);
+    background: rgba(9, 8, 10, 0.42);
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+}
+
+.recap-textarea {
+    min-height: 90px;
+    resize: vertical;
+    line-height: 1.7;
+}
+
+.recap-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.recap-action-secondary {
+    background: linear-gradient(180deg, rgba(48, 43, 40, 0.96), rgba(26, 23, 22, 0.99));
+    border-color: rgba(129, 117, 103, 0.24);
+    color: #e4d9cf;
+}
+
+.match-history-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+}
+
+.match-history-item {
+    border: 1px solid rgba(197, 165, 106, 0.12);
+    border-radius: 16px;
+    background: rgba(18, 14, 17, 0.5);
+    overflow: hidden;
+}
+
+.match-history-item summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+.match-history-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.match-history-meta {
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    font-weight: 400;
+}
+
+.match-history-body {
+    padding: 0 14px 14px;
+    display: grid;
+    gap: 10px;
+}
+
+.match-history-block {
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(197, 165, 106, 0.1);
+    background: rgba(10, 9, 11, 0.28);
+}
+
+.match-history-label {
+    margin-bottom: 6px;
+    color: var(--gold);
+    font-size: 0.76rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.match-history-text {
+    color: var(--text-dim);
+    font-size: 0.84rem;
+    line-height: 1.7;
+    white-space: pre-wrap;
+}
+
+.match-history-roster {
+    display: grid;
+    gap: 6px;
+}
+
+.match-history-roster-line {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    line-height: 1.6;
+}
+
+.match-history-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.match-history-tag {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    border: 1px solid rgba(197, 165, 106, 0.12);
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    background: rgba(26, 22, 24, 0.52);
+}
+
 .scoreboard-list {
     display: grid;
     gap: 8px;
@@ -1759,6 +1913,10 @@ button.night-btn {
     .score-mvp-row {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .recap-actions {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 @media (min-width: 560px) {
@@ -1895,6 +2053,7 @@ button.night-btn {
                     <select id="scriptSelect" class="script-select" onchange="changeScript(this.value)">
                         <option value="tb">暗流魔典</option>
                         <option value="dycs">黯月初升</option>
+                        <option value="mycx">梦殒春宵</option>
                     </select>
                 </div>
             </div>
@@ -1999,6 +2158,22 @@ button.night-btn {
                 <button class="action-btn score-btn-evil" onclick="recordCampWin('evil')">😈 邪恶胜利</button>
                 <button class="action-btn score-btn-clear" onclick="clearScoreBoard()">🗑️ 清空积分栏</button>
             </div>
+            <div class="recap-panel">
+                <div class="recap-header">
+                    <div class="display-panel-title">本局复盘</div>
+                    <div class="recap-tip">点胜利按钮时会自动入档并计入赛季复盘。</div>
+                </div>
+                <div class="recap-grid">
+                    <input id="recapTitleInput" class="recap-input" type="text" placeholder="本局标题，例如：方古跳车翻盘局" oninput="updateMatchRecordDraft()">
+                    <textarea id="recapEventsInput" class="recap-textarea" placeholder="记录本局关键进程，例如：第1天谁带队、哪次处决改变局势、谁被误导、谁做出关键发言。" oninput="updateMatchRecordDraft()"></textarea>
+                    <textarea id="recapHighlightsInput" class="recap-textarea" placeholder="记录高光与争议，例如：关键刀口、关键票型、关键 bluff、说书人裁定点。" oninput="updateMatchRecordDraft()"></textarea>
+                    <textarea id="recapStorytellerInput" class="recap-textarea" placeholder="给复盘或 AI 的额外备注，例如：某玩家手动加减分原因、这局想重点分析什么。" oninput="updateMatchRecordDraft()"></textarea>
+                </div>
+                <div class="recap-actions">
+                    <button class="show-bluff-btn" onclick="exportSeasonRecordForAi()">📤 导出对局记录给 AI（含提示词）</button>
+                    <button class="reset-btn recap-action-secondary" onclick="clearMatchRecordDraft(true)">🧹 清空本局复盘</button>
+                </div>
+            </div>
             <div id="seriesSummary" class="score-summary">已记录 0 局，当前未结算 MVP。</div>
             <div id="scoreBoardList" class="scoreboard-list"><div class="score-empty">暂无记分记录。</div></div>
             <div class="score-mvp-row">
@@ -2006,6 +2181,7 @@ button.night-btn {
                 <button class="show-bluff-btn" onclick="finalizeSeriesMvp()">🏁 结束并记录 MVP</button>
             </div>
             <div id="mvpSummary" class="score-summary">当前赛季 MVP：未产生</div>
+            <div id="matchHistoryList" class="match-history-list"><div class="score-empty">暂无对局复盘。</div></div>
         </section>
     </main>
 
@@ -2023,6 +2199,14 @@ button.night-btn {
         let scoreBoard = {};
         let seriesGames = 0;
         let finalMvp = '';
+        let matchHistory = [];
+        let scoreAuditLog = [];
+        let matchRecordDraft = {
+            title: '',
+            events: '',
+            highlights: '',
+            storytellerNote: ''
+        };
         const COMPETITIVE_MVP_MIN_GAMES = 3;
         const SEAT_LONG_PRESS_MS = 520;
         let selectedScript = 'tb';
@@ -2099,11 +2283,39 @@ button.night-btn {
                     ability: '你活着时，获得一种说书人选择的存活玩家角色的能力（甚至是邪恶阵营的）。',
                     wheel: '获得他人能力'
                 }
+            ],
+            mycx: [
+                {
+                    name: '怪咖',
+                    ability: '只要你今天足够逗趣，如果你本应被放逐，说书人可以让你留在场上。',
+                    wheel: '有趣则免放逐'
+                },
+                {
+                    name: '集骨者',
+                    ability: '每局限一次，于夜晚选择一名死亡玩家：其能力恢复直到明天黄昏。',
+                    wheel: '一次返还能力'
+                },
+                {
+                    name: '咖啡师',
+                    ability: '每晚直到明天黄昏，1名玩家要么清醒、健康并获得真实信息，要么其能力发动两次；该玩家会得知是哪种效果。',
+                    wheel: '提神或双发'
+                },
+                {
+                    name: '流莺',
+                    ability: '每晚选择一名存活玩家：若对方同意，你会得知其角色；若不同意，你们两人都可能在今夜死亡。',
+                    wheel: '夜会知角/可能双死'
+                },
+                {
+                    name: '屠夫',
+                    ability: '每个白天，在第一次处决发生后，你可以再次提名一名玩家。',
+                    wheel: '二次提名处决'
+                }
             ]
         };
 
         const scriptMeta = {
             tb: {
+                displayName: '暗流魔典',
                 title: '📖 暗流魔典 v2.1',
                 subtitle: '夜烛之下，圆桌、伪装、唤醒与审判都在同一座祭坛上完成。',
                 pageTitle: '血染钟楼 - 暗流魔典 v2.1',
@@ -2111,9 +2323,18 @@ button.night-btn {
                 maxPlayers: 15
             },
             dycs: {
+                displayName: '黯月初升',
                 title: '📖 黯月初升 v2.1',
                 subtitle: '死而复生、醉酒与多重夜杀并存的剧本，适合偏向混乱、翻盘与高戏剧性的夜晚。',
                 pageTitle: '血染钟楼 - 黯月初升 v2.1',
+                minPlayers: 7,
+                maxPlayers: 15
+            },
+            mycx: {
+                displayName: '梦殒春宵',
+                title: '📖 梦殒春宵 v2.1',
+                subtitle: '真假信息、角色变更与疯狂宣称交织的剧本，适合已经熟悉基础局后的进阶对局。',
+                pageTitle: '血染钟楼 - 梦殒春宵 v2.1',
                 minPlayers: 7,
                 maxPlayers: 15
             }
@@ -2416,22 +2637,183 @@ button.night-btn {
             '恶魔：朴': { ability: '技能：可选择不杀人；若上一晚未杀人，则本夜杀三人。', action: '唤醒朴。若其上一晚选择不杀，则本夜选择三名玩家死亡；否则本夜可选择继续蓄力不杀或正常击杀。' }
         };
 
-        function getCurrentAllRoles() { return selectedScript === 'dycs' ? dycsAllRoles : allRoles; }
+        const mycxAllRoles = ['❓ 未分配', '镇民：钟表匠', '镇民：筑梦师', '镇民：舞蛇人', '镇民：数学家', '镇民：卖花女孩', '镇民：城镇公告员', '镇民：神谕者', '镇民：博学者', '镇民：裁缝', '镇民：哲学家', '镇民：艺术家', '镇民：杂耍艺人', '镇民：贤者', '外来者：理发师', '外来者：呆瓜', '外来者：心上人', '外来者：畸形秀演员', '爪牙：镜像双子', '爪牙：女巫', '爪牙：洗脑师', '爪牙：麻脸巫婆', '恶魔：方古', '恶魔：涡流', '恶魔：亡骨魔', '恶魔：诺-达鲺', TRAVELER_ROLE];
+        const mycxPoolGood = ['镇民：钟表匠', '镇民：筑梦师', '镇民：舞蛇人', '镇民：数学家', '镇民：卖花女孩', '镇民：城镇公告员', '镇民：神谕者', '镇民：博学者', '镇民：裁缝', '镇民：哲学家', '镇民：艺术家', '镇民：杂耍艺人', '镇民：贤者', '外来者：理发师', '外来者：呆瓜', '外来者：心上人', '外来者：畸形秀演员'];
+        const mycxPoolTownsfolk = mycxPoolGood.slice(0, 13);
+        const mycxPoolOutsiders = mycxPoolGood.slice(13);
+        const mycxPoolMinions = ['爪牙：镜像双子', '爪牙：女巫', '爪牙：洗脑师', '爪牙：麻脸巫婆'];
+        const mycxPoolDemons = ['恶魔：方古', '恶魔：涡流', '恶魔：亡骨魔', '恶魔：诺-达鲺'];
+
+        const mycxRoleAbilities = {
+            '❓ 未分配': '暂无身份，命运尚未降临。',
+            '镇民：钟表匠': '首夜得知恶魔与距离其最近的爪牙之间相隔了多少名玩家。',
+            '镇民：筑梦师': '每晚选择一名玩家：你会得知一个真角色与一个假角色，其中一个是他的真实角色。',
+            '镇民：舞蛇人': '每晚选择一名存活玩家：若他是恶魔，你们交换角色与阵营。',
+            '镇民：数学家': '每晚得知今晚有多少玩家的能力异常生效。',
+            '镇民：卖花女孩': '每晚得知恶魔今天是否投过票。',
+            '镇民：城镇公告员': '每晚得知今天是否有爪牙公开提名过某人。',
+            '镇民：神谕者': '每晚得知目前有多少名死亡玩家属于邪恶阵营。',
+            '镇民：博学者': '每天会从说书人处得到两条信息，其中一真一假。',
+            '镇民：裁缝': '每局限一次，于夜晚选择两名玩家：你会得知他们是否属于同一阵营。',
+            '镇民：哲学家': '每局限一次，于夜晚选择一种善良角色能力并获得它；若该角色在场，则其醉酒。',
+            '镇民：艺术家': '每局限一次，于白天向说书人提出一个是/否问题。',
+            '镇民：杂耍艺人': '每个白天可以公开猜测任意数量的玩家角色；今夜你会得知猜对了几个。',
+            '镇民：贤者': '若恶魔在夜晚杀死你，你会得知两名玩家之一是恶魔。',
+            '外来者：理发师': '若你死亡，今夜说书人可令两名玩家交换角色。',
+            '外来者：呆瓜': '若你被处决，不会死亡，但所有人都会知道你是呆瓜。',
+            '外来者：心上人': '当你死亡时，一名善良玩家会醉酒直到明天黄昏。',
+            '外来者：畸形秀演员': '若你“疯狂”地宣称自己是外来者，你可能会被立刻处决。',
+            '爪牙：镜像双子': '你与一名对立阵营玩家互相知晓；若善良双子被处决，邪恶立刻获胜。',
+            '爪牙：女巫': '每晚选择一名玩家：若他明天提名任何人，则会死亡。',
+            '爪牙：洗脑师': '每晚选择一名玩家和一个角色：若他明天没有“疯狂”地宣称自己是该角色，可能会被处决。',
+            '爪牙：麻脸巫婆': '每晚可以选择一名玩家与一个不在场角色：明早该玩家变成该角色。',
+            '恶魔：方古': '每晚选择一名玩家：他死亡。首个被你杀死的外来者会变成邪恶的方古，而你死亡。[+1 外来者]',
+            '恶魔：涡流': '每晚选择一名玩家：他死亡。镇民信息全部为假；若白天无人被处决，邪恶立即获胜。',
+            '恶魔：亡骨魔': '每晚选择一名玩家：他死亡。被你杀死的爪牙仍保留能力，且其相邻的一名镇民会中毒。',
+            '恶魔：诺-达鲺': '每晚选择一名玩家：他死亡。你相邻的两名镇民中毒。'
+        };
+
+        const mycxRoleBasicPlay = {
+            '镇民：钟表匠': '首轮尽快报出数字，并结合爪牙数量与座位结构缩小恶魔范围。',
+            '镇民：筑梦师': '优先查验核心嫌疑位，把“真一假一”的两个角色都完整记下来。',
+            '镇民：舞蛇人': '前几夜优先查验你最怀疑的活人，一旦换到恶魔就立刻调整自己的发言姿态。',
+            '镇民：数学家': '把每天数字与中毒、醉酒、角色变更逐条对照，别浪费连续读数。',
+            '镇民：卖花女孩': '盯紧当天票型，只要恶魔举手过，你的结果就能帮助缩小投票嫌疑。',
+            '镇民：城镇公告员': '每天记清谁公开提名过谁，你的“是/否”会直接锁定爪牙活跃度。',
+            '镇民：神谕者': '持续公开死亡邪恶数，帮助团队判断处决与夜杀里到底清掉了多少坏人。',
+            '镇民：博学者': '先把两条信息原样报出，再让团队一起找哪条更像说书人给你的陷阱。',
+            '镇民：裁缝': '把一次验阵营机会留给最关键的两人，而不是边角位。',
+            '镇民：哲学家': '看清局面缺什么信息，再决定复制哪个善良能力。',
+            '镇民：艺术家': '问题要足够锋利，最好能直接影响当天站边与处决。',
+            '镇民：杂耍艺人': '白天尽量覆盖多个核心位，晚上用命中数反推谁最可能在说谎。',
+            '镇民：贤者': '藏好自己，逼恶魔夜里刀你，二选一恶魔信息才有最大价值。',
+            '外来者：理发师': '一旦死亡就提醒全桌可能换角，别让旧信息继续被当成真相。',
+            '外来者：呆瓜': '别急着靠处决自证，你的价值在于打乱坏人的处决规划。',
+            '外来者：心上人': '死后立刻追踪谁会醉酒，帮助团队修正接下来一天的信息链。',
+            '外来者：畸形秀演员': '不要公开把自己说成外来者，你的生存空间来自克制。',
+            '爪牙：镜像双子': '尽快把双子局面变成一对一站边，让好人难以贸然处决其中任一人。',
+            '爪牙：女巫': '优先给爱提名的关键信息位下咒，打断好人的提名节奏。',
+            '爪牙：洗脑师': '逼强信息位疯狂成无关角色，让好人内部先互相拆台。',
+            '爪牙：麻脸巫婆': '先改废关键好人，再考虑是否需要重写恶魔结构。',
+            '恶魔：方古': '优先寻找可跳转的外来者，把第一次跳车做成信息断层。',
+            '恶魔：涡流': '牢记所有镇民信息都该是假的，白天一定要推动处决。',
+            '恶魔：亡骨魔': '夜里杀爪牙也有价值，尸体仍能继续给你施压。',
+            '恶魔：诺-达鲺': '你的邻座两侧就是天然毒链，优先利用他们的信息混乱。'
+        };
+
+        const mycxRoleAdvancedPlay = {
+            '镇民：钟表匠': '你的数字更适合做排除工具，别把单个距离过早硬落到某一对座位上。',
+            '镇民：筑梦师': '把假角色池也当信息用，它往往能反向锁出恶魔形态或麻脸巫婆改角痕迹。',
+            '镇民：舞蛇人': '真正强的是交换后的叙事重写能力，而不是单纯查中恶魔。',
+            '镇民：数学家': '连续数字变化最值钱，它能帮助你读出诺-达鲺、亡骨魔与哲学家复制的时机。',
+            '镇民：卖花女孩': '把投票结果与恶魔装好人的节奏绑在一起看，专抓关键放逐里的异常举手。',
+            '镇民：城镇公告员': '你的结果最好和提名动机一起分析，单独的“有/无”不够杀人。',
+            '镇民：神谕者': '中后期把你的数字与已知处决收益交叉，能快速识别谁在假跳好人。',
+            '镇民：博学者': '把两条命题拆成两个平行世界，看谁的发言只在其中一个世界里成立。',
+            '镇民：裁缝': '高阶价值不在验边角，而在一次性清掉一整组互斥叙事。',
+            '镇民：哲学家': '你也能故意复制在场角色去做醉酒定位，让全桌重新审视原技能来源。',
+            '镇民：艺术家': '最好的提问不是“知道答案”，而是能让邪恶第二天必须解释自己的票型和说法。',
+            '镇民：杂耍艺人': '把真假混合的猜测铺成网，命中数一出来就逼出谁在配合邪恶发言。',
+            '镇民：贤者': '若被非恶魔手段触发，不必急着全交信息，先观察谁最怕你开口。',
+            '外来者：理发师': '换角最大的价值是重写信息来源，而不是单纯给某个位置换强角。',
+            '外来者：呆瓜': '残局时你可以把自己当强制验人器，用处决结果逼邪恶表态。',
+            '外来者：心上人': '醉酒窗口既能保护关键位，也能替恶魔背锅；关键在于你死后谁最像被影响。',
+            '外来者：畸形秀演员': '你可以用边缘发言试探洗脑师压力，但千万别把自己真的送上处决台。',
+            '爪牙：镜像双子': '让团队永远困在“先处决谁都亏”的局面里，你的价值就最大。',
+            '爪牙：女巫': '下咒不是为了多杀一个人，而是为了逼停最关键的一次提名。',
+            '爪牙：洗脑师': '把疯狂目标和真实身份错位安排，能让好人既不敢信也不敢不信。',
+            '爪牙：麻脸巫婆': '改角最强的地方在于重写整条信息链，甚至给恶魔制造第二身份。',
+            '恶魔：方古': '第一次跳车后要立刻重写全桌的恶魔视角，让旧方古像个自然死者。',
+            '恶魔：涡流': '你真正的胜点是拖垮共识速度，让所有好人信息看起来都像假的。',
+            '恶魔：亡骨魔': '保留爪牙能力加邻座中毒能同时制造两层伪逻辑，这是你最强的残局资本。',
+            '恶魔：诺-达鲺': '利用邻座中毒链制造“只有半真”的好人视角，比硬冲更容易存活。'
+        };
+
+        const mycxWheelAbilityShort = {
+            '❓ 未分配': '待分配',
+            '镇民：钟表匠': '首夜知魔爪距离',
+            '镇民：筑梦师': '每晚真一假一',
+            '镇民：舞蛇人': '查恶魔可换身',
+            '镇民：数学家': '每晚知异常数',
+            '镇民：卖花女孩': '恶魔投票知是非',
+            '镇民：城镇公告员': '爪牙提名知是非',
+            '镇民：神谕者': '每晚知死邪恶数',
+            '镇民：博学者': '每日一真一假',
+            '镇民：裁缝': '一次验同阵营',
+            '镇民：哲学家': '一次复制善良',
+            '镇民：艺术家': '一次问是非题',
+            '镇民：杂耍艺人': '日猜夜知命中',
+            '镇民：贤者': '被恶魔杀知二选一',
+            '外来者：理发师': '死后可能换角色',
+            '外来者：呆瓜': '被处决但不死',
+            '外来者：心上人': '死后致一人醉酒',
+            '外来者：畸形秀演员': '疯言外来者会死',
+            '爪牙：镜像双子': '善恶双生互知',
+            '爪牙：女巫': '提名就死',
+            '爪牙：洗脑师': '逼人疯成某角',
+            '爪牙：麻脸巫婆': '每晚改角色',
+            '恶魔：方古': '首杀外来者跳魔',
+            '恶魔：涡流': '信息全假且必处决',
+            '恶魔：亡骨魔': '杀爪留能并毒邻',
+            '恶魔：诺-达鲺': '邻座镇民中毒'
+        };
+
+        const mycxNightOrder = {
+            first: ['爪牙：女巫', '爪牙：镜像双子', '【系统：爪牙互相确认】', '【系统：恶魔确认爪牙及3个伪装】', '镇民：钟表匠', '镇民：筑梦师', '镇民：舞蛇人', '镇民：数学家', '镇民：裁缝', '镇民：哲学家', '爪牙：洗脑师', '爪牙：麻脸巫婆'],
+            other: ['爪牙：女巫', '镇民：筑梦师', '镇民：舞蛇人', '镇民：数学家', '镇民：卖花女孩', '镇民：城镇公告员', '镇民：神谕者', '镇民：裁缝', '镇民：哲学家', '爪牙：洗脑师', '爪牙：麻脸巫婆', '恶魔：方古', '恶魔：涡流', '恶魔：亡骨魔', '恶魔：诺-达鲺', '镇民：杂耍艺人']
+        };
+
+        const mycxRoleDetails = {
+            '【系统：爪牙互相确认】': { ability: '爪牙互认环节', action: '唤醒所有爪牙。展示“这是恶魔”提示牌，并指向恶魔。若需要全屏提示牌，可点击<button type="button" class="inline-reveal-btn" onclick="showThisIsDemonModal()">全屏展示“这是恶魔”</button>。让他们闭眼。' },
+            '【系统：恶魔确认爪牙及3个伪装】': { ability: '恶魔信息环节', action: '唤醒恶魔。展示“这些是你的爪牙”，并向其展示 3 个不在场善良角色伪装。若需要全屏提示牌，可点击<button type="button" class="inline-reveal-btn" onclick="showTheseAreYourMinionsModal()">全屏展示“这是你的爪牙”</button>。让他闭眼。' },
+            '爪牙：女巫': { ability: '技能：每晚选择一名玩家；若他明天提名，则会死亡。', action: '唤醒女巫，让她选择一名存活玩家。若该玩家明天发起提名，则立即死亡。' },
+            '爪牙：镜像双子': { ability: '技能：你与一名对立阵营玩家互知；若善良双子被处决，邪恶直接获胜。', action: '首夜唤醒镜像双子。让其知晓与自己相对的善良双子是谁，并提醒说书人持续追踪双子处决结算。' },
+            '镇民：钟表匠': { ability: '技能：首夜得知恶魔与最近爪牙的间隔人数。', action: '唤醒钟表匠。用手势告诉他恶魔与最近爪牙之间相隔的人数。' },
+            '镇民：筑梦师': { ability: '技能：每晚查验一名玩家，获知真一假一两个角色。', action: '唤醒筑梦师，让其选择一名玩家。展示两个角色标记，其中一个是真实角色、另一个是假角色。' },
+            '镇民：舞蛇人': { ability: '技能：每晚选择一名活人；若他是恶魔，你们交换角色与阵营。', action: '唤醒舞蛇人，让其选择一名存活玩家。若其为恶魔，则立即秘密交换双方身份与阵营。' },
+            '镇民：数学家': { ability: '技能：每晚得知今夜有多少能力异常生效。', action: '唤醒数学家。用手势告诉他今晚异常结算的能力数量。' },
+            '镇民：卖花女孩': { ability: '技能：每晚得知恶魔今天是否投票。', action: '若恶魔今天投过票，则向卖花女孩点头，否则摇头。' },
+            '镇民：城镇公告员': { ability: '技能：每晚得知今天是否有爪牙提名。', action: '若今天有爪牙公开提名过任何玩家，则向城镇公告员点头，否则摇头。' },
+            '镇民：神谕者': { ability: '技能：每晚得知目前死亡邪恶玩家数量。', action: '唤醒神谕者。用手势告诉他当前已死亡玩家中邪恶阵营的人数。' },
+            '镇民：裁缝': { ability: '技能：每局限一次，于夜晚选择两名玩家，得知是否同阵营。', action: '若裁缝声明发动，唤醒裁缝，让其选择两名玩家；告诉他两人是否属于同一阵营。' },
+            '镇民：哲学家': { ability: '技能：每局限一次，选择一种善良能力并获得它。', action: '若哲学家声明发动，唤醒哲学家，让其选择一种善良角色能力；若该角色在场，则令原角色醉酒。' },
+            '爪牙：洗脑师': { ability: '技能：每晚指定一名玩家与一个角色；若他明天不疯狂地宣称自己是该角色，可能会被处决。', action: '唤醒洗脑师。让其选择一名玩家与一个角色，并记录该玩家明天的疯狂要求。' },
+            '爪牙：麻脸巫婆': { ability: '技能：每晚可将一名玩家改成一个不在场角色。', action: '唤醒麻脸巫婆。若其发动，选择一名玩家与一个不在场角色，明天早晨该玩家变成新角色。若造出恶魔，则今夜死亡由说书人裁定。' },
+            '恶魔：方古': { ability: '技能：每晚杀一人；首次杀死外来者时，其成为新的邪恶方古，你死亡。', action: '唤醒方古，让其选择一名玩家死亡。若这是方古首次杀死的外来者，则该玩家变成新的邪恶方古，原方古死亡。' },
+            '恶魔：涡流': { ability: '技能：每晚杀一人；所有镇民信息全为假，且白天必须有人被处决。', action: '唤醒涡流，让其选择一名玩家死亡。并持续记住：镇民信息都应为假，若白天无人被处决则邪恶直接获胜。' },
+            '恶魔：亡骨魔': { ability: '技能：每晚杀一人；被其杀死的爪牙仍有能力，且会使相邻一名镇民中毒。', action: '唤醒亡骨魔，让其选择一名玩家死亡。若该死者是爪牙，则保留其能力，并使其相邻一名镇民中毒。' },
+            '恶魔：诺-达鲺': { ability: '技能：每晚杀一人；其相邻两名镇民中毒。', action: '唤醒诺-达鲺，让其选择一名玩家死亡。并使诺-达鲺当前相邻的两名镇民中毒。' },
+            '镇民：杂耍艺人': { ability: '技能：白天公开猜测角色，夜里得知猜对几个。', action: '若杂耍艺人今天公开做出若干角色猜测，则今夜唤醒他，用手势告诉他本次猜对了几个。' }
+        };
+
+        const scriptDataMap = {
+            tb: { allRoles, poolGood, poolTownsfolk, poolOutsiders, poolMinions, poolDemons, roleAbilities: allRoleAbilities, roleBasicPlay, roleAdvancedPlay, wheelAbilityShort, nightOrder, roleDetails },
+            dycs: { allRoles: dycsAllRoles, poolGood: dycsPoolGood, poolTownsfolk: dycsPoolTownsfolk, poolOutsiders: dycsPoolOutsiders, poolMinions: dycsPoolMinions, poolDemons: dycsPoolDemons, roleAbilities: dycsRoleAbilities, roleBasicPlay: dycsRoleBasicPlay, roleAdvancedPlay: dycsRoleAdvancedPlay, wheelAbilityShort: dycsWheelAbilityShort, nightOrder: dycsNightOrder, roleDetails: dycsRoleDetails },
+            mycx: { allRoles: mycxAllRoles, poolGood: mycxPoolGood, poolTownsfolk: mycxPoolTownsfolk, poolOutsiders: mycxPoolOutsiders, poolMinions: mycxPoolMinions, poolDemons: mycxPoolDemons, roleAbilities: mycxRoleAbilities, roleBasicPlay: mycxRoleBasicPlay, roleAdvancedPlay: mycxRoleAdvancedPlay, wheelAbilityShort: mycxWheelAbilityShort, nightOrder: mycxNightOrder, roleDetails: mycxRoleDetails }
+        };
+
+        function getCurrentScriptData() { return scriptDataMap[selectedScript] || scriptDataMap.tb; }
+        function getCurrentScriptDisplayName() {
+            const meta = scriptMeta[selectedScript] || scriptMeta.tb;
+            return meta.displayName || '暗流魔典';
+        }
+
+        function getCurrentAllRoles() { return getCurrentScriptData().allRoles; }
         function getCurrentPlayerRange() {
             const meta = scriptMeta[selectedScript] || scriptMeta.tb;
             return { min: meta.minPlayers || 5, max: meta.maxPlayers || 15 };
         }
-        function getCurrentPoolGood() { return selectedScript === 'dycs' ? dycsPoolGood : poolGood; }
-        function getCurrentPoolTownsfolk() { return selectedScript === 'dycs' ? dycsPoolTownsfolk : poolTownsfolk; }
-        function getCurrentPoolOutsiders() { return selectedScript === 'dycs' ? dycsPoolOutsiders : poolOutsiders; }
-        function getCurrentPoolMinions() { return selectedScript === 'dycs' ? dycsPoolMinions : poolMinions; }
-        function getCurrentPoolDemons() { return selectedScript === 'dycs' ? dycsPoolDemons : poolDemons; }
-        function getCurrentRoleAbilities() { return selectedScript === 'dycs' ? dycsRoleAbilities : allRoleAbilities; }
-        function getCurrentRoleBasicMap() { return selectedScript === 'dycs' ? dycsRoleBasicPlay : roleBasicPlay; }
-        function getCurrentRoleAdvancedMap() { return selectedScript === 'dycs' ? dycsRoleAdvancedPlay : roleAdvancedPlay; }
-        function getCurrentWheelAbilityMap() { return selectedScript === 'dycs' ? dycsWheelAbilityShort : wheelAbilityShort; }
-        function getCurrentNightOrder() { return selectedScript === 'dycs' ? dycsNightOrder : nightOrder; }
-        function getCurrentRoleDetails() { return selectedScript === 'dycs' ? dycsRoleDetails : roleDetails; }
+        function getCurrentPoolGood() { return getCurrentScriptData().poolGood; }
+        function getCurrentPoolTownsfolk() { return getCurrentScriptData().poolTownsfolk; }
+        function getCurrentPoolOutsiders() { return getCurrentScriptData().poolOutsiders; }
+        function getCurrentPoolMinions() { return getCurrentScriptData().poolMinions; }
+        function getCurrentPoolDemons() { return getCurrentScriptData().poolDemons; }
+        function getCurrentRoleAbilities() { return getCurrentScriptData().roleAbilities; }
+        function getCurrentRoleBasicMap() { return getCurrentScriptData().roleBasicPlay; }
+        function getCurrentRoleAdvancedMap() { return getCurrentScriptData().roleAdvancedPlay; }
+        function getCurrentWheelAbilityMap() { return getCurrentScriptData().wheelAbilityShort; }
+        function getCurrentNightOrder() { return getCurrentScriptData().nightOrder; }
+        function getCurrentRoleDetails() { return getCurrentScriptData().roleDetails; }
         const roleIconMap = {
             '镇民：洗衣妇': '👕',
             '镇民：图书管理员': '📚',
@@ -2479,7 +2861,32 @@ button.night-btn {
             '恶魔：僵怖': '🧟',
             '恶魔：普卡': '🐍',
             '恶魔：沙巴洛斯': '🦷',
-            '恶魔：朴': '🌺'
+            '恶魔：朴': '🌺',
+            '镇民：钟表匠': '🕰️',
+            '镇民：筑梦师': '💭',
+            '镇民：舞蛇人': '🪈',
+            '镇民：数学家': '🧮',
+            '镇民：卖花女孩': '🌸',
+            '镇民：城镇公告员': '📯',
+            '镇民：神谕者': '🔯',
+            '镇民：博学者': '📘',
+            '镇民：裁缝': '🧵',
+            '镇民：哲学家': '🏛️',
+            '镇民：艺术家': '🎨',
+            '镇民：杂耍艺人': '🤹',
+            '镇民：贤者': '🦉',
+            '外来者：理发师': '✂️',
+            '外来者：呆瓜': '🙃',
+            '外来者：心上人': '💘',
+            '外来者：畸形秀演员': '🎪',
+            '爪牙：镜像双子': '👥',
+            '爪牙：女巫': '🧙',
+            '爪牙：洗脑师': '🧠',
+            '爪牙：麻脸巫婆': '🪄',
+            '恶魔：方古': '👺',
+            '恶魔：涡流': '🌀',
+            '恶魔：亡骨魔': '☠️',
+            '恶魔：诺-达鲺': '🕸️'
         };
         const travelerRoleIconMap = {
             '枪手': '🔫',
@@ -2491,7 +2898,12 @@ button.night-btn {
             '法官': '⚖️',
             '女族长': '👑',
             '巫毒师': '🕯️',
-            '学徒': '📘'
+            '学徒': '📘',
+            '怪咖': '😜',
+            '集骨者': '🦴',
+            '咖啡师': '☕',
+            '流莺': '💃',
+            '屠夫': '🔪'
         };
         function getRoleIcon(roleStr, player = null) {
             if (isTravelerPlayer(player)) return travelerRoleIconMap[getTravelerName(player)] || '🧳';
@@ -2714,6 +3126,284 @@ button.night-btn {
             saveData();
             updatePlayerListLayoutUi();
         }
+        function normalizeMatchRecordDraft(draft) {
+            return {
+                title: `${draft?.title || ''}`.trim(),
+                events: `${draft?.events || ''}`.trim(),
+                highlights: `${draft?.highlights || ''}`.trim(),
+                storytellerNote: `${draft?.storytellerNote || ''}`.trim()
+            };
+        }
+        function normalizeMatchHistoryEntry(entry, index) {
+            return {
+                id: `${entry?.id || `match-${index + 1}`}`,
+                gameNo: Math.max(1, Math.round(Number(entry?.gameNo ?? index + 1) || index + 1)),
+                script: `${entry?.script || '暗流魔典'}`,
+                winnerCamp: entry?.winnerCamp === 'evil' ? 'evil' : 'good',
+                title: `${entry?.title || ''}`.trim(),
+                events: `${entry?.events || ''}`.trim(),
+                highlights: `${entry?.highlights || ''}`.trim(),
+                storytellerNote: `${entry?.storytellerNote || ''}`.trim(),
+                winners: Array.isArray(entry?.winners) ? entry.winners.filter(Boolean) : [],
+                lineup: Array.isArray(entry?.lineup) ? entry.lineup.map(item => ({
+                    seat: Math.max(1, Math.round(Number(item?.seat ?? 0) || 0)),
+                    name: `${item?.name || `座位 ${item?.seat || '?'}`}`.trim(),
+                    role: `${item?.role || '❓ 未分配'}`.trim(),
+                    camp: `${item?.camp || '未定'}`.trim(),
+                    isAlive: item?.isAlive !== false,
+                    deathType: `${item?.deathType || ''}`.trim(),
+                    tokens: Array.isArray(item?.tokens) ? item.tokens.filter(Boolean) : []
+                })) : [],
+                scoreBoardAfterGame: Array.isArray(entry?.scoreBoardAfterGame) ? entry.scoreBoardAfterGame.map(item => ({
+                    name: `${item?.name || ''}`.trim(),
+                    points: Math.max(0, Math.round(Number(item?.points ?? 0) || 0)),
+                    wins: Math.max(0, Math.round(Number(item?.wins ?? 0) || 0)),
+                    games: Math.max(0, Math.round(Number(item?.games ?? 0) || 0)),
+                    winRate: Math.max(0, Number(item?.winRate ?? 0) || 0)
+                })).filter(item => item.name) : [],
+                recordedAt: `${entry?.recordedAt || ''}`.trim()
+            };
+        }
+        function normalizeScoreAuditEntry(entry, index) {
+            return {
+                id: `${entry?.id || `audit-${index + 1}`}`,
+                type: `${entry?.type || 'unknown'}`.trim(),
+                message: `${entry?.message || ''}`.trim(),
+                at: `${entry?.at || ''}`.trim()
+            };
+        }
+        function updateMatchRecordDraft() {
+            matchRecordDraft = normalizeMatchRecordDraft({
+                title: document.getElementById('recapTitleInput')?.value,
+                events: document.getElementById('recapEventsInput')?.value,
+                highlights: document.getElementById('recapHighlightsInput')?.value,
+                storytellerNote: document.getElementById('recapStorytellerInput')?.value
+            });
+            saveData();
+        }
+        function renderMatchRecordDraft() {
+            const draft = normalizeMatchRecordDraft(matchRecordDraft);
+            const titleInput = document.getElementById('recapTitleInput');
+            const eventsInput = document.getElementById('recapEventsInput');
+            const highlightsInput = document.getElementById('recapHighlightsInput');
+            const noteInput = document.getElementById('recapStorytellerInput');
+            if (titleInput && titleInput.value !== draft.title) titleInput.value = draft.title;
+            if (eventsInput && eventsInput.value !== draft.events) eventsInput.value = draft.events;
+            if (highlightsInput && highlightsInput.value !== draft.highlights) highlightsInput.value = draft.highlights;
+            if (noteInput && noteInput.value !== draft.storytellerNote) noteInput.value = draft.storytellerNote;
+        }
+        function clearMatchRecordDraft(shouldSave = false) {
+            matchRecordDraft = normalizeMatchRecordDraft({});
+            renderMatchRecordDraft();
+            if (shouldSave) saveData();
+        }
+        function getPlayerCampText(player) {
+            if (isTravelerPlayer(player)) return `旅行者/${getTravelerCampLabel(player)}`;
+            return isPlayerOnCamp(player, 'evil') ? '邪恶' : '善良';
+        }
+        function getDeathText(player) {
+            if (player.isAlive) return '存活';
+            if (player.deathType === 'demon') return '死于恶魔刀';
+            return '被处决';
+        }
+        function getLineupSnapshot() {
+            return players
+                .slice()
+                .sort((a, b) => a.id - b.id)
+                .map(player => ({
+                    seat: player.id + 1,
+                    name: player.name,
+                    role: getPlayerRoleLabel(player),
+                    camp: getPlayerCampText(player),
+                    isAlive: player.isAlive,
+                    deathType: player.deathType || '',
+                    tokens: [...player.tokens]
+                }));
+        }
+        function getScoreBoardSnapshot() {
+            return getSortedScoreBoardEntries().map(([name, entry]) => ({
+                name,
+                points: entry.points,
+                wins: entry.wins,
+                games: entry.games,
+                winRate: getScoreBoardWinRate(entry)
+            }));
+        }
+        function pushScoreAudit(message, type = 'note') {
+            scoreAuditLog.push(normalizeScoreAuditEntry({
+                id: `audit-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+                type,
+                message,
+                at: new Date().toISOString()
+            }, scoreAuditLog.length));
+        }
+        function buildCurrentMatchRecord(camp, gameNo, winners) {
+            const draft = normalizeMatchRecordDraft(matchRecordDraft);
+            return normalizeMatchHistoryEntry({
+                id: `match-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+                gameNo,
+                script: getCurrentScriptDisplayName(),
+                winnerCamp: camp,
+                title: draft.title || `${getCurrentScriptDisplayName()} 第 ${gameNo} 局`,
+                events: draft.events,
+                highlights: draft.highlights,
+                storytellerNote: draft.storytellerNote,
+                winners: winners.map(player => player.name),
+                lineup: getLineupSnapshot(),
+                recordedAt: new Date().toISOString()
+            }, matchHistory.length);
+        }
+        function formatLocalDateTime(value) {
+            if (!value) return '未记录时间';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return value;
+            return `${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}-${`${date.getDate()}`.padStart(2, '0')} ${`${date.getHours()}`.padStart(2, '0')}:${`${date.getMinutes()}`.padStart(2, '0')}`;
+        }
+        function renderMatchHistory() {
+            const container = document.getElementById('matchHistoryList');
+            if (!container) return;
+            const records = [...matchHistory].sort((a, b) => (b.gameNo - a.gameNo) || b.id.localeCompare(a.id));
+            container.innerHTML = records.length
+                ? records.map(record => {
+                    const winnerLabel = record.winnerCamp === 'evil' ? '邪恶胜利' : '善良胜利';
+                    const lineupHtml = record.lineup.length
+                        ? `<div class="match-history-roster">${record.lineup.map(item => `<div class="match-history-roster-line">座位 ${item.seat}｜${escapeHtml(item.name)}｜${escapeHtml(item.role)}｜${escapeHtml(item.camp)}｜${item.isAlive ? '存活' : escapeHtml(item.deathType === 'demon' ? '恶魔刀' : '处决')}${item.tokens.length ? `｜标记：${escapeHtml(item.tokens.join('、'))}` : ''}</div>`).join('')}</div>`
+                        : '<div class="match-history-text">无阵容快照。</div>';
+                    const scoreTags = record.scoreBoardAfterGame.length
+                        ? `<div class="match-history-tag-row">${record.scoreBoardAfterGame.slice(0, 6).map(item => `<span class="match-history-tag">${escapeHtml(item.name)} ${item.points}分/${item.wins}胜/${item.games}场</span>`).join('')}</div>`
+                        : '<div class="match-history-text">无赛后积分快照。</div>';
+                    return `
+                        <details class="match-history-item">
+                            <summary>
+                                <span>第 ${record.gameNo} 局｜${escapeHtml(record.title || record.script)}</span>
+                                <span class="match-history-meta">${escapeHtml(record.script)}｜${winnerLabel}｜${formatLocalDateTime(record.recordedAt)}</span>
+                            </summary>
+                            <div class="match-history-body">
+                                <div class="match-history-block">
+                                    <div class="match-history-label">胜者</div>
+                                    <div class="match-history-text">${escapeHtml(record.winners.join('、') || '未记录')}｜${winnerLabel}</div>
+                                </div>
+                                <div class="match-history-block">
+                                    <div class="match-history-label">关键事件</div>
+                                    <div class="match-history-text">${escapeHtml(record.events || '未填写。')}</div>
+                                </div>
+                                <div class="match-history-block">
+                                    <div class="match-history-label">高光与争议</div>
+                                    <div class="match-history-text">${escapeHtml(record.highlights || '未填写。')}</div>
+                                </div>
+                                <div class="match-history-block">
+                                    <div class="match-history-label">说书人备注</div>
+                                    <div class="match-history-text">${escapeHtml(record.storytellerNote || '未填写。')}</div>
+                                </div>
+                                <div class="match-history-block">
+                                    <div class="match-history-label">阵容快照</div>
+                                    ${lineupHtml}
+                                </div>
+                                <div class="match-history-block">
+                                    <div class="match-history-label">赛后积分快照</div>
+                                    ${scoreTags}
+                                </div>
+                            </div>
+                        </details>
+                    `;
+                }).join('')
+                : '<div class="score-empty">暂无对局复盘。</div>';
+        }
+        function buildSeasonRecordForAi() {
+            const sortedEntries = getSortedScoreBoardEntries();
+            const currentMvpNames = finalMvp ? finalMvp.split('、').filter(Boolean) : getCurrentMvpNames();
+            const draft = normalizeMatchRecordDraft(matchRecordDraft);
+            const lines = [];
+            lines.push('你是一名《血染钟楼》赛季复盘分析师。请只根据我提供的完整对局记录，输出一份“最终积分报告”。');
+            lines.push('输出要求：');
+            lines.push('1. 先给最终积分榜表格，列出：排名、玩家、积分、胜场、出场、胜率。');
+            lines.push('2. 再给每位玩家的赛季表现总结，每人 2-4 句。');
+            lines.push('3. 评出赛季 MVP，并说明理由。');
+            lines.push('4. 评出“虽败犹荣”，并说明理由。');
+            lines.push('5. 如果记录里存在手动加减分，请单独说明这些调整如何影响了最终排名。');
+            lines.push('6. 最后给说书人一段简短建议，指出下赛季适合改进的点。');
+            lines.push('7. 不要虚构未记录的对局细节；信息不足时请明确说信息不足。');
+            lines.push('');
+            lines.push('【赛季概况】');
+            lines.push(`已记录局数：${seriesGames}`);
+            lines.push(`当前剧本：${getCurrentScriptDisplayName()}`);
+            lines.push(`当前赛季 MVP：${currentMvpNames.length ? currentMvpNames.join('、') : `未产生（至少 ${COMPETITIVE_MVP_MIN_GAMES} 局）`}`);
+            lines.push('');
+            lines.push('【最终积分榜】');
+            if (sortedEntries.length) {
+                sortedEntries.forEach(([name, entry], index) => {
+                    lines.push(`${index + 1}. ${name}｜积分 ${entry.points}｜胜场 ${entry.wins}｜出场 ${entry.games}｜胜率 ${formatScoreBoardWinRate(entry)}`);
+                });
+            } else {
+                lines.push('暂无积分数据。');
+            }
+            lines.push('');
+            lines.push('【逐局复盘】');
+            if (matchHistory.length) {
+                matchHistory
+                    .slice()
+                    .sort((a, b) => a.gameNo - b.gameNo)
+                    .forEach(record => {
+                        lines.push(`### 第 ${record.gameNo} 局｜${record.script}｜${record.winnerCamp === 'evil' ? '邪恶胜利' : '善良胜利'}`);
+                        lines.push(`标题：${record.title || `${record.script} 第 ${record.gameNo} 局`}`);
+                        lines.push(`记录时间：${formatLocalDateTime(record.recordedAt)}`);
+                        lines.push(`胜者名单：${record.winners.join('、') || '未记录'}`);
+                        lines.push(`关键事件：${record.events || '未填写。'}`);
+                        lines.push(`高光与争议：${record.highlights || '未填写。'}`);
+                        lines.push(`说书人备注：${record.storytellerNote || '未填写。'}`);
+                        lines.push('阵容快照：');
+                        if (record.lineup.length) {
+                            record.lineup.forEach(item => {
+                                lines.push(`- 座位 ${item.seat}｜${item.name}｜${item.role}｜${item.camp}｜${item.isAlive ? '存活' : (item.deathType === 'demon' ? '死于恶魔刀' : '被处决')}${item.tokens.length ? `｜标记：${item.tokens.join('、')}` : ''}`);
+                            });
+                        } else {
+                            lines.push('- 无阵容快照。');
+                        }
+                        if (record.scoreBoardAfterGame.length) {
+                            lines.push('赛后积分快照：');
+                            record.scoreBoardAfterGame.forEach((item, index) => {
+                                lines.push(`- #${index + 1} ${item.name}｜积分 ${item.points}｜胜场 ${item.wins}｜出场 ${item.games}｜胜率 ${Math.round(item.winRate * 100)}%`);
+                            });
+                        }
+                        lines.push('');
+                    });
+            } else {
+                lines.push('暂无逐局复盘。');
+                lines.push('');
+            }
+            lines.push('【手动调分与赛季操作记录】');
+            if (scoreAuditLog.length) {
+                scoreAuditLog.forEach((entry, index) => {
+                    lines.push(`${index + 1}. [${formatLocalDateTime(entry.at)}] ${entry.message}`);
+                });
+            } else {
+                lines.push('暂无额外手动调分或赛季操作记录。');
+            }
+            if (draft.title || draft.events || draft.highlights || draft.storytellerNote) {
+                lines.push('');
+                lines.push('【尚未入档的当前草稿】');
+                lines.push(`标题：${draft.title || '未填写'}`);
+                lines.push(`关键事件：${draft.events || '未填写'}`);
+                lines.push(`高光与争议：${draft.highlights || '未填写'}`);
+                lines.push(`说书人备注：${draft.storytellerNote || '未填写'}`);
+            }
+            return lines.join('\n');
+        }
+        async function exportSeasonRecordForAi() {
+            const text = buildSeasonRecordForAi();
+            let copied = false;
+            if (navigator.clipboard && window.isSecureContext) {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    copied = true;
+                } catch (error) {
+                    copied = fallbackCopyText(text);
+                }
+            } else {
+                copied = fallbackCopyText(text);
+            }
+            alert(copied ? '已复制完整对局记录与 AI 分析指令。你现在可以直接粘贴给 AI。' : '复制失败，请重试。');
+        }
         function normalizeScoreBoardEntry(entry) {
             if (typeof entry === 'number') {
                 const legacyPoints = Math.max(0, Math.round(entry));
@@ -2855,7 +3545,7 @@ button.night-btn {
                     `;
                 }).join('')
                 : '<div class="score-empty">暂无记分记录。</div>';
-            summary.innerText = `已记录 ${seriesGames} 局，当前共有 ${entries.length} 名玩家进入榜单。赛季 MVP 至少需出场 ${COMPETITIVE_MVP_MIN_GAMES} 局。`;
+            summary.innerText = `已记录 ${seriesGames} 局，当前共有 ${entries.length} 名玩家进入榜单，已沉淀 ${matchHistory.length} 份逐局复盘。赛季 MVP 至少需出场 ${COMPETITIVE_MVP_MIN_GAMES} 局。`;
             mvpSummary.innerText = `当前赛季 MVP：${finalMvp || (currentMvpNames.length ? currentMvpNames.join('、') : `未产生（至少 ${COMPETITIVE_MVP_MIN_GAMES} 局）`)}`;
         }
         function addScoreToPlayer(name, amount = 1) {
@@ -2868,6 +3558,8 @@ button.night-btn {
             if (!name || !delta) return;
             clearFinalMvpAward();
             addScoreToPlayer(name, delta);
+            const entry = scoreBoard[name];
+            pushScoreAudit(`手动调分：${name} ${delta > 0 ? '+' : ''}${delta} 分，当前积分 ${entry?.points || 0}。`, 'manual_adjust');
             saveData();
             renderScoreBoard();
         }
@@ -2884,6 +3576,8 @@ button.night-btn {
             const participants = getPlayersEligibleForScore();
             const winners = participants.filter(player => isPlayerOnCamp(player, camp));
             if (!winners.length) return alert('当前没有可计分的胜利阵营玩家。');
+            const nextGameNo = seriesGames + 1;
+            const matchRecord = buildCurrentMatchRecord(camp, nextGameNo, winners);
             clearFinalMvpAward();
             participants.forEach(player => {
                 const entry = ensureScoreBoardEntry(player.name);
@@ -2895,18 +3589,27 @@ button.night-btn {
                 entry.wins += 1;
                 entry.points += 1;
             });
-            seriesGames += 1;
+            seriesGames = nextGameNo;
+            matchRecord.scoreBoardAfterGame = getScoreBoardSnapshot();
+            matchHistory.push(matchRecord);
+            pushScoreAudit(`第 ${nextGameNo} 局记录完成：${getCurrentScriptDisplayName()}，${camp === 'evil' ? '邪恶阵营' : '善良阵营'}胜利。`, 'match_result');
+            clearMatchRecordDraft();
             saveData();
             renderScoreBoard();
+            renderMatchHistory();
             alert(`${camp === 'evil' ? '邪恶阵营' : '善良阵营'}已加分，并已更新出场、胜场与胜率。`);
         }
         function clearScoreBoard() {
-            if (!confirm('确定要清空积分栏吗？这会重置所有玩家积分、已记录局数和当前赛季 MVP。')) return;
+            if (!confirm('确定要清空积分栏吗？这会重置所有玩家积分、已记录局数、逐局复盘、调分日志和当前赛季 MVP。')) return;
             scoreBoard = {};
             seriesGames = 0;
             finalMvp = '';
+            matchHistory = [];
+            scoreAuditLog = [];
+            clearMatchRecordDraft();
             saveData();
             renderScoreBoard();
+            renderMatchHistory();
         }
         function finalizeSeriesMvp() {
             const currentMvpEntries = getCurrentMvpEntries();
@@ -2916,6 +3619,7 @@ button.night-btn {
             const sortedEntries = getSortedScoreBoardEntries();
             const valiantEntries = getValiantEntries(sortedEntries, currentMvpNames);
             applyFinalMvpAward(currentMvpNames);
+            pushScoreAudit(`赛季结算：MVP 为 ${currentMvpNames.join('、')}。${valiantEntries.length ? `虽败犹荣：${valiantEntries.map(([name]) => name).join('、')}。` : ''}`, 'season_mvp');
             saveData();
             renderScoreBoard();
             const canvas = createMvpAwardCanvas(currentMvpNames, mvpWinCount, seriesGames, sortedEntries, valiantEntries.map(([name]) => name));
@@ -2928,7 +3632,7 @@ button.night-btn {
                     alert(`本轮赛季 MVP：${finalMvp}`);
                     return;
                 }
-                const fileName = `${sanitizeFileName(selectedScript === 'dycs' ? '黯月初升' : '暗流魔典')}_${sanitizeFileName(finalMvp)}_赛季结算图.png`;
+                const fileName = `${sanitizeFileName(getCurrentScriptDisplayName())}_${sanitizeFileName(finalMvp)}_赛季结算图.png`;
                 openRoleCardPreviewModal(canvas, blob, fileName, {
                     title: '赛季结算图',
                     subtitle: '手机上可长按下方荣誉图保存到相册，或直接使用系统分享。',
@@ -3522,7 +4226,7 @@ button.night-btn {
 
             ctx.textAlign = 'right';
             ctx.fillStyle = '#d7c097';
-            ctx.fillText(`${selectedScript === 'dycs' ? '黯月初升' : '暗流魔典'} · 第 ${Math.max(totalGames, 1)} 局封卷`, width - paddingX, topPad);
+            ctx.fillText(`${getCurrentScriptDisplayName()} · 第 ${Math.max(totalGames, 1)} 局封卷`, width - paddingX, topPad);
             ctx.textAlign = 'left';
 
             drawMvpCrown(ctx, width / 2, topPad + 92, portrait ? 0.8 : 0.9);
@@ -3731,7 +4435,7 @@ button.night-btn {
             const categoryLabel = isTraveler ? `旅行者${travelerCampLabel}` : (parts.length > 1 ? parts[0] : '身份');
             const shortRoleName = isTraveler ? getTravelerName(player) : (parts.length > 1 ? parts[1] : roleName);
             const roleIcon = getRoleIcon(roleName, player);
-            const scriptName = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
+            const scriptName = getCurrentScriptDisplayName();
             const palette = getRoleCardPalette(roleName);
             const portrait = isMobileLikeDevice();
             const width = portrait ? 860 : 1120;
@@ -3907,7 +4611,7 @@ button.night-btn {
             const category = isTravelerPlayer(player) ? '旅行者' : (roleParts.length > 1 ? roleParts[0] : '身份');
             const shortRoleName = isTravelerPlayer(player) ? getTravelerName(player) : (roleParts.length > 1 ? roleParts[1] : roleName);
             const roleIcon = getRoleIcon(roleName, player);
-            const scriptName = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
+            const scriptName = getCurrentScriptDisplayName();
             const sections = [
                 { label: '技能', text: getPlayerAbilityText(player) },
                 { label: '初级玩法', text: getRoleBasicPlay(roleName, player) },
@@ -4046,7 +4750,7 @@ button.night-btn {
             ].join('\n');
             const canvas = createRoleProfileCanvasV2(player);
             const imageBlob = await canvasToBlob(canvas);
-            const scriptNameForFile = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
+            const scriptNameForFile = getCurrentScriptDisplayName();
             const imageFileName = `${sanitizeFileName(scriptNameForFile)}_${sanitizeFileName(roleLabel)}_角色卡.png`;
             const isMobileLike = isMobileLikeDevice();
             const preferWeChatPreview = !!options.preferWeChatPreview;
@@ -5200,11 +5904,19 @@ button.night-btn {
                 if (tbSetup.hasBaron) setupNotes.push('男爵已自动按 +2 外来者处理');
             } else {
                 const dist = roleDistribution[count];
+                let townsfolkCount = dist[0];
+                let outsiderCount = dist[1];
+                const chosenDemon = shuffle([...getCurrentPoolDemons()])[0];
+                if (selectedScript === 'mycx' && chosenDemon === '恶魔：方古') {
+                    townsfolkCount = Math.max(0, townsfolkCount - 1);
+                    outsiderCount += 1;
+                    setupNotes.push('方古已自动按 +1 外来者处理');
+                }
                 selectedRoles = [].concat(
-                    shuffle([...getCurrentPoolTownsfolk()]).slice(0, dist[0]),
-                    shuffle([...getCurrentPoolOutsiders()]).slice(0, dist[1]),
+                    shuffle([...getCurrentPoolTownsfolk()]).slice(0, townsfolkCount),
+                    shuffle([...getCurrentPoolOutsiders()]).slice(0, outsiderCount),
                     shuffle([...getCurrentPoolMinions()]).slice(0, dist[2]),
-                    shuffle([...getCurrentPoolDemons()]).slice(0, dist[3])
+                    [chosenDemon]
                 );
             }
             selectedRoles = shuffle(selectedRoles);
@@ -5281,6 +5993,10 @@ button.night-btn {
                 }
             }
             if (hasRole('爪牙：男爵')) hints.push({ type: 'system', text: '本局有男爵：一键发牌时已按 +2 外来者处理；若你是手动改出的男爵，请自行检查阵容。' });
+            if (selectedScript === 'mycx' && hasRole('恶魔：方古')) hints.push({ type: 'system', text: '本局有方古：一键发牌时已按 +1 外来者处理；若你是手动改出的方古，请自行检查阵容。' });
+            if (selectedScript === 'mycx' && hasRole('恶魔：涡流')) hints.push({ type: 'warning', text: '本局有涡流：镇民信息都应为假，且白天若无人被处决，邪恶会直接获胜。' });
+            if (selectedScript === 'mycx' && hasRole('镇民：博学者')) hints.push({ type: 'system', text: '本局有博学者：记得每天白天给出两条信息，其中一真一假。' });
+            if (selectedScript === 'mycx' && hasRole('外来者：畸形秀演员')) hints.push({ type: 'warning', text: '本局有畸形秀演员：若其疯狂地宣称自己是外来者，可能会被立刻处决。' });
             if (drunkFacadePlayers.length) hints.push({ type: 'system', text: `本局含酒鬼伪装：${drunkFacadePlayers.map(player => `[${player.name}]`).join('、')} 已自动以镇民身份入座，并带有“🍺 醉酒”标记。` });
             if (scarletWomanPromotion) hints.push({ type: 'warning', text: `小恶魔已死亡，且 [${scarletWomanPromotion.name}] 满足红唇女郎接任条件。<button type="button" class="inline-reveal-btn" onclick="showScarletWomanPromotionModal()">全屏展示“你已成为小恶魔”</button>` });
             if (hasSpyInPlay() && (hasRole('镇民：厨师') || hasRole('镇民：共情者'))) hints.push({ type: 'system', text: '本局有间谍：夜晚顺序中的厨师/共情者会给出真实值与注册值两种结果，按说书人裁定任选其一。' });
@@ -5339,7 +6055,7 @@ button.night-btn {
 
         function saveData() { 
             bluffs[0] = document.getElementById('bluff1').value; bluffs[1] = document.getElementById('bluff2').value; bluffs[2] = document.getElementById('bluff3').value;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, bluffs, currentNightOrderType, playerListLayout, scoreBoard, seriesGames, finalMvp, selectedScript, travelerFeatureEnabled })); 
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({ players, bluffs, currentNightOrderType, playerListLayout, scoreBoard, seriesGames, finalMvp, selectedScript, travelerFeatureEnabled, matchHistory, scoreAuditLog, matchRecordDraft })); 
         }
 
         function loadData() { 
@@ -5354,6 +6070,9 @@ button.night-btn {
                 scoreBoard = normalizeScoreBoardData(data.scoreBoard || {});
                 seriesGames = typeof data.seriesGames === 'number' ? data.seriesGames : 0;
                 finalMvp = data.finalMvp || '';
+                matchHistory = Array.isArray(data.matchHistory) ? data.matchHistory.map((entry, index) => normalizeMatchHistoryEntry(entry, index)) : [];
+                scoreAuditLog = Array.isArray(data.scoreAuditLog) ? data.scoreAuditLog.map((entry, index) => normalizeScoreAuditEntry(entry, index)) : [];
+                matchRecordDraft = normalizeMatchRecordDraft(data.matchRecordDraft || {});
                 travelerFeatureEnabled = typeof data.travelerFeatureEnabled === 'boolean'
                     ? data.travelerFeatureEnabled
                     : players.some(player => isTravelerPlayer(player));
@@ -5362,6 +6081,9 @@ button.night-btn {
                 playerListLayout = window.innerWidth >= 720 ? 'double' : 'single';
                 selectedScript = 'tb';
                 travelerFeatureEnabled = false;
+                matchHistory = [];
+                scoreAuditLog = [];
+                matchRecordDraft = normalizeMatchRecordDraft({});
             }
             initBluffSelects(); initRoleRevealSelect(); updateScriptUi(); renderAll(); updateTimerDisplay();
         }
@@ -5421,7 +6143,9 @@ button.night-btn {
             renderList();
             updateRenameModeUi();
             updatePlayerListLayoutUi();
+            renderMatchRecordDraft();
             renderScoreBoard();
+            renderMatchHistory();
             refreshNightOrderIfOpen();
         }
 
