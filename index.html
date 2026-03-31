@@ -3339,6 +3339,7 @@ button.night-btn {
             const nameFontSize = portrait ? 46 : 54;
             const bodyFontSize = portrait ? 24 : 28;
             const bodyLineHeight = portrait ? 34 : 38;
+            const sectionGap = portrait ? 16 : 18;
             const headerTitleSize = portrait ? 54 : 66;
             const rowHeight = portrait ? 72 : 64;
             const boardHeaderHeight = 54;
@@ -3925,7 +3926,7 @@ button.night-btn {
             document.body.removeChild(textarea);
             return succeeded;
         }
-        async function copyRoleProfile(id) {
+        async function copyRoleProfile(id, options = {}) {
             const player = players.find(item => item.id === id);
             if (!player) return;
             const roleName = normalizeRoleName(player.role);
@@ -3941,9 +3942,10 @@ button.night-btn {
             const scriptNameForFile = selectedScript === 'dycs' ? '黯月初升' : '暗流魔典';
             const imageFileName = `${sanitizeFileName(scriptNameForFile)}_${sanitizeFileName(roleLabel)}_角色卡.png`;
             const isMobileLike = isMobileLikeDevice();
+            const preferDownload = !!options.preferDownload;
 
             if (imageBlob && isMobileLike) {
-                if (canShareRoleCard(imageBlob, imageFileName)) {
+                if (!preferDownload && canShareRoleCard(imageBlob, imageFileName)) {
                     try {
                         const file = new File([imageBlob], imageFileName, { type: 'image/png' });
                         await navigator.share({
@@ -4089,7 +4091,7 @@ button.night-btn {
                     pressPoint = null;
                     suppressClickUntil = Date.now() + 900;
                     if (navigator.vibrate) navigator.vibrate(18);
-                    copyRoleProfile(playerId);
+                    copyRoleProfile(playerId, { preferDownload: true });
                 }, SEAT_LONG_PRESS_MS);
             };
             const movePress = event => {
