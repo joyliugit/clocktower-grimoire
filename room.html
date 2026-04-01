@@ -2325,6 +2325,7 @@ button.night-btn {
     </main>
 
     <script src="vendor/qrcode-generator.js"></script>
+    <script src="vendor/room-core.js"></script>
     <script>
         let players = [];
         let bluffs = ['❓ 未分配', '❓ 未分配', '❓ 未分配'];
@@ -3893,6 +3894,99 @@ button.night-btn {
         function renderRoomPanels(statusText = '') {
             renderStoryRoomRoster(statusText);
             renderPlayerRoomPanel(statusText);
+        }
+
+        function saveData() {
+            const bluff1 = document.getElementById('bluff1');
+            const bluff2 = document.getElementById('bluff2');
+            const bluff3 = document.getElementById('bluff3');
+            if (bluff1) bluffs[0] = bluff1.value;
+            if (bluff2) bluffs[1] = bluff2.value;
+            if (bluff3) bluffs[2] = bluff3.value;
+
+            const roomSnapshot = {
+                ...createEmptyRoomSession(),
+                ...(roomSession || {}),
+                roomCode: sanitizeRoomCode(roomSession?.roomCode || ''),
+                seatPin: sanitizeSeatPin(roomSession?.seatPin || ''),
+                seatPins: { ...(roomSession?.seatPins || {}) }
+            };
+
+            if (!Number.isInteger(roomSnapshot.seatIndex)) roomSnapshot.seatIndex = null;
+
+            localStorage.setItem(STORAGE_KEY, JSON.stringify({
+                players,
+                bluffs,
+                currentNightOrderType,
+                playerListLayout,
+                scoreBoard,
+                seriesGames,
+                finalMvp,
+                selectedScript,
+                travelerFeatureEnabled,
+                appMode,
+                roomSession: roomSnapshot,
+                playerInboxCard
+            }));
+        }
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY) || LEGACY_STORAGE_KEYS.map(key => localStorage.getItem(key)).find(Boolean);
+            if (saved) {
+                const data = JSON.parse(saved);
+                selectedScript = scriptMeta[data.selectedScript] ? data.selectedScript : 'tb';
+                players = (data.players || []).map((player, index) => normalizePlayerData(player, index));
+                bluffs = (data.bluffs || ['❓ 未分配', '❓ 未分配', '❓ 未分配']).map(normalizeRoleName);
+                currentNightOrderType = data.currentNightOrderType || '';
+                playerListLayout = data.playerListLayout || (window.innerWidth >= 720 ? 'double' : 'single');
+                scoreBoard = normalizeScoreBoardData(data.scoreBoard || {});
+                seriesGames = typeof data.seriesGames === 'number' ? data.seriesGames : 0;
+                finalMvp = data.finalMvp || '';
+                travelerFeatureEnabled = typeof data.travelerFeatureEnabled === 'boolean'
+                    ? data.travelerFeatureEnabled
+                    : players.some(player => isTravelerPlayer(player));
+                appMode = data.appMode === 'player' ? 'player' : 'storyteller';
+                roomSession = {
+                    ...createEmptyRoomSession(),
+                    ...(data.roomSession || {})
+                };
+                roomSession.roomCode = sanitizeRoomCode(roomSession.roomCode || '');
+                roomSession.seatPin = sanitizeSeatPin(roomSession.seatPin || '');
+                roomSession.connected = !!roomSession.roomCode;
+                roomSession.seatIndex = Number.isInteger(roomSession.seatIndex) ? roomSession.seatIndex : null;
+                playerInboxCard = data.playerInboxCard || null;
+                roomSummary = null;
+                ensureOfflineSeatPins(roomSession.seatCount || players.length || getConfiguredSeatCount() || 0);
+                if (players.length > 0) document.getElementById('timerPanel').style.display = 'block';
+            } else {
+                playerListLayout = window.innerWidth >= 720 ? 'double' : 'single';
+                selectedScript = 'tb';
+                travelerFeatureEnabled = false;
+                appMode = 'storyteller';
+                roomSession = createEmptyRoomSession();
+                roomSummary = null;
+                playerInboxCard = null;
+            }
+            initBluffSelects();
+            initRoleRevealSelect();
+            updateScriptUi();
+            renderAll();
+            updateTimerDisplay();
+        }
+
+        function renderAll() {
+            initTravelerControls();
+            updateTravelerFeatureUi();
+            initRoleRevealSelect();
+            updateRoleInfo();
+            renderCircle();
+            renderHints();
+            renderList();
+            updateRenameModeUi();
+            updatePlayerListLayoutUi();
+            renderScoreBoard();
+            updateAppModeUi();
+            refreshNightOrderIfOpen();
         }
 
         generateAndDeal = function generateAndDealOfflineWrapped() {
