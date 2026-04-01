@@ -3185,6 +3185,7 @@ button.night-btn {
             renderAll();
             saveData();
         }
+        const DEFAULT_ROOM_API_BASE = 'https://clocktower-grimoire-room-api.2837751815.workers.dev';
         function normalizeRoomApiBase(value) {
             return `${value || ''}`.trim().replace(/\/$/, '');
         }
@@ -3195,8 +3196,9 @@ button.night-btn {
             const params = new URLSearchParams(window.location.search);
             const queryValue = normalizeRoomApiBase(params.get('roomApi'));
             const storedValue = normalizeRoomApiBase(localStorage.getItem(ROOM_API_BASE_STORAGE_KEY));
-            roomApiBase = queryValue || storedValue;
-            if (queryValue) localStorage.setItem(ROOM_API_BASE_STORAGE_KEY, queryValue);
+            const defaultValue = normalizeRoomApiBase(DEFAULT_ROOM_API_BASE);
+            roomApiBase = queryValue || storedValue || defaultValue;
+            if (roomApiBase) localStorage.setItem(ROOM_API_BASE_STORAGE_KEY, roomApiBase);
         }
         function getRoomApiUrl(path) {
             if (roomApiBase) return `${roomApiBase}${path}`;
