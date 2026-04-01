@@ -2222,7 +2222,19 @@ button.night-btn {
 
         <section class="panel control-panel text-center storyteller-only">
             <label>设定玩家总数</label>
-            <select id="playerCountInput" onchange="handlePlayerCountChange()"></select>
+            <select id="playerCountInput" onchange="handlePlayerCountChange()">
+                <option value="5">5 人</option>
+                <option value="6">6 人</option>
+                <option value="7">7 人</option>
+                <option value="8" selected>8 人</option>
+                <option value="9">9 人</option>
+                <option value="10">10 人</option>
+                <option value="11">11 人</option>
+                <option value="12">12 人</option>
+                <option value="13">13 人</option>
+                <option value="14">14 人</option>
+                <option value="15">15 人</option>
+            </select>
             <div id="roleInfo" class="role-info">标准配置: 读取中...</div>
 
             <div class="traveler-toggle-row">
@@ -3191,10 +3203,14 @@ button.night-btn {
                     : Math.min(maxPlayers, Math.max(minPlayers, currentValue));
                 let options = '';
                 for (let count = minPlayers; count <= maxPlayers; count++) {
-                    options += `<option value="${count}">${count} 人</option>`;
+                    options += `<option value="${count}" ${count === nextValue ? 'selected' : ''}>${count} 人</option>`;
                 }
                 playerCountInput.innerHTML = options;
                 playerCountInput.value = `${nextValue}`;
+                if (playerCountInput.value !== `${nextValue}`) {
+                    const matchedIndex = Array.from(playerCountInput.options).findIndex(option => option.value === `${nextValue}`);
+                    if (matchedIndex >= 0) playerCountInput.selectedIndex = matchedIndex;
+                }
                 configuredPlayerCount = nextValue;
             }
             document.title = meta.pageTitle;
