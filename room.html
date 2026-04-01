@@ -2222,7 +2222,7 @@ button.night-btn {
 
         <section class="panel control-panel text-center storyteller-only">
             <label>设定玩家总数</label>
-            <select id="playerCountInput" onchange="updateRoleInfo(true)"></select>
+            <select id="playerCountInput" onchange="handlePlayerCountChange()"></select>
             <div id="roleInfo" class="role-info">标准配置: 读取中...</div>
 
             <div class="traveler-toggle-row">
@@ -2355,6 +2355,7 @@ button.night-btn {
         let roomSyncTimer = null;
         let lastStoryRoomSyncSignature = '';
         let playerInboxCard = null;
+        let configuredPlayerCount = 8;
         const STORAGE_KEY = 'tb_v2_0_data';
         const LEGACY_STORAGE_KEYS = ['tb_v9_7_data', 'tb_v9_6_data'];
         const TRAVELER_ROLE = '旅行者：旅行者';
@@ -3180,7 +3181,9 @@ button.night-btn {
             if (title) title.innerText = meta.title;
             if (subtitle) subtitle.innerText = meta.subtitle;
             if (playerCountInput) {
-                const currentValue = parseInt(playerCountInput.value, 10);
+                const currentValue = Number.isInteger(configuredPlayerCount)
+                    ? configuredPlayerCount
+                    : parseInt(playerCountInput.value, 10);
                 const minPlayers = meta.minPlayers || 5;
                 const maxPlayers = meta.maxPlayers || 15;
                 const nextValue = Number.isNaN(currentValue)
@@ -3192,9 +3195,22 @@ button.night-btn {
                 }
                 playerCountInput.innerHTML = options;
                 playerCountInput.value = `${nextValue}`;
+                configuredPlayerCount = nextValue;
             }
             document.title = meta.pageTitle;
             updateRoleInfo();
+        }
+        function handlePlayerCountChange() {
+            const input = document.getElementById('playerCountInput');
+            if (!input) return;
+            configuredPlayerCount = parseInt(input.value, 10) || getCurrentPlayerRange().min;
+            updateRoleInfo(true);
+            if (roomSession.role === 'storyteller' && roomSession.roomCode && !players.length) {
+                roomSession.seatCount = configuredPlayerCount;
+                ensureOfflineSeatPins(configuredPlayerCount);
+                renderRoomPanels();
+            }
+            saveData();
         }
         function changeScript(value) {
             const nextScript = scriptMeta[value] ? value : 'tb';
@@ -3249,6 +3265,11 @@ button.night-btn {
             appMode = mode === 'player' ? 'player' : 'storyteller';
             updateAppModeUi();
             saveData();
+        }
+        function closeSeatTokenModal() {
+            activeSeatTokenPlayerId = null;
+            const modal = document.getElementById('seatTokenModal');
+            if (modal) modal.style.display = 'none';
         }
         async function copyStoryRoomCode() {
             if (!roomSession.roomCode) return;
@@ -3924,6 +3945,7 @@ button.night-btn {
                 finalMvp,
                 selectedScript,
                 travelerFeatureEnabled,
+                configuredPlayerCount,
                 appMode,
                 roomSession: roomSnapshot,
                 playerInboxCard
@@ -3945,6 +3967,9 @@ button.night-btn {
                 travelerFeatureEnabled = typeof data.travelerFeatureEnabled === 'boolean'
                     ? data.travelerFeatureEnabled
                     : players.some(player => isTravelerPlayer(player));
+                configuredPlayerCount = typeof data.configuredPlayerCount === 'number'
+                    ? data.configuredPlayerCount
+                    : getCurrentPlayerRange().min;
                 appMode = data.appMode === 'player' ? 'player' : 'storyteller';
                 roomSession = {
                     ...createEmptyRoomSession(),
@@ -3962,6 +3987,7 @@ button.night-btn {
                 playerListLayout = window.innerWidth >= 720 ? 'double' : 'single';
                 selectedScript = 'tb';
                 travelerFeatureEnabled = false;
+                configuredPlayerCount = getCurrentPlayerRange().min;
                 appMode = 'storyteller';
                 roomSession = createEmptyRoomSession();
                 roomSummary = null;
