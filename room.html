@@ -3242,7 +3242,7 @@ button.night-btn {
         function initRoomApiBase() {}
         function getConfiguredSeatCount() {
             const input = document.getElementById('playerCountInput');
-            return Math.max(0, parseInt(input?.value || '0', 10) || 0);
+            return Math.max(0, parseInt(input?.value || `${configuredPlayerCount || 0}`, 10) || configuredPlayerCount || 0);
         }
         function sanitizeRoomCode(value) {
             return `${value || ''}`.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
@@ -3644,19 +3644,20 @@ button.night-btn {
         async function createStoryRoom() {
             setupOfflineRoomUi();
             closeRoomConnection();
+            const seatCount = players.length || getConfiguredSeatCount() || configuredPlayerCount || 0;
             roomSession = {
                 ...createEmptyRoomSession(),
                 roomCode: createOfflineRoomCode(),
                 role: 'storyteller',
                 playerName: '\u8bf4\u4e66\u4eba',
                 connected: true,
-                seatCount: players.length || getConfiguredSeatCount() || 0
+                seatCount
             };
             ensureOfflineSeatPins(roomSession.seatCount);
             roomSummary = null;
             playerInboxCard = null;
             saveData();
-            renderRoomPanels('\u5df2\u521b\u5efa\u79bb\u7ebf\u623f\u95f4\u53f7\u3002\u628a\u623f\u95f4\u53f7\u3001\u5ea7\u4f4d\u53f7\u4e0e\u5ea7\u4f4d PIN \u7ed9\u5230\u5bf9\u5e94\u73a9\u5bb6\u5373\u53ef\u3002');
+            renderRoomPanels(`已创建离线房间 ${roomSession.roomCode}。当前按 ${roomSession.seatCount || 0} 个座位生成 PIN；先把房间号、座位号与座位 PIN 发给玩家，本局发牌后再生成公共二维码。`);
         }
 
         async function joinRoomAsPlayer() {
@@ -3715,7 +3716,7 @@ button.night-btn {
                 return;
             }
             if (!players.length) {
-                renderRoomPanels('\u8bf7\u5148\u5e03\u7f6e\u5ea7\u4f4d\u5e76\u5b8c\u6210\u672c\u5c40\u53d1\u724c\u3002');
+                renderRoomPanels('公共二维码必须在发牌后生成。请先在下方设置人数，然后点击“一键布置并随机发牌”。');
                 return;
             }
             if (players.some(player => normalizeRoleName(player.role) === '\u2753 \u672a\u5206\u914d')) {
@@ -3867,10 +3868,10 @@ button.night-btn {
                 return;
             }
 
-            roomSession.seatCount = players.length || getConfiguredSeatCount() || roomSession.seatCount || 0;
+            roomSession.seatCount = players.length || getConfiguredSeatCount() || configuredPlayerCount || roomSession.seatCount || 0;
             const pins = ensureOfflineSeatPins(roomSession.seatCount);
             codeChip.innerText = roomSession.roomCode;
-            status.innerText = statusText || `\u672c\u5c40\u4e3a\u79bb\u7ebf\u684c\u53f7 ${roomSession.roomCode}\u3002\u628a\u623f\u95f4\u53f7\u3001\u5ea7\u4f4d\u53f7\u548c\u5bf9\u5e94\u5ea7\u4f4d PIN \u7ed9\u5230\u73a9\u5bb6\uff1b\u6bcf\u5c40\u53ea\u9700\u8981\u518d\u516c\u5e03\u540c\u4e00\u4efd\u516c\u5171\u4e8c\u7ef4\u7801\u6216\u516c\u5171\u53d1\u5361\u7801\u3002`;
+            status.innerText = statusText || `本局为离线桌号 ${roomSession.roomCode}。离线流程：1. 下方设人数并发牌  2. 把房间号、座位号和 PIN 给玩家  3. 每局生成同一张公共二维码给所有人扫码。`;
             roster.innerHTML = Array.from({ length: roomSession.seatCount }, (_, index) => {
                 const seatName = players[index]?.name || getDefaultSeatName(index);
                 const pin = pins[index] || '----';
