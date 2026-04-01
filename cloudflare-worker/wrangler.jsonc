@@ -1,0 +1,16 @@
+﻿{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "clocktower-grimoire-room-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-03-31",
+  "workers_dev": true,
+  "kv_namespaces": [
+    {
+      "binding": "ROOMS_KV",
+      "id": "c144f7422675462698839b74e46c83a6",
+      "preview_id": "a5ff2e3a34354a4bae9bc9ae368087e6"
+    }
+  ]
+}
+
+
