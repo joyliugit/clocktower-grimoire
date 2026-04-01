@@ -3189,13 +3189,19 @@ button.night-btn {
         function normalizeRoomApiBase(value) {
             return `${value || ''}`.trim().replace(/\/$/, '');
         }
+        function isLocalRoomApiBase(value) {
+            return /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(normalizeRoomApiBase(value));
+        }
         function hasLocalSameOriginRoomService() {
             return /^https?:$/i.test(window.location.protocol) && ['localhost', '127.0.0.1'].includes(window.location.hostname);
         }
         function initRoomApiBase() {
             const params = new URLSearchParams(window.location.search);
             const queryValue = normalizeRoomApiBase(params.get('roomApi'));
-            const storedValue = normalizeRoomApiBase(localStorage.getItem(ROOM_API_BASE_STORAGE_KEY));
+            let storedValue = normalizeRoomApiBase(localStorage.getItem(ROOM_API_BASE_STORAGE_KEY));
+            if (!hasLocalSameOriginRoomService() && isLocalRoomApiBase(storedValue)) {
+                storedValue = '';
+            }
             const defaultValue = normalizeRoomApiBase(DEFAULT_ROOM_API_BASE);
             roomApiBase = queryValue || storedValue || defaultValue;
             if (roomApiBase) localStorage.setItem(ROOM_API_BASE_STORAGE_KEY, roomApiBase);
