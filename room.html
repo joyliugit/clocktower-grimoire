@@ -92,8 +92,134 @@ body::after {
 .ritual-shell {
     position: relative;
     z-index: 1;
-    width: min(100%, 680px);
+    width: min(100%, 1480px);
     margin: 0 auto;
+}
+
+.storyteller-workspace {
+    display: grid;
+    gap: 18px;
+    margin-bottom: 22px;
+}
+
+.dashboard-rail {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    margin-bottom: 0;
+    border-radius: 22px;
+}
+
+.dashboard-rail-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dashboard-rail-meta {
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+}
+
+.dashboard-rail-btn {
+    min-height: 38px;
+    padding: 8px 14px;
+    border: 1px solid rgba(197, 165, 106, 0.18);
+    border-radius: 999px;
+    color: var(--text-dim);
+    background: linear-gradient(180deg, rgba(31, 24, 29, 0.95), rgba(16, 13, 16, 0.99));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.dashboard-rail-btn.active-screen {
+    color: #fff2d4;
+    border-color: rgba(197, 165, 106, 0.34);
+    background: linear-gradient(180deg, rgba(108, 84, 47, 0.94), rgba(64, 47, 27, 0.99));
+    box-shadow: 0 10px 18px rgba(0, 0, 0, 0.28), 0 0 20px rgba(166, 123, 67, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.dashboard-screens {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.dashboard-screens::-webkit-scrollbar {
+    display: none;
+}
+
+.dashboard-screen {
+    flex: 0 0 100%;
+    min-width: 0;
+    scroll-snap-align: start;
+}
+
+.dashboard-screen-grid {
+    display: grid;
+    gap: 18px;
+    align-items: start;
+}
+
+.dashboard-stack {
+    display: grid;
+    gap: 18px;
+    align-content: start;
+    min-width: 0;
+}
+
+.dashboard-panel-frame {
+    padding: 18px;
+    border: 1px solid rgba(197, 165, 106, 0.14);
+    border-radius: 26px;
+    background: linear-gradient(180deg, rgba(22, 18, 22, 0.72), rgba(10, 9, 11, 0.82));
+    box-shadow: var(--shadow-deep), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+#dashboardStoryRoomSlot:empty {
+    display: none;
+}
+
+#dashboardStoryRoomSlot > #storyRoomPanel {
+    margin-bottom: 0;
+}
+
+.dashboard-panel-title {
+    margin: 0 0 14px;
+    color: var(--gold);
+    font-size: 0.78rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+}
+
+.storyteller-workspace .panel,
+.storyteller-workspace #nightOrderDisplay {
+    margin-bottom: 0;
+}
+
+.dashboard-circle-card {
+    padding: 16px 16px 18px;
+    border-radius: 26px;
+}
+
+.dashboard-circle-card #circleStage {
+    margin: 0;
+}
+
+.dashboard-circle-card #circleToolbar {
+    margin-top: 12px;
+}
+
+.dashboard-screen-table #playerList {
+    min-height: 320px;
 }
 
 .panel,
@@ -2040,6 +2166,31 @@ button.night-btn {
     }
 }
 
+@media (min-width: 900px) {
+    .dashboard-screen-ritual .dashboard-screen-grid {
+        grid-template-columns: minmax(340px, 0.88fr) minmax(420px, 1.12fr);
+    }
+
+    .dashboard-screen-night .dashboard-screen-grid {
+        grid-template-columns: minmax(300px, 0.78fr) minmax(440px, 1.22fr);
+    }
+
+    .dashboard-screen-table .dashboard-screen-grid {
+        grid-template-columns: minmax(420px, 1.08fr) minmax(340px, 0.92fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    body {
+        padding: 24px 24px 40px;
+    }
+
+    .dashboard-screen {
+        flex-basis: calc(100vw - 80px);
+        max-width: 1380px;
+    }
+}
+
 @media (hover: hover) and (pointer: fine) {
     .reset-btn:hover,
     button.action-btn:hover,
@@ -2220,6 +2371,21 @@ button.night-btn {
             </div>
         </section>
 
+        <div id="storytellerWorkspace" class="storyteller-workspace storyteller-only">
+            <div class="panel dashboard-rail">
+                <div class="dashboard-rail-group">
+                    <button type="button" class="dashboard-rail-btn active-screen" data-dashboard-target="0" onclick="showDashboardScreen(0)">夜晚轮盘</button>
+                    <button type="button" class="dashboard-rail-btn" data-dashboard-target="1" onclick="showDashboardScreen(1)">夜顺裁定</button>
+                    <button type="button" class="dashboard-rail-btn" data-dashboard-target="2" onclick="showDashboardScreen(2)">角色与计分</button>
+                </div>
+                <div class="dashboard-rail-meta">横向滑动或点按钮切换控台页面</div>
+            </div>
+            <div id="storytellerScreens" class="dashboard-screens">
+                <section class="dashboard-screen dashboard-screen-ritual" data-dashboard-screen="0">
+                    <div class="dashboard-screen-grid">
+                        <div class="dashboard-stack dashboard-stack-primary">
+                            <div id="dashboardStoryRoomSlot"></div>
+
         <section class="panel control-panel text-center storyteller-only">
             <label>设定玩家总数</label>
             <select id="playerCountInput" onchange="handlePlayerCountChange()">
@@ -2279,6 +2445,9 @@ button.night-btn {
             </div>
         </section>
 
+                        </div>
+                        <div class="dashboard-stack dashboard-stack-secondary">
+        <section class="panel dashboard-circle-card storyteller-only">
         <div id="circleStage" class="circle-stage storyteller-only" style="display: none;">
             <div id="circleView" class="circle-container" style="display: none;"></div>
         </div>
@@ -2286,6 +2455,13 @@ button.night-btn {
             <button id="renameToggleBtn" class="action-btn rename-toggle-btn" onclick="toggleRenameMode()">🪑 入座模式：关闭</button>
             <div id="circleToolbarTip" class="circle-toolbar-tip">当前点座位会打开标记面板。</div>
         </div>
+        </section>
+                        </div>
+                    </div>
+                </section>
+                <section class="dashboard-screen dashboard-screen-night" data-dashboard-screen="1">
+                    <div class="dashboard-screen-grid">
+                        <div class="dashboard-stack">
         <div id="storytellerHints" class="panel hints-panel storyteller-only" style="display: none;"></div>
 
         <div class="night-panel storyteller-only">
@@ -2293,12 +2469,22 @@ button.night-btn {
             <button class="night-btn btn-other" onclick="generateNightOrder('other')">🌘 其余夜晚</button>
         </div>
 
+                        </div>
+                        <div class="dashboard-stack dashboard-stack-secondary">
         <div id="nightOrderDisplay" class="storyteller-only"></div>
+                        </div>
+                    </div>
+                </section>
+                <section class="dashboard-screen dashboard-screen-table" data-dashboard-screen="2">
+                    <div class="dashboard-screen-grid">
+                        <div class="dashboard-stack dashboard-stack-primary">
         <div id="playerListToolbar" class="panel playerlist-toolbar storyteller-only" style="display: none;">
             <button id="playerListLayoutBtn" class="action-btn playerlist-layout-btn" onclick="togglePlayerListLayout()">🧾 角色栏：单栏</button>
             <div id="playerListLayoutTip" class="circle-toolbar-tip">当前为单栏视图。</div>
         </div>
         <div id="playerList" class="storyteller-only"></div>
+                        </div>
+                        <div class="dashboard-stack dashboard-stack-secondary">
         <section class="panel display-panel storyteller-only">
             <div class="display-panel-title">展示牌</div>
             <div class="display-panel-row">
@@ -2334,6 +2520,11 @@ button.night-btn {
             </div>
             <div id="mvpSummary" class="score-summary">当前赛季 MVP：未产生</div>
         </section>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
     </main>
 
     <script src="vendor/qrcode-generator.js"></script>
@@ -2369,6 +2560,7 @@ button.night-btn {
         let playerInboxCard = null;
         let configuredPlayerCount = 8;
         let lastPublicQrStatus = 'empty';
+        let currentDashboardScreen = 0;
         const STORAGE_KEY = 'tb_v2_0_data';
         const LEGACY_STORAGE_KEYS = ['tb_v9_7_data', 'tb_v9_6_data'];
         const TRAVELER_ROLE = '旅行者：旅行者';
@@ -3276,12 +3468,69 @@ button.night-btn {
             document.querySelectorAll('.player-only').forEach(element => {
                 element.hidden = appMode !== 'player';
             });
+            mountStorytellerPanels();
+            setupDashboardScreenEvents();
+            syncDashboardScreenUi();
             renderRoomPanels();
         }
         function setAppMode(mode) {
             appMode = mode === 'player' ? 'player' : 'storyteller';
             updateAppModeUi();
             saveData();
+        }
+        function syncDashboardScreenUi() {
+            const railButtons = Array.from(document.querySelectorAll('[data-dashboard-target]'));
+            railButtons.forEach((button, index) => {
+                button.classList.toggle('active-screen', index === currentDashboardScreen);
+            });
+        }
+        function showDashboardScreen(index, behavior = 'smooth') {
+            const scroller = document.getElementById('storytellerScreens');
+            if (!scroller) return;
+            const screens = Array.from(scroller.querySelectorAll('.dashboard-screen'));
+            if (!screens.length) return;
+            currentDashboardScreen = Math.max(0, Math.min(index, screens.length - 1));
+            const target = screens[currentDashboardScreen];
+            if (!target) return;
+            scroller.scrollTo({
+                left: target.offsetLeft - scroller.offsetLeft,
+                behavior
+            });
+            syncDashboardScreenUi();
+        }
+        function updateDashboardScreenFromScroll() {
+            const scroller = document.getElementById('storytellerScreens');
+            if (!scroller) return;
+            const screens = Array.from(scroller.querySelectorAll('.dashboard-screen'));
+            if (!screens.length) return;
+            const currentLeft = scroller.scrollLeft;
+            let nextIndex = currentDashboardScreen;
+            let minDistance = Number.POSITIVE_INFINITY;
+            screens.forEach((screen, index) => {
+                const distance = Math.abs((screen.offsetLeft - scroller.offsetLeft) - currentLeft);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nextIndex = index;
+                }
+            });
+            if (nextIndex !== currentDashboardScreen) {
+                currentDashboardScreen = nextIndex;
+                syncDashboardScreenUi();
+            }
+        }
+        function setupDashboardScreenEvents() {
+            const scroller = document.getElementById('storytellerScreens');
+            if (!scroller || scroller.dataset.bound) return;
+            scroller.addEventListener('scroll', updateDashboardScreenFromScroll, { passive: true });
+            scroller.dataset.bound = '1';
+            syncDashboardScreenUi();
+        }
+        function mountStorytellerPanels() {
+            const storyRoomPanel = document.getElementById('storyRoomPanel');
+            const storyRoomSlot = document.getElementById('dashboardStoryRoomSlot');
+            if (storyRoomPanel && storyRoomSlot && storyRoomPanel.parentElement !== storyRoomSlot) {
+                storyRoomSlot.appendChild(storyRoomPanel);
+            }
         }
         function closeSeatTokenModal() {
             activeSeatTokenPlayerId = null;
@@ -3601,7 +3850,7 @@ button.night-btn {
 
         function buildPublicDealUrl(code = roomSession.publicDealCode) {
             if (!code) return '';
-            const url = new URL(window.location.href);
+            const url = new URL(window.location.origin + window.location.pathname);
             url.searchParams.delete('deal');
             url.hash = `d=${encodeURIComponent(code)}`;
             return url.toString();
@@ -3638,6 +3887,7 @@ button.night-btn {
                 lastPublicQrStatus = 'ok';
                 return lastPublicQrStatus;
             } catch (error) {
+                console.error('renderPublicDealQr failed:', error);
                 frame.innerHTML = '<div class="score-empty">\u672c\u5c40\u516c\u5171\u7801\u8fc7\u957f\uff0c\u4e8c\u7ef4\u7801\u751f\u6210\u5931\u8d25\uff1b\u8bf7\u6539\u7528\u4e0a\u65b9\u516c\u5171\u53d1\u5361\u7801\u624b\u52a8\u7c98\u8d34\u3002</div>';
                 lastPublicQrStatus = 'too-long';
                 return lastPublicQrStatus;
@@ -3745,7 +3995,8 @@ button.night-btn {
                 renderRoomPanels('\u8fd8\u6709\u5ea7\u4f4d\u672a\u5206\u914d\u89d2\u8272\uff0c\u8bf7\u5148\u5b8c\u6210\u53d1\u724c\u3002');
                 return;
             }
-            const pins = ensureOfflineSeatPins(players.length);
+            try {
+                const pins = ensureOfflineSeatPins(players.length);
             const issuedAt = Date.now();
             const entries = [];
             for (const player of players) {
@@ -3766,11 +4017,15 @@ button.night-btn {
             roomSession.seatCount = players.length;
             saveData();
             const qrStatus = renderPublicDealQr();
-            renderRoomPanels(
+                renderRoomPanels(
                 qrStatus === 'ok'
                     ? '\u5df2\u751f\u6210\u672c\u5c40\u516c\u5171\u4e8c\u7ef4\u7801\u548c\u516c\u5171\u53d1\u5361\u7801\u3002\u73a9\u5bb6\u626b\u63cf\u540c\u4e00\u5f20\u7801\u540e\uff0c\u4f1a\u6309\u5404\u81ea\u5ea7\u4f4d\u53f7\u4e0e PIN \u89e3\u9501\u89d2\u8272\u3002'
                     : '公共发卡码已经生成，但二维码过长，当前无法显示二维码。请直接点击“复制公共发卡码”，发给玩家手动粘贴。'
-            );
+                );
+            } catch (error) {
+                console.error('generatePublicDealCode failed:', error);
+                renderRoomPanels(`\u751f\u6210\u516c\u5171\u53d1\u5361\u7801\u5931\u8d25\uff1a${error?.message || '\u672a\u77e5\u9519\u8bef'}\u3002`);
+            }
         }
 
         async function copyPublicDealCode() {
@@ -4106,8 +4361,8 @@ button.night-btn {
         };
 
         updateRoleInfo();
-        window.onload = async () => { setupUiGuards(); loadData(); await applyPublicDealFromLocation(); };
-        window.addEventListener('resize', renderCircle);
+        window.onload = async () => { setupUiGuards(); mountStorytellerPanels(); setupDashboardScreenEvents(); loadData(); syncDashboardScreenUi(); await applyPublicDealFromLocation(); };
+        window.addEventListener('resize', () => { renderCircle(); showDashboardScreen(currentDashboardScreen, 'auto'); });
     </script>
 </body>
 </html>
