@@ -2483,12 +2483,11 @@ button.night-btn {
         <section id="storyRoomPanel" class="panel room-panel storyteller-only">
             <div class="display-panel-title">房间</div>
             <div class="room-panel-row">
-                <button id="createRoomBtn" class="action-btn" type="button" onclick="createStoryRoom()">🏠 创建房间</button>
-                <div id="storyRoomCode" class="room-code-chip">未建房</div>
-                <button id="copyRoomCodeBtn" class="show-bluff-btn room-secondary-btn" type="button" onclick="copyStoryRoomCode()">📋 复制房间号</button>
+                <div id="storyRoomCode" class="room-code-chip">自动桌号</div>
+                <button id="copyRoomCodeBtn" class="show-bluff-btn room-secondary-btn" type="button" onclick="copyStoryRoomCode()">📋 复制桌号</button>
             </div>
-            <div id="storyRoomStatus" class="room-status">通过本地房间服务访问时，玩家可以输入房间号加入并入座。</div>
-            <div id="storyRoomRoster" class="room-roster"><div class="score-empty">当前还没有在线玩家。</div></div>
+            <div id="storyRoomStatus" class="room-status">说书人页面会自动生成本局桌号与各座位 PIN，发给玩家后即可离线绑定。</div>
+            <div id="storyRoomRoster" class="room-roster"><div class="score-empty">当前桌号会自动生成，这里会列出每个座位的 PIN。</div></div>
         </section>
 
         <div id="playerModePanel" class="player-workspace player-only" hidden>
@@ -3983,6 +3982,40 @@ button.night-btn {
             return output;
         }
 
+        function ensureStoryRoomSession() {
+            if (appMode !== 'storyteller') return false;
+            const nextSeatCount = players.length || getConfiguredSeatCount() || configuredPlayerCount || roomSession.seatCount || 0;
+            let changed = false;
+            if (roomSession.role !== 'storyteller') {
+                roomSession = {
+                    ...createEmptyRoomSession(),
+                    roomCode: createOfflineRoomCode(),
+                    role: 'storyteller',
+                    playerName: '说书人',
+                    connected: true,
+                    seatCount: nextSeatCount
+                };
+                roomSummary = null;
+                playerInboxCard = null;
+                changed = true;
+            } else {
+                if (!roomSession.roomCode) {
+                    roomSession.roomCode = createOfflineRoomCode();
+                    changed = true;
+                }
+                if (!roomSession.connected) {
+                    roomSession.connected = true;
+                    changed = true;
+                }
+                if (roomSession.seatCount !== nextSeatCount) {
+                    roomSession.seatCount = nextSeatCount;
+                    changed = true;
+                }
+            }
+            ensureOfflineSeatPins(roomSession.seatCount);
+            return changed;
+        }
+
         function sanitizeSeatPin(value) {
             return `${value || ''}`.replace(/\D/g, '').slice(0, 4);
         }
@@ -4052,7 +4085,7 @@ button.night-btn {
                     `);
                 }
                 const storyStatus = document.getElementById('storyRoomStatus');
-                if (storyStatus) storyStatus.innerText = '\u79BB\u7EBF\u6A21\u5F0F\u4E0B\uFF0C\u73A9\u5BB6\u53EA\u505A\u672C\u5730\u7ED1\u5B9A\uFF1A\u8F93\u5165\u623F\u95F4\u53F7\u3001\u5EA7\u4F4D\u53F7\u548C PIN\u3002\u6BCF\u5C40\u5F00\u59CB\u540E\uFF0C\u8BF4\u4E66\u4EBA\u7EDF\u4E00\u5C55\u793A\u540C\u4E00\u5F20\u516C\u5171\u4E8C\u7EF4\u7801\u3002';
+                if (storyStatus) storyStatus.innerText = '\u79BB\u7EBF\u6A21\u5F0F\u4E0B\uFF0C\u8BF4\u4E66\u4EBA\u9875\u4F1A\u81EA\u52A8\u751F\u6210\u623F\u95F4\u53F7\u4E0E\u5EA7\u4F4D PIN\u3002\u73A9\u5BB6\u53EA\u9700\u8F93\u5165\u623F\u95F4\u53F7\u3001\u5EA7\u4F4D\u53F7\u548C PIN \u5B8C\u6210\u672C\u5730\u7ED1\u5B9A\u3002';
                 storyPanel.dataset.offlineEnhanced = '1';
             }
 
@@ -4275,6 +4308,10 @@ button.night-btn {
         async function createStoryRoom() {
             setupOfflineRoomUi();
             closeRoomConnection();
+            ensureStoryRoomSession();
+            saveData();
+            renderRoomPanels(`当前桌号 ${roomSession.roomCode} 已自动就绪。把桌号、座位号与对应 PIN 发给玩家，本局发牌后再生成公共二维码。`);
+            return;
             const seatCount = players.length || getConfiguredSeatCount() || configuredPlayerCount || 0;
             roomSession = {
                 ...createEmptyRoomSession(),
@@ -4343,8 +4380,9 @@ button.night-btn {
         }
 
         async function generatePublicDealCode() {
+            ensureStoryRoomSession();
             if (roomSession.role !== 'storyteller' || !roomSession.roomCode) {
-                renderRoomPanels('\u8bf7\u5148\u521b\u5efa\u79bb\u7ebf\u623f\u95f4\uff0c\u518d\u751f\u6210\u516c\u5171\u53d1\u5361\u7801\u3002');
+                renderRoomPanels('当前桌号尚未初始化，请刷新页面后重试。');
                 return;
             }
             if (!players.length) {
@@ -4529,18 +4567,18 @@ button.night-btn {
         }
 
         function renderStoryRoomRoster(statusText = '') {
+            if (appMode !== 'storyteller') return;
             setupOfflineRoomUi();
             const codeChip = document.getElementById('storyRoomCode');
             const status = document.getElementById('storyRoomStatus');
             const roster = document.getElementById('storyRoomRoster');
-            const createBtn = document.getElementById('createRoomBtn');
             const copyBtn = document.getElementById('copyRoomCodeBtn');
             const dealOutput = document.getElementById('publicDealCodeOutput');
             const generateBtn = document.getElementById('generatePublicDealBtn');
             const copyDealBtn = document.getElementById('copyPublicDealBtn');
-            if (!codeChip || !status || !roster || !createBtn || !copyBtn) return;
+            if (!codeChip || !status || !roster || !copyBtn) return;
 
-            createBtn.disabled = false;
+            const changed = ensureStoryRoomSession();
             if (generateBtn) generateBtn.disabled = !players.length;
             if (copyDealBtn) copyDealBtn.disabled = !roomSession.publicDealCode;
             copyBtn.disabled = !roomSession.roomCode;
@@ -4548,16 +4586,10 @@ button.night-btn {
             if (dealOutput) dealOutput.value = roomSession.publicDealCode || '';
             renderPublicDealQr();
 
-            if (roomSession.role !== 'storyteller' || !roomSession.roomCode) {
-                codeChip.innerText = '\u8bf4\u4e66\u4eba';
-                status.innerText = statusText || '\u79bb\u7ebf\u623f\u95f4\u53ea\u8d1f\u8d23\u751f\u6210\u623f\u95f4\u53f7\u3001\u5ea7\u4f4d PIN \u4e0e\u516c\u5171\u53d1\u5361\u7801\u3002\u73a9\u5bb6\u7aef\u4e0d\u4f1a\u8054\u7f51\uff0c\u53ea\u4f1a\u672c\u5730\u4fdd\u5b58\u81ea\u5df1\u7684\u7ed1\u5b9a\u4fe1\u606f\u3002';
-                roster.innerHTML = '<div class="score-empty">\u521b\u5efa\u623f\u95f4\u540e\uff0c\u8fd9\u91cc\u4f1a\u5217\u51fa\u6bcf\u4e2a\u5ea7\u4f4d\u7684 PIN\u3002</div>';
-                return;
-            }
-
             roomSession.seatCount = players.length || getConfiguredSeatCount() || configuredPlayerCount || roomSession.seatCount || 0;
             const pins = ensureOfflineSeatPins(roomSession.seatCount);
             codeChip.innerText = roomSession.roomCode;
+            if (!statusText) statusText = `本局离线桌号 ${roomSession.roomCode} 已自动生成。流程：1. 下方设人数并发牌  2. 把桌号、座位号和 PIN 给玩家  3. 每局生成同一张公共二维码给所有人扫码。`;
             status.innerText = statusText || `本局为离线桌号 ${roomSession.roomCode}。离线流程：1. 下方设人数并发牌  2. 把房间号、座位号和 PIN 给玩家  3. 每局生成同一张公共二维码给所有人扫码。`;
             roster.innerHTML = Array.from({ length: roomSession.seatCount }, (_, index) => {
                 const seatName = players[index]?.name || getDefaultSeatName(index);
