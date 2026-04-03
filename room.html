@@ -2457,13 +2457,6 @@ button.night-btn {
         <header class="panel hero-panel">
             <div class="hero-topbar">
                 <div class="hero-caption">Storyteller Ritual Console</div>
-                <div class="interface-switcher">
-                    <span class="script-switcher-label">界面</span>
-                    <select id="appModeSelect" class="script-select mode-select" onchange="setAppMode(this.value)">
-                        <option value="storyteller">说书人</option>
-                        <option value="player">玩家</option>
-                    </select>
-                </div>
                 <div class="script-switcher">
                     <span class="script-switcher-label">剧本</span>
                     <select id="scriptSelect" class="script-select" onchange="changeScript(this.value)">
@@ -3678,31 +3671,25 @@ button.night-btn {
             return Array.from({ length: count }, (_, index) => players[index]?.name || getDefaultSeatName(index));
         }
         function updateAppModeUi() {
-            const select = document.getElementById('appModeSelect');
-            if (select) select.value = appMode;
+            appMode = 'storyteller';
             document.querySelectorAll('.storyteller-only').forEach(element => {
-                element.hidden = appMode !== 'storyteller';
+                element.hidden = false;
             });
             document.querySelectorAll('.player-only').forEach(element => {
-                element.hidden = appMode !== 'player';
+                element.hidden = true;
             });
             mountStorytellerPanels();
             setupDashboardScreenEvents();
             syncDashboardScreenUi();
             setupPlayerScreenEvents();
             syncPlayerScreenUi();
-            if (appMode === 'storyteller') {
-                showDashboardScreen(currentDashboardScreen, 'auto');
-            } else {
-                showPlayerScreen(currentPlayerScreen, 'auto');
-            }
+            showDashboardScreen(currentDashboardScreen, 'auto');
             renderRoomPanels();
         }
         function setAppMode(mode) {
-            appMode = mode === 'player' ? 'player' : 'storyteller';
+            appMode = 'storyteller';
             updateAppModeUi();
             renderCircle();
-            renderPlayerReferencePanels();
             saveData();
         }
         function syncPlayerScreenUi() {
@@ -4690,7 +4677,7 @@ button.night-btn {
                 configuredPlayerCount = typeof data.configuredPlayerCount === 'number'
                     ? data.configuredPlayerCount
                     : getCurrentPlayerRange().min;
-                appMode = data.appMode === 'player' ? 'player' : 'storyteller';
+                appMode = 'storyteller';
                 roomSession = {
                     ...createEmptyRoomSession(),
                     ...(data.roomSession || {})
