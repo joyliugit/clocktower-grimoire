@@ -2516,7 +2516,26 @@
             };
             const style = getTbReasonableSetupStyle(count, outsiderRoles, minionRoles);
             const template = templates[style];
-            const orderedCore = [...template.core];
+            const smallCountVariants = {
+                5: [
+                    ['镇民：厨师', '镇民：共情者', '镇民：占卜师'],
+                    ['镇民：洗衣妇', '镇民：调查员', '镇民：厨师'],
+                    ['镇民：调查员', '镇民：僧侣', '镇民：送葬者'],
+                    ['镇民：洗衣妇', '镇民：占卜师', '镇民：守鸦人'],
+                    ['镇民：图书管理员', '镇民：共情者', '镇民：送葬者']
+                ],
+                6: [
+                    ['镇民：图书管理员', '镇民：共情者', '镇民：占卜师'],
+                    ['镇民：洗衣妇', '镇民：调查员', '镇民：僧侣'],
+                    ['镇民：图书管理员', '镇民：厨师', '镇民：送葬者'],
+                    ['镇民：调查员', '镇民：共情者', '镇民：守鸦人'],
+                    ['镇民：洗衣妇', '镇民：占卜师', '镇民：送葬者']
+                ]
+            };
+            const smallVariants = smallCountVariants[count] || null;
+            const orderedCore = smallVariants
+                ? [...smallVariants[Math.floor(Math.random() * smallVariants.length)]]
+                : [...template.core];
 
             if (outsiderRoles.length) insertUniqueRole(orderedCore, '镇民：图书管理员', 1);
             if (outsiderRoles.includes('外来者：酒鬼')) insertUniqueRole(orderedCore, '镇民：调查员', 2);
