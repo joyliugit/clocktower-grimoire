@@ -2368,6 +2368,7 @@ button.night-btn {
         let lastStoryRoomSyncSignature = '';
         let playerInboxCard = null;
         let configuredPlayerCount = 8;
+        let lastPublicQrStatus = 'empty';
         const STORAGE_KEY = 'tb_v2_0_data';
         const LEGACY_STORAGE_KEYS = ['tb_v9_7_data', 'tb_v9_6_data'];
         const TRAVELER_ROLE = '旅行者：旅行者';
@@ -3622,19 +3623,24 @@ button.night-btn {
 
         function renderPublicDealQr() {
             const frame = document.getElementById('publicDealQrFrame');
-            if (!frame) return;
+            if (!frame) return 'missing';
             const publicUrl = roomSession.publicDealUrl || buildPublicDealUrl(roomSession.publicDealCode);
             if (!roomSession.publicDealCode || !publicUrl) {
                 frame.innerHTML = '<div class="score-empty">\u751f\u6210\u672c\u5c40\u516c\u5171\u53d1\u5361\u7801\u540e\uff0c\u8fd9\u91cc\u4f1a\u51fa\u73b0\u516c\u5171\u4e8c\u7ef4\u7801\u3002</div>';
-                return;
+                lastPublicQrStatus = 'empty';
+                return lastPublicQrStatus;
             }
             try {
                 const qr = qrcode(0, 'L');
                 qr.addData(publicUrl);
                 qr.make();
                 frame.innerHTML = qr.createSvgTag(5, 10);
+                lastPublicQrStatus = 'ok';
+                return lastPublicQrStatus;
             } catch (error) {
                 frame.innerHTML = '<div class="score-empty">\u672c\u5c40\u516c\u5171\u7801\u8fc7\u957f\uff0c\u4e8c\u7ef4\u7801\u751f\u6210\u5931\u8d25\uff1b\u8bf7\u6539\u7528\u4e0a\u65b9\u516c\u5171\u53d1\u5361\u7801\u624b\u52a8\u7c98\u8d34\u3002</div>';
+                lastPublicQrStatus = 'too-long';
+                return lastPublicQrStatus;
             }
         }
 
@@ -3759,7 +3765,12 @@ button.night-btn {
             roomSession.lastDealIssuedAt = issuedAt;
             roomSession.seatCount = players.length;
             saveData();
-            renderRoomPanels('\u5df2\u751f\u6210\u672c\u5c40\u516c\u5171\u4e8c\u7ef4\u7801\u548c\u516c\u5171\u53d1\u5361\u7801\u3002\u73a9\u5bb6\u626b\u63cf\u540c\u4e00\u5f20\u7801\u540e\uff0c\u4f1a\u6309\u5404\u81ea\u5ea7\u4f4d\u53f7\u4e0e PIN \u89e3\u9501\u89d2\u8272\u3002');
+            const qrStatus = renderPublicDealQr();
+            renderRoomPanels(
+                qrStatus === 'ok'
+                    ? '\u5df2\u751f\u6210\u672c\u5c40\u516c\u5171\u4e8c\u7ef4\u7801\u548c\u516c\u5171\u53d1\u5361\u7801\u3002\u73a9\u5bb6\u626b\u63cf\u540c\u4e00\u5f20\u7801\u540e\uff0c\u4f1a\u6309\u5404\u81ea\u5ea7\u4f4d\u53f7\u4e0e PIN \u89e3\u9501\u89d2\u8272\u3002'
+                    : '公共发卡码已经生成，但二维码过长，当前无法显示二维码。请直接点击“复制公共发卡码”，发给玩家手动粘贴。'
+            );
         }
 
         async function copyPublicDealCode() {
