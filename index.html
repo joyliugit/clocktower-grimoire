@@ -2571,14 +2571,14 @@ button.night-btn {
                 <div class="script-switcher">
                     <span class="script-switcher-label">剧本</span>
                     <select id="scriptSelect" class="script-select" onchange="changeScript(this.value)">
-                        <option value="tb">暗流魔典</option>
+                        <option value="tb">暗流涌动</option>
                         <option value="dycs">黯月初升</option>
                         <option value="mycx">梦殒春宵</option>
                     </select>
                 </div>
             </div>
             <h2>
-                <span id="appTitleText" class="title-text">📖 暗流魔典 v2.2</span>
+                <span id="appTitleText" class="title-text">📖 暗流涌动 v2.2</span>
                 <button class="reset-btn" onclick="clearData()">🔄 洗牌重开</button>
             </h2>
             <p id="appSubtitle" class="hero-subtitle">夜烛之下，圆桌、伪装、唤醒与审判都在同一座祭坛上完成。</p>
@@ -2984,10 +2984,10 @@ button.night-btn {
 
         const scriptMeta = {
             tb: {
-                displayName: '暗流魔典',
-                title: '📖 暗流魔典 v2.2',
+                displayName: '暗流涌动',
+                title: '📖 暗流涌动 v2.2',
                 subtitle: '夜烛之下，圆桌、伪装、唤醒与审判都在同一座祭坛上完成。',
-                pageTitle: '血染钟楼 - 暗流魔典 v2.2',
+                pageTitle: '血染钟楼 - 暗流涌动 v2.2',
                 minPlayers: 5,
                 maxPlayers: 15
             },
@@ -3464,7 +3464,7 @@ button.night-btn {
         function getCurrentScriptData() { return scriptDataMap[selectedScript] || scriptDataMap.tb; }
         function getCurrentScriptDisplayName() {
             const meta = scriptMeta[selectedScript] || scriptMeta.tb;
-            return meta.displayName || '暗流魔典';
+            return meta.displayName || '暗流涌动';
         }
 
         function getCurrentAllRoles() { return getCurrentScriptData().allRoles; }
@@ -4258,38 +4258,41 @@ button.night-btn {
             return '';
         }
         function getSpecialNightRoleHtml(role, player) {
+            const toolHtml = getSpecialRoleToolsHtml(player);
+            const blocks = [];
             if (role === '镇民：筑梦师') {
-                return `<div class="ai-suggestion"><div class="ai-suggestion-title">筑梦师提示</div><div class="ai-option">当前可在角色栏里选定目标后，直接生成“真一假一”的展示结果。</div></div>`;
+                blocks.push(`<div class="ai-suggestion"><div class="ai-suggestion-title">筑梦师提示</div><div class="ai-option">当前可在本步骤直接选定目标，生成“真一假一”的展示结果。</div></div>`);
             }
             if (role === '镇民：舞蛇人') {
                 const livingDemons = players.filter(item => item.id !== player.id && item.isAlive && getRoleCategory(normalizeRoleName(item.role)) === 'Demon');
                 const detail = livingDemons.length
                     ? `当前若点中 [${livingDemons.map(item => item.name).join(']、[')}]，会立即交换身份。`
                     : '当前没有存活恶魔可被交换。';
-                return `<div class="ai-suggestion"><div class="ai-suggestion-title">舞蛇人结算提示</div><div class="ai-option">${detail}</div></div>`;
+                blocks.push(`<div class="ai-suggestion"><div class="ai-suggestion-title">舞蛇人结算提示</div><div class="ai-option">${detail}</div></div>`);
             }
             if (role === '镇民：裁缝') {
-                return `<div class="ai-suggestion"><div class="ai-suggestion-title">裁缝提示</div><div class="ai-option">${player.tailorUsed ? '当前已记录裁缝发动过一次；如需更正，可在角色栏重做或清除。' : '当前尚未记录裁缝发动。若今夜发动，可在角色栏直接判定两人是否同阵营。'}</div></div>`;
+                blocks.push(`<div class="ai-suggestion"><div class="ai-suggestion-title">裁缝提示</div><div class="ai-option">${player.tailorUsed ? '当前已记录裁缝发动过一次；如需更正，可在本步骤清除或重做。' : '当前尚未记录裁缝发动。若今夜发动，可在本步骤直接判定两人是否同阵营。'}</div></div>`);
             }
             if (role === '镇民：哲学家') {
-                return `<div class="ai-suggestion"><div class="ai-suggestion-title">哲学家记录</div><div class="ai-option">${player.philosopherChoice ? `当前已记录复制 ${renderRevealButton(player.philosopherChoice)}。` : '当前尚未记录哲学家复制的能力。'}</div></div>`;
+                blocks.push(`<div class="ai-suggestion"><div class="ai-suggestion-title">哲学家记录</div><div class="ai-option">${player.philosopherChoice ? `当前已记录复制 ${renderRevealButton(player.philosopherChoice)}。` : '当前尚未记录哲学家复制的能力。'}</div></div>`);
             }
             if (role === '爪牙：洗脑师') {
                 const currentTarget = getMindmasterTargetForSource(player.id);
                 const detail = currentTarget
                     ? `当前已记录：[${currentTarget.name}] 需要疯狂宣称 ${renderRevealButton(currentTarget.brainwashRole)}。`
-                    : '当前尚未记录疯狂目标，可在角色栏中指定一名玩家与要宣称的角色。';
-                return `<div class="ai-suggestion"><div class="ai-suggestion-title">洗脑师记录</div><div class="ai-option">${detail}</div></div>`;
+                    : '当前尚未记录疯狂目标，可在本步骤指定一名玩家与要宣称的角色。';
+                blocks.push(`<div class="ai-suggestion"><div class="ai-suggestion-title">洗脑师记录</div><div class="ai-option">${detail}</div></div>`);
             }
             if (role === '爪牙：女巫') {
                 const currentTarget = getWitchTargetForSource(player.id);
-                return `<div class="ai-suggestion"><div class="ai-suggestion-title">女巫记录</div><div class="ai-option">${currentTarget ? `当前已下咒：[${currentTarget.name}]。若其明天提名，应立刻死亡。` : '当前尚未记录女巫诅咒目标。'}</div></div>`;
+                blocks.push(`<div class="ai-suggestion"><div class="ai-suggestion-title">女巫记录</div><div class="ai-option">${currentTarget ? `当前已下咒：[${currentTarget.name}]。若其明天提名，应立刻死亡。` : '当前尚未记录女巫诅咒目标。'}</div></div>`);
             }
             if (role === '爪牙：镜像双子') {
                 const currentPartner = getTwinPartner(player);
-                return `<div class="ai-suggestion"><div class="ai-suggestion-title">镜像双子记录</div><div class="ai-option">${currentPartner ? `当前互知对象：[${currentPartner.name}]。` : '当前尚未记录双子对。'}</div></div>`;
+                blocks.push(`<div class="ai-suggestion"><div class="ai-suggestion-title">镜像双子记录</div><div class="ai-option">${currentPartner ? `当前互知对象：[${currentPartner.name}]。` : '当前尚未记录双子对。'}</div></div>`);
             }
-            return '';
+            if (toolHtml) blocks.push(toolHtml);
+            return blocks.join('');
         }
         function updateScriptUi() {
             const meta = scriptMeta[selectedScript] || scriptMeta.tb;
@@ -5634,7 +5637,6 @@ button.night-btn {
                 const showTravelerEditor = travelerFeatureEnabled && isTravelerPlayer(player);
                 const primaryAbilityHtml = showTravelerEditor ? '' : `<div class="role-desc">ℹ️ ${abilityDesc}</div>`;
                 const automationStatusHtml = getAutomationStatusHtml(player);
-                const specialRoleToolsHtml = showTravelerEditor ? '' : getSpecialRoleToolsHtml(player);
                 const travelerEditorHtml = showTravelerEditor
                     ? `
                         <div class="traveler-editor">
@@ -5662,7 +5664,6 @@ button.night-btn {
                     <div class="row" style="margin-bottom: 4px;"><select onchange="updateRole(${player.id}, this.value)">${roleOptions}</select></div>
                     ${primaryAbilityHtml}
                     ${automationStatusHtml}
-                    ${specialRoleToolsHtml}
                     ${travelerEditorHtml}
                 `;
                 list.appendChild(card);
