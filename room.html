@@ -353,6 +353,11 @@ body::after {
     border-radius: 22px;
 }
 
+.player-workspace {
+    display: grid;
+    gap: 18px;
+}
+
 .room-panel-row,
 .player-join-actions,
 .player-room-meta {
@@ -534,6 +539,117 @@ body::after {
 .player-role-card-empty {
     color: var(--text-dim);
     line-height: 1.7;
+}
+
+.player-binding-shell {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(197, 165, 106, 0.12);
+}
+
+.player-wheel-card {
+    min-height: 100%;
+}
+
+.player-circle-stage {
+    width: min(100%, 760px);
+    min-height: 560px;
+    display: grid;
+    place-items: center;
+}
+
+.player-circle-empty {
+    max-width: 320px;
+    text-align: center;
+    line-height: 1.7;
+}
+
+.player-role-index-root,
+.player-faq-root {
+    display: grid;
+    gap: 14px;
+    margin-top: 14px;
+}
+
+.player-role-index-section,
+.player-faq-card {
+    padding: 14px;
+    border-radius: 18px;
+    border: 1px solid rgba(197, 165, 106, 0.12);
+    background: linear-gradient(180deg, rgba(26, 20, 24, 0.82), rgba(14, 11, 14, 0.92));
+}
+
+.player-role-index-section-title {
+    margin-bottom: 12px;
+    color: var(--gold);
+    font-size: 0.92rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+}
+
+.player-role-index-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+}
+
+.player-role-index-card {
+    padding: 12px 12px 10px;
+    border-radius: 16px;
+    border: 1px solid rgba(197, 165, 106, 0.1);
+    background: rgba(15, 12, 15, 0.6);
+}
+
+.player-role-index-name {
+    color: var(--text-main);
+    font-weight: 600;
+    line-height: 1.45;
+}
+
+.player-role-index-ability {
+    margin-top: 8px;
+    color: var(--text-dim);
+    font-size: 0.84rem;
+    line-height: 1.65;
+}
+
+.player-faq-card-question {
+    margin-bottom: 8px;
+    color: var(--gold);
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.player-faq-card-answer {
+    color: var(--text-dim);
+    font-size: 0.86rem;
+    line-height: 1.7;
+}
+
+.night-order-helper {
+    padding: 14px 16px;
+}
+
+.night-order-dual {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+}
+
+.night-order-column {
+    display: grid;
+    gap: 12px;
+}
+
+.night-order-column-header {
+    padding: 12px 14px;
+    border-radius: 16px;
+    border: 1px solid rgba(197, 165, 106, 0.16);
+    color: var(--gold);
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    background: linear-gradient(180deg, rgba(42, 29, 33, 0.78), rgba(19, 14, 17, 0.86));
 }
 
 .send-card-btn {
@@ -1067,6 +1183,10 @@ button.action-btn {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 10px;
+}
+
+#playerGuessModal .seat-assign-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .seat-token-btn {
@@ -2140,6 +2260,10 @@ button.night-btn {
         grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
+    .player-role-index-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .traveler-grid,
     .traveler-editor-row {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2188,6 +2312,13 @@ button.night-btn {
     .dashboard-screen {
         flex-basis: calc(100vw - 80px);
         max-width: 1380px;
+    }
+}
+
+@media (min-width: 720px) {
+    .night-order-dual {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
     }
 }
 
@@ -2310,6 +2441,22 @@ button.night-btn {
         <div class="modal-close-tip">-- 点击空白处关闭 --</div>
     </div>
 
+    <div id="playerGuessModal" class="modal-overlay" onclick="closePlayerGuessModal()">
+        <div id="playerGuessModalPanel" class="modal-panel">
+            <div class="seat-token-title" id="playerGuessTitle">记录座位猜测</div>
+            <div class="seat-token-subtitle">这里只会保存你自己设备上的猜测姓名和角色，不会影响说书人桌面。</div>
+            <div class="seat-assign-manual">
+                <input type="text" id="playerGuessNameInput" class="add-token-input" placeholder="输入你给这个座位记的名字">
+                <select id="playerGuessRoleSelect" class="traveler-meta-input"></select>
+                <div class="seat-assign-actions">
+                    <button type="button" class="seat-token-btn active" onclick="applyPlayerGuess()">保存猜测</button>
+                    <button type="button" class="seat-token-btn clear" onclick="resetPlayerGuess()">清空猜测</button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-close-tip">-- 点击空白处关闭 --</div>
+    </div>
+
     <main class="ritual-shell">
         <header class="panel hero-panel">
             <div class="hero-topbar">
@@ -2348,28 +2495,85 @@ button.night-btn {
             <div id="storyRoomRoster" class="room-roster"><div class="score-empty">当前还没有在线玩家。</div></div>
         </section>
 
-        <section id="playerModePanel" class="panel player-mode-panel player-only" hidden>
-            <div class="display-panel-title">玩家界面</div>
-            <div id="playerModeHint" class="room-status">输入房间号，加入说书人创建的房间并选择座位。</div>
-            <div class="player-join-grid">
-                <input type="text" id="playerJoinNameInput" class="add-token-input" maxlength="24" placeholder="输入你的名字">
-                <input type="text" id="playerJoinCodeInput" class="add-token-input" maxlength="6" placeholder="输入房间号">
+        <div id="playerModePanel" class="player-workspace player-only" hidden>
+            <div class="panel dashboard-rail">
+                <div class="dashboard-rail-group">
+                    <button type="button" class="dashboard-rail-btn active-screen" data-player-target="0" onclick="showPlayerScreen(0)">夜晚轮盘</button>
+                    <button type="button" class="dashboard-rail-btn" data-player-target="1" onclick="showPlayerScreen(1)">剧本角色</button>
+                    <button type="button" class="dashboard-rail-btn" data-player-target="2" onclick="showPlayerScreen(2)">常见问题</button>
+                </div>
+                <div class="dashboard-rail-meta">玩家端只保存你的本地笔记、座位猜测和接收到的角色卡。</div>
             </div>
-            <div class="player-join-actions" style="margin-top: 12px;">
-                <button class="action-btn" type="button" onclick="joinRoomAsPlayer()">🚪 加入房间</button>
-                <button class="show-bluff-btn room-secondary-btn" type="button" onclick="leaveCurrentRoom()">↩ 退出房间</button>
+            <div id="playerScreens" class="dashboard-screens">
+                <section class="dashboard-screen player-dashboard-screen" data-player-screen="0">
+                    <div class="dashboard-screen-grid">
+                        <div class="dashboard-stack dashboard-stack-primary">
+                            <section class="panel player-mode-panel">
+                                <div class="display-panel-title">玩家界面</div>
+                                <div id="playerModeHint" class="room-status">先输入房间号、座位号和座位 PIN 完成本地绑定；之后每局只要扫同一张公共二维码。</div>
+                                <div class="player-join-grid">
+                                    <input type="text" id="playerJoinNameInput" class="add-token-input" maxlength="24" placeholder="输入你的名字">
+                                    <input type="text" id="playerJoinCodeInput" class="add-token-input" maxlength="6" placeholder="输入房间号">
+                                    <select id="playerSeatSelectInput" class="add-token-input"></select>
+                                    <input type="text" id="playerSeatPinInput" class="add-token-input" maxlength="4" inputmode="numeric" placeholder="输入该座位的 4 位 PIN">
+                                </div>
+                                <div class="player-join-actions" style="margin-top: 12px;">
+                                    <button class="action-btn" type="button" onclick="joinRoomAsPlayer()">🪑 本地入座绑定</button>
+                                    <button class="show-bluff-btn room-secondary-btn" type="button" onclick="leaveCurrentRoom()">↩ 退出房间</button>
+                                </div>
+                                <div class="player-room-meta">
+                                    <div id="playerRoomStatus" class="room-status">尚未加入房间。</div>
+                                </div>
+                                <div id="playerSeatPanel" class="player-binding-shell">
+                                    <div class="player-seat-note">夜晚轮盘只显示你自己记录的姓名与猜测。点击任意座位可修改名字，并记录你觉得该座位是什么角色。</div>
+                                    <textarea id="playerDealCodeInput" class="traveler-ability-input" placeholder="每局开始后，扫码打开公共二维码，或把说书人发来的公共发卡码粘贴到这里。"></textarea>
+                                    <div class="player-join-actions" style="margin-top: 12px;">
+                                        <button class="action-btn" type="button" onclick="receivePublicRoleCard()">🔓 接收本局角色卡</button>
+                                        <button class="show-bluff-btn room-secondary-btn" type="button" onclick="pastePublicDealCodeFromClipboard()">📋 粘贴公共发卡码</button>
+                                    </div>
+                                </div>
+                            </section>
+                            <div id="playerRoleCardPanel" class="player-role-card-panel">
+                                <div class="player-role-card-empty">完成绑定并接收公共发卡码后，这里会显示你的角色卡。</div>
+                            </div>
+                        </div>
+                        <div class="dashboard-stack dashboard-stack-secondary">
+                            <section class="panel dashboard-circle-card player-wheel-card">
+                                <div id="playerCircleStage" class="circle-stage player-circle-stage">
+                                    <div id="playerCircleView" class="circle-container player-circle-container" style="display: none;"></div>
+                                    <div id="playerCircleEmpty" class="score-empty player-circle-empty">先完成房间绑定或接收本局发卡，夜晚轮盘才会按当前桌面人数展开。</div>
+                                </div>
+                                <div class="panel circle-toolbar">
+                                    <div class="circle-toolbar-tip">玩家轮盘不会显示真实身份。点击座位，只会修改你本地记录的姓名和猜测角色。</div>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </section>
+                <section class="dashboard-screen player-dashboard-screen" data-player-screen="1">
+                    <div class="dashboard-screen-grid">
+                        <div class="dashboard-stack">
+                            <section class="panel player-reference-panel">
+                                <div class="display-panel-title">剧本角色</div>
+                                <div class="room-status">这里会列出当前剧本的所有角色与技能，方便玩家快速查阅与比对。</div>
+                                <div id="playerRoleIndexPanel" class="player-role-index-root"></div>
+                            </section>
+                        </div>
+                    </div>
+                </section>
+                <section class="dashboard-screen player-dashboard-screen" data-player-screen="2">
+                    <div class="dashboard-screen-grid">
+                        <div class="dashboard-stack">
+                            <section class="panel player-reference-panel">
+                                <div class="display-panel-title">常见的角色问题</div>
+                                <div class="room-status">这一页只放最常被问到的规则边界，适合玩家在夜里快速核对。</div>
+                                <div id="playerFaqPanel" class="player-faq-root"></div>
+                            </section>
+                        </div>
+                    </div>
+                </section>
             </div>
-            <div class="player-room-meta">
-                <div id="playerRoomStatus" class="room-status">尚未加入房间。</div>
-            </div>
-            <div id="playerSeatPanel" style="display: none;">
-                <div class="player-seat-note">选择你的座位。已被其他玩家占用的座位会锁定。</div>
-                <div id="playerSeatGrid" class="player-seat-grid"></div>
-            </div>
-            <div id="playerRoleCardPanel" class="player-role-card-panel">
-                <div class="player-role-card-empty">入座后，等待说书人发送你的角色卡。</div>
-            </div>
-        </section>
+        </div>
 
         <div id="storytellerWorkspace" class="storyteller-workspace storyteller-only">
             <div class="panel dashboard-rail">
@@ -2463,10 +2667,8 @@ button.night-btn {
                     <div class="dashboard-screen-grid">
                         <div class="dashboard-stack">
         <div id="storytellerHints" class="panel hints-panel storyteller-only" style="display: none;"></div>
-
-        <div class="night-panel storyteller-only">
-            <button class="night-btn btn-first" onclick="generateNightOrder('first')">🌙 首夜降临</button>
-            <button class="night-btn btn-other" onclick="generateNightOrder('other')">🌘 其余夜晚</button>
+        <div class="panel player-reference-panel storyteller-only night-order-helper">
+            <div class="room-status">夜顺裁定会按当前桌面角色、死亡状态与中毒/醉酒标记自动刷新。左栏是首夜，右栏是其余夜晚。</div>
         </div>
 
                         </div>
@@ -2478,10 +2680,6 @@ button.night-btn {
                 <section class="dashboard-screen dashboard-screen-table" data-dashboard-screen="2">
                     <div class="dashboard-screen-grid">
                         <div class="dashboard-stack dashboard-stack-primary">
-        <div id="playerListToolbar" class="panel playerlist-toolbar storyteller-only" style="display: none;">
-            <button id="playerListLayoutBtn" class="action-btn playerlist-layout-btn" onclick="togglePlayerListLayout()">🧾 角色栏：单栏</button>
-            <div id="playerListLayoutTip" class="circle-toolbar-tip">当前为单栏视图。</div>
-        </div>
         <div id="playerList" class="storyteller-only"></div>
                         </div>
                         <div class="dashboard-stack dashboard-stack-secondary">
@@ -2561,6 +2759,8 @@ button.night-btn {
         let configuredPlayerCount = 8;
         let lastPublicQrStatus = 'empty';
         let currentDashboardScreen = 0;
+        let currentPlayerScreen = 0;
+        let playerGuessTargetSeat = null;
         const STORAGE_KEY = 'tb_v2_0_data';
         const LEGACY_STORAGE_KEYS = ['tb_v9_7_data', 'tb_v9_6_data'];
         const TRAVELER_ROLE = '旅行者：旅行者';
@@ -2575,6 +2775,32 @@ button.night-btn {
             advanced: '高阶旅行者的价值在于改写白天票型与叙事结构；说书人应先讲清技能边界，再让旅行者公开影响桌面。',
             wheel: '旅行者'
         };
+        const commonRoleQuestions = [
+            {
+                question: '中毒和醉酒有什么区别？',
+                answer: '对玩家视角通常几乎一样：能力可能失效，也可能收到错误信息。差别更多在于来源与持续时间，由说书人裁定。'
+            },
+            {
+                question: '为什么我明明有信息位，却可能拿到错误结果？',
+                answer: '最常见原因是中毒、醉酒、被旅行者或特殊剧本角色影响，或者你读到的是注册结果而非真实阵营。'
+            },
+            {
+                question: '保护、士兵和恶魔刀怎么理解？',
+                answer: '保护和士兵都可能让恶魔刀无效，但不一定能挡住所有死亡来源。白天处决、部分角色技能和特殊剧本效果仍可能让人死亡。'
+            },
+            {
+                question: '为什么有人看起来像坏人，但最后是好人？',
+                answer: '部分角色会改变注册结果，例如陌客、间谍，或处于某些剧本的特殊效果中。注册和真实身份不总是一回事。'
+            },
+            {
+                question: '为什么有时不公开身份反而更好？',
+                answer: '信息位太早明牌，往往会被恶魔优先夜杀；一次性技能太早交，也容易被毒或被团队误解。很多角色都依赖时机。'
+            },
+            {
+                question: '玩家端记录的猜测会影响说书人吗？',
+                answer: '不会。玩家版轮盘上的姓名和猜测角色只保存在你自己的设备里，作用只是帮助你复盘和推理。'
+            }
+        ];
         const travelerPresets = {
             tb: [
                 {
@@ -3471,12 +3697,68 @@ button.night-btn {
             mountStorytellerPanels();
             setupDashboardScreenEvents();
             syncDashboardScreenUi();
+            setupPlayerScreenEvents();
+            syncPlayerScreenUi();
+            if (appMode === 'storyteller') {
+                showDashboardScreen(currentDashboardScreen, 'auto');
+            } else {
+                showPlayerScreen(currentPlayerScreen, 'auto');
+            }
             renderRoomPanels();
         }
         function setAppMode(mode) {
             appMode = mode === 'player' ? 'player' : 'storyteller';
             updateAppModeUi();
+            renderCircle();
+            renderPlayerReferencePanels();
             saveData();
+        }
+        function syncPlayerScreenUi() {
+            const railButtons = Array.from(document.querySelectorAll('[data-player-target]'));
+            railButtons.forEach((button, index) => {
+                button.classList.toggle('active-screen', index === currentPlayerScreen);
+            });
+        }
+        function showPlayerScreen(index, behavior = 'smooth') {
+            const scroller = document.getElementById('playerScreens');
+            if (!scroller) return;
+            const screens = Array.from(scroller.querySelectorAll('[data-player-screen]'));
+            if (!screens.length) return;
+            currentPlayerScreen = Math.max(0, Math.min(index, screens.length - 1));
+            const target = screens[currentPlayerScreen];
+            if (!target) return;
+            scroller.scrollTo({
+                left: target.offsetLeft - scroller.offsetLeft,
+                behavior
+            });
+            syncPlayerScreenUi();
+        }
+        function updatePlayerScreenFromScroll() {
+            const scroller = document.getElementById('playerScreens');
+            if (!scroller) return;
+            const screens = Array.from(scroller.querySelectorAll('[data-player-screen]'));
+            if (!screens.length) return;
+            const currentLeft = scroller.scrollLeft;
+            let nextIndex = currentPlayerScreen;
+            let minDistance = Number.POSITIVE_INFINITY;
+            screens.forEach((screen, index) => {
+                const distance = Math.abs((screen.offsetLeft - scroller.offsetLeft) - currentLeft);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nextIndex = index;
+                }
+            });
+            if (nextIndex !== currentPlayerScreen) {
+                currentPlayerScreen = nextIndex;
+                syncPlayerScreenUi();
+            }
+        }
+        function setupPlayerScreenEvents() {
+            const scroller = document.getElementById('playerScreens');
+            if (!scroller || scroller.dataset.bound) return;
+            scroller.addEventListener('scroll', updatePlayerScreenFromScroll, { passive: true });
+            scroller.dataset.bound = '1';
+            syncPlayerScreenUi();
         }
         function syncDashboardScreenUi() {
             const railButtons = Array.from(document.querySelectorAll('[data-dashboard-target]'));
@@ -3585,10 +3867,97 @@ button.night-btn {
                 seatPin: '',
                 seatCount: 0,
                 seatPins: {},
+                playerSeatNotes: {},
                 publicDealCode: '',
                 publicDealUrl: '',
                 lastDealIssuedAt: 0
             };
+        }
+        function normalizePlayerSeatNotes(notes) {
+            return Object.entries(notes || {}).reduce((acc, [key, value]) => {
+                const seatIndex = Number.parseInt(key, 10);
+                if (!Number.isInteger(seatIndex) || seatIndex < 0) return acc;
+                const name = `${value?.name || ''}`.trim();
+                const guessedRole = `${value?.guessedRole || ''}`.trim();
+                if (!name && !guessedRole) return acc;
+                acc[seatIndex] = { name, guessedRole };
+                return acc;
+            }, {});
+        }
+        function getPlayerGuessRoleChoices() {
+            const roles = getCurrentAllRoles().filter(role => role !== '❓ 未分配' && role !== TRAVELER_ROLE);
+            if (travelerFeatureEnabled) roles.push(TRAVELER_ROLE);
+            return roles;
+        }
+        function getPlayerSeatNote(seatIndex) {
+            const notes = normalizePlayerSeatNotes(roomSession.playerSeatNotes);
+            const note = notes[seatIndex] || {};
+            const validRoles = getPlayerGuessRoleChoices();
+            return {
+                name: `${note.name || ''}`.trim(),
+                guessedRole: validRoles.includes(note.guessedRole) ? note.guessedRole : ''
+            };
+        }
+        function getPlayerSeatDisplayName(seatIndex) {
+            const note = getPlayerSeatNote(seatIndex);
+            if (note.name) return note.name;
+            if (roomSession.role === 'player' && roomSession.seatIndex === seatIndex && roomSession.playerName) return roomSession.playerName;
+            return getDefaultSeatName(seatIndex);
+        }
+        function getPlayerGuessRoleLabel(roleValue) {
+            if (!roleValue) return '点击标记';
+            if (roleValue === TRAVELER_ROLE) return `${getRoleIcon(roleValue)} 旅行者`;
+            return `${getRoleIcon(roleValue)} ${(roleValue.split('：')[1] || roleValue)}`;
+        }
+        function openPlayerGuessModal(seatIndex) {
+            playerGuessTargetSeat = seatIndex;
+            const modal = document.getElementById('playerGuessModal');
+            const title = document.getElementById('playerGuessTitle');
+            const nameInput = document.getElementById('playerGuessNameInput');
+            const roleSelect = document.getElementById('playerGuessRoleSelect');
+            if (!modal || !nameInput || !roleSelect) return;
+            const note = getPlayerSeatNote(seatIndex);
+            if (title) title.innerText = `记录座位 ${seatIndex + 1} 的猜测`;
+            nameInput.value = note.name || getPlayerSeatDisplayName(seatIndex);
+            roleSelect.innerHTML = `<option value="">先不标记角色</option>${getPlayerGuessRoleChoices().map(role => `<option value="${role}" ${note.guessedRole === role ? 'selected' : ''}>${escapeHtml(getPlayerGuessRoleLabel(role))}</option>`).join('')}`;
+            modal.style.display = 'flex';
+        }
+        function closePlayerGuessModal() {
+            const modal = document.getElementById('playerGuessModal');
+            if (modal) modal.style.display = 'none';
+            playerGuessTargetSeat = null;
+        }
+        function applyPlayerGuess() {
+            if (!Number.isInteger(playerGuessTargetSeat)) return;
+            const nameInput = document.getElementById('playerGuessNameInput');
+            const roleSelect = document.getElementById('playerGuessRoleSelect');
+            const nextName = `${nameInput?.value || ''}`.trim();
+            const nextRole = `${roleSelect?.value || ''}`.trim();
+            const notes = normalizePlayerSeatNotes(roomSession.playerSeatNotes);
+            const defaultName = roomSession.role === 'player' && roomSession.seatIndex === playerGuessTargetSeat && roomSession.playerName
+                ? roomSession.playerName
+                : getDefaultSeatName(playerGuessTargetSeat);
+            if (!nextName && !nextRole) {
+                delete notes[playerGuessTargetSeat];
+            } else {
+                notes[playerGuessTargetSeat] = {
+                    name: nextName === defaultName ? '' : nextName,
+                    guessedRole: nextRole
+                };
+            }
+            roomSession.playerSeatNotes = notes;
+            saveData();
+            closePlayerGuessModal();
+            renderAll();
+        }
+        function resetPlayerGuess() {
+            if (!Number.isInteger(playerGuessTargetSeat)) return;
+            const notes = normalizePlayerSeatNotes(roomSession.playerSeatNotes);
+            delete notes[playerGuessTargetSeat];
+            roomSession.playerSeatNotes = notes;
+            saveData();
+            closePlayerGuessModal();
+            renderAll();
         }
         function canUseRoomService() {
             return true;
@@ -3698,26 +4067,8 @@ button.night-btn {
             if (playerPanel && !playerPanel.dataset.offlineEnhanced) {
                 const playerHint = document.getElementById('playerModeHint');
                 if (playerHint) playerHint.innerText = '\u5148\u8F93\u5165\u623F\u95F4\u53F7\u3001\u5EA7\u4F4D\u53F7\u548C\u8BE5\u5EA7\u4F4D PIN \u5B8C\u6210\u672C\u5730\u7ED1\u5B9A\uFF1B\u4E4B\u540E\u6BCF\u5C40\u626B\u63CF\u540C\u4E00\u5F20\u516C\u5171\u4E8C\u7EF4\u7801\uFF0C\u6216\u624B\u52A8\u7C98\u8D34\u516C\u5171\u53D1\u5361\u7801\u3002';
-                const joinGrid = playerPanel.querySelector('.player-join-grid');
-                if (joinGrid && !document.getElementById('playerSeatSelectInput')) {
-                    joinGrid.insertAdjacentHTML('beforeend', `
-                        <select id="playerSeatSelectInput" class="add-token-input"></select>
-                        <input type="text" id="playerSeatPinInput" class="add-token-input" maxlength="4" inputmode="numeric" placeholder="\u8F93\u5165\u8BE5\u5EA7\u4F4D\u7684 4 \u4F4D PIN">
-                    `);
-                }
                 const joinBtn = playerPanel.querySelector('.player-join-actions .action-btn');
                 if (joinBtn) joinBtn.innerText = '\uD83D\uDEAA \u672C\u5730\u5165\u5EA7\u7ED1\u5B9A';
-                const seatPanel = document.getElementById('playerSeatPanel');
-                if (seatPanel) {
-                    seatPanel.innerHTML = `
-                        <div class="player-seat-note">\u79BB\u7EBF\u6A21\u5F0F\u4E0D\u4F1A\u8054\u7F51\u6821\u9A8C\u5360\u5EA7\u3002\u8BF7\u786E\u8BA4\u4F60\u8F93\u5165\u7684\u5EA7\u4F4D\u53F7\u4E0E PIN \u7531\u8BF4\u4E66\u4EBA\u73B0\u573A\u63D0\u4F9B\u3002</div>
-                        <textarea id="playerDealCodeInput" class="traveler-ability-input" placeholder="\u6BCF\u5C40\u5F00\u59CB\u540E\uFF0C\u626B\u7801\u6253\u5F00\u516C\u5171\u4E8C\u7EF4\u7801\uFF0C\u6216\u628A\u8BF4\u4E66\u4EBA\u53D1\u6765\u7684\u516C\u5171\u53D1\u5361\u7801\u7C98\u8D34\u5230\u8FD9\u91CC\u3002"></textarea>
-                        <div class="player-join-actions" style="margin-top: 12px;">
-                            <button class="action-btn" type="button" onclick="receivePublicRoleCard()">\uD83D\uDD13 \u63A5\u6536\u672C\u5C40\u89D2\u8272\u5361</button>
-                            <button class="show-bluff-btn room-secondary-btn" type="button" onclick="pastePublicDealCodeFromClipboard()">\uD83D\uDCCB \u7C98\u8D34\u516C\u5171\u53D1\u5361\u7801</button>
-                        </div>
-                    `;
-                }
                 playerPanel.dataset.offlineEnhanced = '1';
             }
 
@@ -3727,6 +4078,11 @@ button.night-btn {
         function setupUiGuards() {
             originalSetupUiGuards();
             setupOfflineRoomUi();
+            const playerGuessPanel = document.getElementById('playerGuessModalPanel');
+            if (playerGuessPanel && !playerGuessPanel.dataset.bound) {
+                playerGuessPanel.addEventListener('click', event => event.stopPropagation());
+                playerGuessPanel.dataset.bound = '1';
+            }
             const pinInput = document.getElementById('playerSeatPinInput');
             if (pinInput && !pinInput.dataset.bound) {
                 pinInput.addEventListener('keydown', event => {
@@ -3757,6 +4113,16 @@ button.night-btn {
                     }
                 });
                 dealInput.dataset.bound = '1';
+            }
+            const guessNameInput = document.getElementById('playerGuessNameInput');
+            if (guessNameInput && !guessNameInput.dataset.bound) {
+                guessNameInput.addEventListener('keydown', event => {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        applyPlayerGuess();
+                    }
+                });
+                guessNameInput.dataset.bound = '1';
             }
         }
 
@@ -3948,13 +4314,14 @@ button.night-btn {
             }
             roomSession = {
                 ...createEmptyRoomSession(),
+                playerSeatNotes: normalizePlayerSeatNotes(roomSession.playerSeatNotes),
                 roomCode,
                 role: 'player',
                 playerName: playerName || `\u5ea7\u4f4d ${seatIndex + 1} \u73a9\u5bb6`,
                 connected: true,
                 seatIndex,
                 seatPin,
-                seatCount: getSelectableSeatCount()
+                seatCount: Number(roomSession.seatCount) || 0
             };
             playerInboxCard = null;
             saveData();
@@ -4123,6 +4490,51 @@ button.night-btn {
             `;
         }
 
+        function renderPlayerRoleIndex() {
+            const panel = document.getElementById('playerRoleIndexPanel');
+            if (!panel) return;
+            const groups = [
+                { key: 'Townsfolk', label: '镇民' },
+                { key: 'Outsider', label: '外来者' },
+                { key: 'Minion', label: '爪牙' },
+                { key: 'Demon', label: '恶魔' }
+            ];
+            const roleCards = groups.map(group => {
+                const roles = getCurrentAllRoles().filter(role => role !== '❓ 未分配' && role !== TRAVELER_ROLE && getRoleCategory(role) === group.key);
+                if (!roles.length) return '';
+                return `
+                    <section class="player-role-index-section">
+                        <div class="player-role-index-section-title">${group.label}</div>
+                        <div class="player-role-index-grid">
+                            ${roles.map(role => `
+                                <article class="player-role-index-card">
+                                    <div class="player-role-index-name">${escapeHtml(getRoleLabelWithIcon(role))}</div>
+                                    <div class="player-role-index-ability">${escapeHtml(getPlayerAbilityText({ role, travelerName: '', travelerCamp: 'undecided' }))}</div>
+                                </article>
+                            `).join('')}
+                        </div>
+                    </section>
+                `;
+            }).join('');
+            panel.innerHTML = roleCards || '<div class="score-empty">当前剧本还没有可展示的角色。</div>';
+        }
+
+        function renderPlayerFaq() {
+            const panel = document.getElementById('playerFaqPanel');
+            if (!panel) return;
+            panel.innerHTML = commonRoleQuestions.map(item => `
+                <article class="player-faq-card">
+                    <div class="player-faq-card-question">${escapeHtml(item.question)}</div>
+                    <div class="player-faq-card-answer">${escapeHtml(item.answer)}</div>
+                </article>
+            `).join('');
+        }
+
+        function renderPlayerReferencePanels() {
+            renderPlayerRoleIndex();
+            renderPlayerFaq();
+        }
+
         function renderStoryRoomRoster(statusText = '') {
             setupOfflineRoomUi();
             const codeChip = document.getElementById('storyRoomCode');
@@ -4182,15 +4594,14 @@ button.night-btn {
             codeInput.value = roomSession.roomCode || codeInput.value;
             pinInput.value = roomSession.role === 'player' ? (roomSession.seatPin || pinInput.value) : pinInput.value;
             if (roomSession.role === 'player' && Number.isInteger(roomSession.seatIndex)) seatSelect.value = `${roomSession.seatIndex}`;
+            seatPanel.style.display = 'block';
 
             if (roomSession.role !== 'player' || !roomSession.roomCode) {
                 status.innerText = statusText || '尚未进行本地绑定。请输入房间号、座位号和 PIN。';
-                seatPanel.style.display = 'none';
                 renderPlayerRoleCard();
                 return;
             }
 
-            seatPanel.style.display = 'block';
             status.innerText = statusText || `已本地绑定到房间 ${roomSession.roomCode} 的座位 ${Number(roomSession.seatIndex) + 1}。等待说书人公布本局公共发卡码。`;
             renderPlayerRoleCard();
         }
@@ -4213,7 +4624,8 @@ button.night-btn {
                 ...(roomSession || {}),
                 roomCode: sanitizeRoomCode(roomSession?.roomCode || ''),
                 seatPin: sanitizeSeatPin(roomSession?.seatPin || ''),
-                seatPins: { ...(roomSession?.seatPins || {}) }
+                seatPins: { ...(roomSession?.seatPins || {}) },
+                playerSeatNotes: normalizePlayerSeatNotes(roomSession?.playerSeatNotes || {})
             };
 
             if (!Number.isInteger(roomSnapshot.seatIndex)) roomSnapshot.seatIndex = null;
@@ -4262,6 +4674,7 @@ button.night-btn {
                 roomSession.seatPin = sanitizeSeatPin(roomSession.seatPin || '');
                 roomSession.connected = !!roomSession.roomCode;
                 roomSession.seatIndex = Number.isInteger(roomSession.seatIndex) ? roomSession.seatIndex : null;
+                roomSession.playerSeatNotes = normalizePlayerSeatNotes(roomSession.playerSeatNotes || {});
                 playerInboxCard = data.playerInboxCard || null;
                 roomSummary = null;
                 ensureOfflineSeatPins(roomSession.seatCount || players.length || getConfiguredSeatCount() || 0);
@@ -4288,15 +4701,153 @@ button.night-btn {
             updateTravelerFeatureUi();
             initRoleRevealSelect();
             updateRoleInfo();
+            playerListLayout = 'double';
             renderCircle();
             renderHints();
             renderList();
             updateRenameModeUi();
             updatePlayerListLayoutUi();
             renderScoreBoard();
+            renderPlayerReferencePanels();
             updateAppModeUi();
             refreshNightOrderIfOpen();
         }
+
+        const originalRenderCircle = renderCircle;
+        renderCircle = function renderCircleRoomAware() {
+            if (appMode !== 'player') {
+                const stage = document.getElementById('playerCircleStage');
+                const playerWheel = document.getElementById('playerCircleView');
+                const playerEmpty = document.getElementById('playerCircleEmpty');
+                if (playerWheel) playerWheel.style.display = 'none';
+                if (playerEmpty) playerEmpty.style.display = 'none';
+                return originalRenderCircle();
+            }
+
+            const stage = document.getElementById('playerCircleStage');
+            const container = document.getElementById('playerCircleView');
+            const empty = document.getElementById('playerCircleEmpty');
+            if (!stage || !container || !empty) return;
+
+            const seatCount = Number(roomSession.seatCount) || (roomSession.role === 'player' ? getSelectableSeatCount() : 0);
+            if (!roomSession.roomCode || seatCount <= 0) {
+                container.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+
+            empty.style.display = 'none';
+            container.style.display = 'block';
+            container.innerHTML = '';
+
+            const stageStyle = window.getComputedStyle(stage);
+            const horizontalPadding = parseFloat(stageStyle.paddingLeft) + parseFloat(stageStyle.paddingRight);
+            const availableWidth = Math.max(250, stage.clientWidth - horizontalPadding);
+            const size = availableWidth < 300 ? availableWidth : Math.min(availableWidth, 420);
+            const seatSize = Math.min(seatCount >= 12 ? 56 : seatCount >= 9 ? 60 : 66, Math.floor(size * 0.21));
+            container.style.setProperty('--altar-size', `${size}px`);
+            container.style.setProperty('--seat-size', `${seatSize}px`);
+            container.style.setProperty('--seat-name-size', `${Math.max(11, Math.round(seatSize * 0.22))}px`);
+            container.style.setProperty('--seat-role-size', `${Math.max(9, Math.round(seatSize * 0.17))}px`);
+
+            const center = size / 2;
+            const radius = center - seatSize / 2 - 18;
+            const angleStep = (2 * Math.PI) / seatCount;
+            for (let index = 0; index < seatCount; index++) {
+                const angle = index * angleStep - Math.PI / 2;
+                const x = center + radius * Math.cos(angle);
+                const y = center + radius * Math.sin(angle);
+                const noteRadius = radius + seatSize * 1.02;
+                const noteX = center + noteRadius * Math.cos(angle);
+                const noteY = center + noteRadius * Math.sin(angle);
+                const note = getPlayerSeatNote(index);
+                const seat = document.createElement('div');
+                seat.className = 'seat';
+                seat.style.cssText = `left:${x}px; top:${y}px;`;
+                seat.title = `点击记录你对座位 ${index + 1} 的猜测`;
+                seat.onclick = () => openPlayerGuessModal(index);
+                seat.innerHTML = `<div class="seat-name">${escapeHtml(getPlayerSeatDisplayName(index))}</div>`;
+
+                const guessNote = document.createElement('div');
+                guessNote.className = 'seat-ability player-guess-note';
+                guessNote.style.cssText = `left:${noteX}px; top:${noteY}px;`;
+                guessNote.innerText = note.guessedRole ? getPlayerGuessRoleLabel(note.guessedRole) : '点击标记';
+
+                container.appendChild(guessNote);
+                container.appendChild(seat);
+            }
+        };
+
+        updatePlayerListLayoutUi = function updatePlayerListLayoutUiRoomMode() {
+            playerListLayout = 'double';
+            const toolbar = document.getElementById('playerListToolbar');
+            const list = document.getElementById('playerList');
+            if (toolbar) toolbar.style.display = 'none';
+            if (!list) return;
+            list.classList.remove('single-column');
+            list.classList.add('double-column');
+        };
+        togglePlayerListLayout = function togglePlayerListLayoutRoomMode() {
+            playerListLayout = 'double';
+            updatePlayerListLayoutUi();
+        };
+
+        function renderNightOrderColumnHtml(type) {
+            const activeRoles = players.map(player => normalizeRoleName(player.role));
+            const activeNightOrder = getCurrentNightOrder();
+            const activeRoleDetails = getCurrentRoleDetails();
+            const hideTbEvilIntroSteps = shouldHideTbEvilIntroSteps();
+            let stepCount = 1;
+            let itemsHtml = '';
+
+            activeNightOrder[type].forEach(role => {
+                if (hideTbEvilIntroSteps && (role === '【系统：爪牙互相确认】' || role === '【系统：恶魔确认爪牙及3个伪装】')) return;
+                const details = activeRoleDetails[role] || { ability: '', action: '无详细操作说明' };
+                if (role.startsWith('【')) {
+                    itemsHtml += `<li class="night-item"><div class="night-header">${stepCount}. <span class="system-prompt">${role}</span></div><div class="storyteller-action">👉 <b>说书人：</b>${details.action}</div></li>`;
+                    stepCount++;
+                    return;
+                }
+                if (!activeRoles.includes(role)) return;
+                players.filter(player => normalizeRoleName(player.role) === role).forEach(player => {
+                    const status = player.isAlive ? '' : ' <span class="status-dead">(已死亡)</span>';
+                    const shortRole = role.split('：')[1] || role;
+                    const aiHtml = getAIRecommendation(role, player);
+                    itemsHtml += `
+                        <li class="night-item">
+                            <div class="night-header">${stepCount}. 唤醒 <span class="highlight">${shortRole}</span> [${player.name}] ${status}</div>
+                            <div class="role-ability">${details.ability}</div>
+                            <div class="storyteller-action">👉 <b>说书人：</b>${details.action}</div>
+                            ${aiHtml}
+                        </li>
+                    `;
+                    stepCount++;
+                });
+            });
+
+            return `
+                <section class="night-order-column">
+                    <div class="night-order-column-header">${type === 'first' ? '🌙 首夜' : '🌘 其余夜晚'}</div>
+                    <ul class="night-list">${itemsHtml || '<li class="night-item"><div class="role-ability">当前没有需要处理的角色。</div></li>'}</ul>
+                </section>
+            `;
+        }
+
+        generateNightOrder = function generateNightOrderDual(type = 'first', options = {}) {
+            if (players.length === 0) return;
+            currentNightOrderType = type || 'first';
+            const display = document.getElementById('nightOrderDisplay');
+            if (!display) return;
+            display.innerHTML = `
+                <h3 class="night-order-title">夜顺裁定总览</h3>
+                <div class="night-order-dual">
+                    ${renderNightOrderColumnHtml('first')}
+                    ${renderNightOrderColumnHtml('other')}
+                </div>
+            `;
+            display.style.display = 'block';
+            if (options.scroll !== false) display.scrollIntoView({ behavior: 'smooth' });
+        };
 
         generateAndDeal = function generateAndDealOfflineWrapped() {
             originalGenerateAndDeal();
@@ -4361,8 +4912,21 @@ button.night-btn {
         };
 
         updateRoleInfo();
-        window.onload = async () => { setupUiGuards(); mountStorytellerPanels(); setupDashboardScreenEvents(); loadData(); syncDashboardScreenUi(); await applyPublicDealFromLocation(); };
-        window.addEventListener('resize', () => { renderCircle(); showDashboardScreen(currentDashboardScreen, 'auto'); });
+        window.onload = async () => {
+            setupUiGuards();
+            mountStorytellerPanels();
+            setupDashboardScreenEvents();
+            setupPlayerScreenEvents();
+            loadData();
+            syncDashboardScreenUi();
+            syncPlayerScreenUi();
+            await applyPublicDealFromLocation();
+        };
+        window.addEventListener('resize', () => {
+            renderCircle();
+            showDashboardScreen(currentDashboardScreen, 'auto');
+            showPlayerScreen(currentPlayerScreen, 'auto');
+        });
     </script>
 </body>
 </html>
