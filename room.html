@@ -192,6 +192,12 @@ body::after {
     margin-bottom: 0;
 }
 
+#storyRoomPanel,
+#playerModePanel,
+#dashboardStoryRoomSlot {
+    display: none !important;
+}
+
 .dashboard-panel-title {
     margin: 0 0 14px;
     color: var(--gold);
@@ -3787,11 +3793,7 @@ button.night-btn {
             syncDashboardScreenUi();
         }
         function mountStorytellerPanels() {
-            const storyRoomPanel = document.getElementById('storyRoomPanel');
-            const storyRoomSlot = document.getElementById('dashboardStoryRoomSlot');
-            if (storyRoomPanel && storyRoomSlot && storyRoomPanel.parentElement !== storyRoomSlot) {
-                storyRoomSlot.appendChild(storyRoomPanel);
-            }
+            return;
         }
         function closeSeatTokenModal() {
             activeSeatTokenPlayerId = null;
@@ -4055,6 +4057,7 @@ button.night-btn {
         }
 
         function setupOfflineRoomUi() {
+            return;
             const storyPanel = document.getElementById('storyRoomPanel');
             if (storyPanel && !storyPanel.dataset.offlineEnhanced) {
                 const roster = document.getElementById('storyRoomRoster');
@@ -4554,6 +4557,7 @@ button.night-btn {
         }
 
         function renderStoryRoomRoster(statusText = '') {
+            return;
             if (appMode !== 'storyteller') return;
             setupOfflineRoomUi();
             const codeChip = document.getElementById('storyRoomCode');
@@ -4592,6 +4596,7 @@ button.night-btn {
         }
 
         function renderPlayerRoomPanel(statusText = '') {
+            return;
             setupOfflineRoomUi();
             const status = document.getElementById('playerRoomStatus');
             const seatPanel = document.getElementById('playerSeatPanel');
@@ -4619,6 +4624,7 @@ button.night-btn {
         }
 
         function renderRoomPanels(statusText = '') {
+            return;
             renderStoryRoomRoster(statusText);
             renderPlayerRoomPanel(statusText);
         }
@@ -4863,9 +4869,6 @@ button.night-btn {
 
         generateAndDeal = function generateAndDealOfflineWrapped() {
             originalGenerateAndDeal();
-            if (roomSession.role === 'storyteller' && roomSession.roomCode && players.length) {
-                generatePublicDealCode();
-            }
         };
 
         renderList = function renderListOfflineRoomMode() {
