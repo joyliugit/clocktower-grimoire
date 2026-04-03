@@ -1599,6 +1599,7 @@
             const player = players.find(item => item.id === activeSeatTokenPlayerId);
             if (!player) return;
             player.tokens = [];
+            if (typeof clearAutomationStateForSeat === 'function') clearAutomationStateForSeat(player.id);
             saveData();
             renderAll();
             openSeatTokenModal(player.id);
@@ -1802,7 +1803,15 @@
                 deathType: player.deathType || (player.isAlive === false ? 'execution' : ''),
                 travelerName: isTraveler ? (preset?.name || `${player.travelerName || ''}`.trim() || getTravelerPresetList()[0]?.name || '') : '',
                 travelerAbility: isTraveler ? (preset?.ability || `${player.travelerAbility || ''}`.trim() || travelerRoleTexts.ability) : '',
-                travelerCamp: isTraveler && travelerCampLabels[player.travelerCamp] ? player.travelerCamp : 'undecided'
+                travelerCamp: isTraveler && travelerCampLabels[player.travelerCamp] ? player.travelerCamp : 'undecided',
+                brainwashSourceId: typeof player.brainwashSourceId === 'number' ? player.brainwashSourceId : null,
+                brainwashRole: `${player.brainwashRole || ''}`.trim(),
+                witchCurseSourceId: typeof player.witchCurseSourceId === 'number' ? player.witchCurseSourceId : null,
+                twinPartnerId: typeof player.twinPartnerId === 'number' ? player.twinPartnerId : null,
+                twinAlignment: `${player.twinAlignment || ''}`.trim(),
+                philosopherChoice: `${player.philosopherChoice || ''}`.trim(),
+                tailorUsed: !!player.tailorUsed,
+                fangGuJumpUsed: !!player.fangGuJumpUsed
             };
         }
         function createPlayer(id, preservedName = '') {
@@ -1818,7 +1827,15 @@
                 deathType: '',
                 travelerName: '',
                 travelerAbility: '',
-                travelerCamp: 'undecided'
+                travelerCamp: 'undecided',
+                brainwashSourceId: null,
+                brainwashRole: '',
+                witchCurseSourceId: null,
+                twinPartnerId: null,
+                twinAlignment: '',
+                philosopherChoice: '',
+                tailorUsed: false,
+                fangGuJumpUsed: false
             };
         }
         function getTravelerEditorPlayer() {
@@ -2082,6 +2099,10 @@
             const badges = [];
             if (player.deathType === 'execution') badges.push(badgeMap.__execution);
             if (player.deathType === 'demon') badges.push(badgeMap.__demonDeath);
+            if (player.brainwashRole) badges.push({ icon: '🧠', className: 'brainwash' });
+            if (player.witchCurseSourceId !== null) badges.push({ icon: '🧙', className: 'witch' });
+            if (player.twinPartnerId !== null) badges.push({ icon: '👥', className: 'twin' });
+            if (player.philosopherChoice) badges.push({ icon: '🏛️', className: 'philosopher' });
             badges.push(...player.tokens
                 .map(token => badgeMap[token])
                 .filter(Boolean));
@@ -2690,6 +2711,7 @@
             const player = players.find(p => p.id === id);
             if (!player) return;
             const normalizedRole = normalizeRoleName(newRole);
+            if (typeof clearAutomationStateForSeat === 'function') clearAutomationStateForSeat(id);
             player.role = normalizedRole;
             if (isTravelerRole(normalizedRole)) {
                 applyTravelerPresetToPlayer(player, player.travelerName || getTravelerPresetList()[0]?.name);
